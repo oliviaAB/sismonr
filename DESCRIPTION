@@ -1,11 +1,15 @@
 Package: sismon
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Simulation of In Silico Multi-Omic Networks
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
+Author: Olivia Angelin-Bonnet
+Maintainer: Olivia Angelin-Bonnet <olivia.angelinbonnet@gmail.com>
 Description: More about what it does (maybe more than one line)
     Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
+Imports: 
+    XRJulia,
+    parallel
+RoxygenNote: 6.1.0
