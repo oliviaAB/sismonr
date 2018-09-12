@@ -1,3 +1,3 @@
-function firstest()
+function juliatest()
 	println("Hello world from Julia!")
 end

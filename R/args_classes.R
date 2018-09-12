@@ -139,7 +139,7 @@ insilicosystemargs <- function(
   TC.NC.twonodesloop = FALSE,
   TCbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
   TCunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
-  TCfoldchange_samplingfct = function(x){ rtruncnorm(x, a = 1, mean = 3, sd = 10) },
+  TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) },
   TL.PC.outdeg.distr = "powerlaw",
   TL.NC.outdeg.distr = "powerlaw",
   TL.PC.outdeg.exp = 3,
@@ -334,17 +334,21 @@ insilicosystemargs <- function(
 insilicoindividualargs <- function(
   ploidy = 2,
   ngenevariants = 5,
-  qtleffect_samplingfct = function(x){rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1)},
-  initvar_samplingfct = function(x){rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1)}
+  qtleffect_samplingfct = function(x){truncnorm::rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1)},
+  initvar_samplingfct = function(x){truncnorm::rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1)}
 ){
-  gcnList = sapply(1:ploidy, function(x){paste0(gcnname, x)})
+  gcnList = sapply(1:ploidy, function(x){paste0("GCN", x)})
+  ## qtlnames: names of the qtl effect coefficients
+  ## The first 5 are the qtl affecting all genes, the last 4 only affect protein coding genes
+  qtlnames = c("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDbindreg", "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregbind")
 
   value = list("ploidy" = ploidy,
-               "gcnname" = gcnname,
                "gcnList" = gcnList,
                "ngenevariants" = ngenevariants,
                "qtleffect_samplingfct" = qtleffect_samplingfct,
-               "initvar_samplingfct" = initvar_samplingfct)
+               "initvar_samplingfct" = initvar_samplingfct,
+               "qtlnames" = qtlnames
+               )
 
 
   attr(value, "class") = "insilicoindividualargs"

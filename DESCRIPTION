@@ -11,5 +11,6 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     XRJulia,
-    parallel
+    parallel,
+    truncnorm
 RoxygenNote: 6.1.0

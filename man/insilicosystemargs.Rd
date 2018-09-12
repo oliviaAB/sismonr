@@ -25,22 +25,23 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = 0.4,
   TC.PC.twonodesloop = FALSE, TC.NC.twonodesloop = FALSE,
   TCbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01) },
   TCunbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01)
-  }, TCfoldchange_samplingfct = function(x) {     rtruncnorm(x, a = 1,
-  mean = 3, sd = 10) }, TL.PC.outdeg.distr = "powerlaw",
-  TL.NC.outdeg.distr = "powerlaw", TL.PC.outdeg.exp = 3,
-  TL.NC.outdeg.exp = 1, TL.PC.indeg.distr = "powerlaw",
-  TL.NC.indeg.distr = "powerlaw", TL.PC.autoregproba = 0.2,
-  TL.NC.autoregproba = 0, TL.PC.twonodesloop = FALSE,
-  TL.NC.twonodesloop = FALSE, TLbindingrate_samplingfct = function(x) {
-      runif(x, 0.001, 0.01) }, TLunbindingrate_samplingfct = function(x)
-  {     runif(x, 0.001, 0.01) }, TLfoldchange_samplingfct = function(x) {
-      sample(2:30, x, replace = T) }, RD.PC.outdeg.distr = "powerlaw",
+  }, TCfoldchange_samplingfct = function(x) {    
+  truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) },
+  TL.PC.outdeg.distr = "powerlaw", TL.NC.outdeg.distr = "powerlaw",
+  TL.PC.outdeg.exp = 3, TL.NC.outdeg.exp = 1,
+  TL.PC.indeg.distr = "powerlaw", TL.NC.indeg.distr = "powerlaw",
+  TL.PC.autoregproba = 0.2, TL.NC.autoregproba = 0,
+  TL.PC.twonodesloop = FALSE, TL.NC.twonodesloop = FALSE,
+  TLbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01) },
+  TLunbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01)
+  }, TLfoldchange_samplingfct = function(x) {     sample(2:30, x, replace
+  = T) }, RD.PC.outdeg.distr = "powerlaw",
   RD.NC.outdeg.distr = "powerlaw", RD.PC.outdeg.exp = 3,
   RD.NC.outdeg.exp = 1, RD.PC.indeg.distr = "powerlaw",
   RD.NC.indeg.distr = "powerlaw", RD.PC.autoregproba = 0.2,
   RD.NC.autoregproba = 0, RD.PC.twonodesloop = FALSE,
-  RD.NC.twonodesloop = FALSE, RDreggrate_samplingfct = function(x) {   
-   runif(x, 0.001, 0.01) }, PD.PC.outdeg.distr = "powerlaw",
+  RD.NC.twonodesloop = FALSE, RDregrate_samplingfct = function(x) {    
+  runif(x, 0.001, 0.01) }, PD.PC.outdeg.distr = "powerlaw",
   PD.NC.outdeg.distr = "powerlaw", PD.PC.outdeg.exp = 3,
   PD.NC.outdeg.exp = 1, PD.PC.indeg.distr = "powerlaw",
   PD.NC.indeg.distr = "powerlaw", PD.PC.autoregproba = 0.2,
@@ -186,6 +187,8 @@ Values from Schwanhausser et al., 2013: proteins half-life distribution log-norm
 
 \item{RD.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with noncoding regulators? Default value is FALSE.}
 
+\item{RDregrate_samplingfct}{Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is}
+
 \item{PD.PC.outdeg.distr}{Form of the distribution of the number of targets of protein decay factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PD.NC.outdeg.distr}{Form of the the distribution of the number of targets of noncoding RNAs regulating protein decay; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
@@ -246,8 +249,6 @@ Values from Schwanhausser et al., 2013: proteins half-life distribution log-norm
 \item{mycolsGF}{Colours used in the plots to represent the different gene expression steps (transcription, translation, etc). Default value is c("TC" = "#FF7F11", "TL" = "#FF963C", "RD" = "#5AB7A4", "PD" = "#78C4B4", "PTM" = "#FF1B1C", "MR" = "#FF6D6E").}
 
 \item{mycolsPosNeg}{Colours used in plots to represent positive/negative regulatory interactions. Default value is c("1" = "#D63230", "-1" = "#69BAF4").}
-
-\item{RDregrate_samplingfct}{Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is}
 }
 \value{
 An object of the class \code{insilicosystemargs}, that is a list of the different parameters.
