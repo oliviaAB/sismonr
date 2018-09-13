@@ -7,26 +7,24 @@
 insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = 0.4,
   PC.TL.p = 0.3, PC.RD.p = 0.1, PC.PD.p = 0.1, PC.PTM.p = 0.05,
   PC.MR.p = 0.05, NC.TC.p = 0.3, NC.TL.p = 0.3, NC.RD.p = 0.3,
-  NC.PD.p = 0.05, NC.PTM.p = 0.05, TC.PC.pos.p = 0.5,
-  TC.NC.pos.p = 0.5, TL.PC.pos.p = 0.5, TL.NC.pos.p = 0.5,
-  PTM.PC.pos.p = 0.5, PTM.NC.pos.p = 0.5,
-  basal_transcription_rate_samplingfct = function(x) {     logval =
-  rnorm(x, mean = 0.5, sd = 0.5)     val = 10^logval     return(val/3600)
-  }, basal_translation_rate_samplingfct = function(x) {     logval =
-  rnorm(x, mean = 2.5, sd = 0.8)     val = 10^logval     return(val/3600)
-  }, basal_RNAlifetime_samplingfct = function(x) {     logval = rnorm(x,
-  mean = 0, sd = 0.5)     val = 10^logval     return(val * 3600) },
-  basal_protlifetime_samplingfct = function(x) {     logval = rnorm(x,
-  mean = 1.75, sd = 0.5)     val = 10^logval     return(val * 3600) },
-  TC.PC.outdeg.distr = "powerlaw", TC.NC.outdeg.distr = "powerlaw",
-  TC.PC.outdeg.exp = 3, TC.NC.outdeg.exp = 1,
-  TC.PC.indeg.distr = "powerlaw", TC.NC.indeg.distr = "powerlaw",
-  TC.PC.autoregproba = 0.2, TC.NC.autoregproba = 0,
-  TC.PC.twonodesloop = FALSE, TC.NC.twonodesloop = FALSE,
-  TCbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01) },
-  TCunbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01)
-  }, TCfoldchange_samplingfct = function(x) {    
-  truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) },
+  NC.PD.p = 0.05, NC.PTM.p = 0.05, TC.pos.p = 0.5, TL.pos.p = 0.5,
+  PTM.pos.p = 0.5, basal_transcription_rate_samplingfct = function(x) {
+      logval = rnorm(x, mean = 0.5, sd = 0.5)     val = 10^logval    
+  return(val/3600) }, basal_translation_rate_samplingfct = function(x) { 
+     logval = rnorm(x, mean = 2.5, sd = 0.8)     val = 10^logval    
+  return(val/3600) }, basal_RNAlifetime_samplingfct = function(x) {    
+  logval = rnorm(x, mean = 0, sd = 0.5)     val = 10^logval     return(val
+  * 3600) }, basal_protlifetime_samplingfct = function(x) {     logval =
+  rnorm(x, mean = 1.75, sd = 0.5)     val = 10^logval     return(val *
+  3600) }, TC.PC.outdeg.distr = "powerlaw",
+  TC.NC.outdeg.distr = "powerlaw", TC.PC.outdeg.exp = 3,
+  TC.NC.outdeg.exp = 1, TC.PC.indeg.distr = "powerlaw",
+  TC.NC.indeg.distr = "powerlaw", TC.PC.autoregproba = 0.2,
+  TC.NC.autoregproba = 0, TC.PC.twonodesloop = FALSE,
+  TC.NC.twonodesloop = FALSE, TCbindingrate_samplingfct = function(x) {
+      runif(x, 0.001, 0.01) }, TCunbindingrate_samplingfct = function(x)
+  {     runif(x, 0.001, 0.01) }, TCfoldchange_samplingfct = function(x) {
+      truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) },
   TL.PC.outdeg.distr = "powerlaw", TL.NC.outdeg.distr = "powerlaw",
   TL.PC.outdeg.exp = 3, TL.NC.outdeg.exp = 1,
   TL.PC.indeg.distr = "powerlaw", TL.NC.indeg.distr = "powerlaw",
@@ -89,18 +87,11 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = 0.4,
 
 \item{NC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05.}
 
-\item{TC.PC.pos.p}{Numeric. Probability that the transcription is positively regulated by protein regulators. Default value is 0.5.}
+\item{TC.pos.p}{Numeric. Probability that the transcription is positively regulated by regulators. Default value is 0.5.}
 
-\item{TC.NC.pos.p}{Numeric. Probability that the transcription is positively regulated by noncoding regulators. Default value is 0.5.}
+\item{TL.pos.p}{Numeric. Probability that the translation is positively regulated by regulators. Default value is 0.5.}
 
-\item{TL.PC.pos.p}{Numeric. Probability that the translation is positively regulated by protein regulators. Default value is 0.5.}
-
-\item{TL.NC.pos.p}{Numeric. Probability that the translation is positively regulated by noncoding regulators. Default value is 0.5.}
-
-\item{PTM.PC.pos.p}{Numeric. Probability that the protein regulators transform the original protein into its modified form
-(as opposed to transforming the modified protein back into its original form). Default value is 0.5.}
-
-\item{PTM.NC.pos.p}{Numeric. Probability that the noncoding regulators transform the original protein into its modified form
+\item{PTM.pos.p}{Numeric. Probability that the regulators transform the original protein into its modified form
 (as opposed to transforming the modified protein back into its original form). Default value is 0.5.}
 
 \item{basal_transcription_rate_samplingfct}{Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is

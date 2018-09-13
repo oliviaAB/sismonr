@@ -17,14 +17,18 @@
 #' @param NC.RD.p Numeric. Ratio of regulators of RNA decay among the noncoding genes. Default value is 0.3.
 #' @param NC.PD.p Numeric. Ratio of regulators of protein decay among the noncoding genes. Default value is 0.05.
 #' @param NC.PTM.p Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05.
-#' @param TC.PC.pos.p Numeric. Probability that the transcription is positively regulated by protein regulators. Default value is 0.5.
-#' @param TC.NC.pos.p Numeric. Probability that the transcription is positively regulated by noncoding regulators. Default value is 0.5.
-#' @param TL.PC.pos.p Numeric. Probability that the translation is positively regulated by protein regulators. Default value is 0.5.
-#' @param TL.NC.pos.p Numeric. Probability that the translation is positively regulated by noncoding regulators. Default value is 0.5.
-#' @param PTM.PC.pos.p Numeric. Probability that the protein regulators transform the original protein into its modified form
+#' @param TC.pos.p Numeric. Probability that the transcription is positively regulated by regulators. Default value is 0.5.
+#' @param TL.pos.p Numeric. Probability that the translation is positively regulated by regulators. Default value is 0.5.
+#' @param PTM.pos.p Numeric. Probability that the regulators transform the original protein into its modified form
 #' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
-#' @param PTM.NC.pos.p Numeric. Probability that the noncoding regulators transform the original protein into its modified form
-#' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
+# #' @param TC.PC.pos.p Numeric. Probability that the transcription is positively regulated by protein regulators. Default value is 0.5.
+# #' @param TC.NC.pos.p Numeric. Probability that the transcription is positively regulated by noncoding regulators. Default value is 0.5.
+# #' @param TL.PC.pos.p Numeric. Probability that the translation is positively regulated by protein regulators. Default value is 0.5.
+# #' @param TL.NC.pos.p Numeric. Probability that the translation is positively regulated by noncoding regulators. Default value is 0.5.
+# #' @param PTM.PC.pos.p Numeric. Probability that the protein regulators transform the original protein into its modified form
+# #' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
+# #' @param PTM.NC.pos.p Numeric. Probability that the noncoding regulators transform the original protein into its modified form
+# #' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
 #' @param basal_transcription_rate_samplingfct Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
 #' Values from Schwanhausser et al., 2013: transcription rate distribution log-normal, from 0.1 to 100 mRNA/hour -> we want the transcription rate in seconds. Default value is
 #' @param basal_translation_rate_samplingfct Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is
@@ -117,12 +121,15 @@ insilicosystemargs <- function(
   NC.RD.p = 0.3,
   NC.PD.p = 0.05,
   NC.PTM.p = 0.05,
-  TC.PC.pos.p = 0.5,
-  TC.NC.pos.p = 0.5,
-  TL.PC.pos.p = 0.5,
-  TL.NC.pos.p = 0.5,
-  PTM.PC.pos.p = 0.5,
-  PTM.NC.pos.p = 0.5,
+  TC.pos.p = 0.5,
+  TL.pos.p = 0.5,
+  PTM.pos.p = 0.5,
+#  TC.PC.pos.p = 0.5,
+#  TC.NC.pos.p = 0.5,
+#  TL.PC.pos.p = 0.5,
+#  TL.NC.pos.p = 0.5,
+#  PTM.PC.pos.p = 0.5,
+#  PTM.NC.pos.p = 0.5,
   basal_transcription_rate_samplingfct = function(x){ logval = rnorm(x, mean = 0.5, sd = 0.5); val = 10^logval; return(val/3600) },
   basal_translation_rate_samplingfct = function(x){ logval = rnorm(x, mean = 2.5, sd = 0.8); val = 10^logval; return(val/3600) },
   basal_RNAlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 0, sd = 0.5); val = 10^logval; return(val*3600) },
@@ -213,10 +220,12 @@ insilicosystemargs <- function(
   NC.PTM.p = NC.PTM.p/temp
 
   ## There cannot be negative regulation for transcript and protein decay
-  RD.PC.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
-  RD.NC.pos.p = 1 ## RD.NC.pos.p: probability that the RNA decay is positively regulated by noncoding regulators (faster decay)
-  PD.PC.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
-  PD.NC.pos.p = 1 ## PD.NC.pos.p: probability that the protein decay is positively regulated by noncoding regulators (faster decay)
+  RD.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
+  PD.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
+#  RD.PC.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
+#  RD.NC.pos.p = 1 ## RD.NC.pos.p: probability that the RNA decay is positively regulated by noncoding regulators (faster decay)
+#  PD.PC.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
+#  PD.NC.pos.p = 1 ## PD.NC.pos.p: probability that the protein decay is positively regulated by noncoding regulators (faster decay)
 
   value = list(  "G" = G,
                  "PC.p" = PC.p,
@@ -232,16 +241,21 @@ insilicosystemargs <- function(
                  "NC.RD.p" = NC.RD.p,
                  "NC.PD.p" = NC.PD.p,
                  "NC.PTM.p" = NC.PTM.p,
-                 "TC.PC.pos.p" = TC.PC.pos.p,
-                 "TC.NC.pos.p" = TC.NC.pos.p,
-                 "TL.PC.pos.p" = TL.PC.pos.p,
-                 "TL.NC.pos.p" = TL.NC.pos.p,
-                 "RD.PC.pos.p" = RD.PC.pos.p,
-                 "RD.NC.pos.p" = RD.NC.pos.p,
-                 "PD.PC.pos.p" = PD.PC.pos.p,
-                 "PD.NC.pos.p" = PD.NC.pos.p,
-                 "PTM.PC.pos.p" = PTM.PC.pos.p,
-                 "PTM.NC.pos.p" = PTM.NC.pos.p,
+                 "TC.pos.p" = TC.pos.p,
+                 "TL.pos.p" = TL.pos.p,
+                 "RD.pos.p" = RD.pos.p,
+                 "PD.pos.p" = PD.pos.p,
+                 "PTM.pos.p" = PTM.pos.p,
+#                 "TC.PC.pos.p" = TC.PC.pos.p,
+#                 "TC.NC.pos.p" = TC.NC.pos.p,
+#                 "TL.PC.pos.p" = TL.PC.pos.p,
+#                 "TL.NC.pos.p" = TL.NC.pos.p,
+#                 "RD.PC.pos.p" = RD.PC.pos.p,
+#                 "RD.NC.pos.p" = RD.NC.pos.p,
+#                 "PD.PC.pos.p" = PD.PC.pos.p,
+#                 "PD.NC.pos.p" = PD.NC.pos.p,
+#                 "PTM.PC.pos.p" = PTM.PC.pos.p,
+#                 "PTM.NC.pos.p" = PTM.NC.pos.p,
                  "basal_transcription_rate_samplingfct" = basal_transcription_rate_samplingfct,
                  "basal_translation_rate_samplingfct" = basal_translation_rate_samplingfct,
                  "basal_RNAlifetime_samplingfct" = basal_RNAlifetime_samplingfct,

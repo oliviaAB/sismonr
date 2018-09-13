@@ -1,2 +1,2 @@
-#' @importFrom XRJulia RJulia juliaEval juliaCommand juliaCall juliaUsing
+#' @importFrom XRJulia RJulia juliaEval juliaCommand juliaCall juliaUsing juliaGet
 NULL
