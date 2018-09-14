@@ -130,22 +130,34 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #'
 #' Creates an in silico multi omic network from a data-frame of genes in the system.
 #'
+#' The \code{edg} data-frame represents the edges in a regulatory network (1 row = 1 edge). It contains the following parameters:
+#' \itemize{
+#' \item \code{from}: gene ID of the origin of the edge (character).
+#' \item \code{to}: gene ID of the destination of the edge (integer).
+#' \item \code{TargetReaction}: Type of regulation (ID of the controlled reaction: "TC", "TL", "RD", "PD" or "PTM").
+#' \item \code{RegSign}: Sign of the reaction ("1" for positive regulation, "-1" for negative regulation).
+#' \item \code{RegBy}: Type of the regulator: "PC" for protein-coding regulation, "NC" for noncoding regulator,
+#' "C" for regulatory complex.
+#' }
+#'
 #' @param genes A data-frame of genes in the system (see \code{\link{createGenes}}).
 #' @param sysargs An object of class \code{insilicosystemargs} (i.e. a list with parameters for in silico system generation).
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return An in silico multi omic network, that is a list of:
 #' \itemize{
-#' \item \code{genes} the modified data-frame of genes;
-#' \item \code{edg} A data-frame of edges in the multi-omic network (see details below).
-#' \item \code{mosystem} A list of the different regulation networks in the system and associated information.
+#' \item \code{genes}: the modified data-frame of genes;
+#' \item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
+#' \item \code{mosystem}: A list of the different regulation networks in the system and associated information.
 #' }
 #' The \code{mosystem} list is composed of:
-#' \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
+#' \itemize{
+#' \item \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
 #' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
 #' regulation.
-#' \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
+#' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex.
-#' \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+#' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+#' }
 #' @export
 createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   complexes = list()
@@ -304,4 +316,40 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 
   return(list("mosystem" = res, "genes" = genes, "edg" = edg))
 
+}
+
+#' Creates an empty in silico multi omic network
+#'
+#' Creates an empty in silico multi omic network from a data-frame of genes in the system (no regulatory interactions) (cf
+#' \code{\link{createMultiOmicNetwork}}).
+#'
+#' @param genes A data-frame of genes in the system (see \code{\link{createGenes}}).
+#' @return An in silico multi omic network, that is a list of:
+#' \itemize{
+#' \item \code{genes}: the modified data-frame of genes;
+#' \item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
+#' \item \code{mosystem}: A list of the different regulation networks in the system and associated information.
+#' }
+#' The \code{mosystem} list is composed of:
+#' \itemize{
+#' \item \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
+#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
+#' regulation. All empty.
+#' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
+#' values are vectors of gene IDs constituting each regulatory complex. Empty list.
+#' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters. Empty list.
+#' }
+#' @export
+createEmptyMultiOmicNetwork = function(genes){
+
+  edg = data.frame("from" = integer(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
+  res = list("TCRN_edg" = data.frame(edg,  "TCbindingrate" = numeric(), "TCbunindingrate" = numeric(), "TCfoldchange" = numeric(), stringsAsFactors = F),
+             "TLRN_edg" = data.frame(edg,  "TLbunindingrate" = numeric(), "TLfoldchange" = numeric(), stringsAsFactors = F),
+             "RDRN_edg" = data.frame(edg, "RDregrate" = numeric(), stringsAsFactors = F),
+             "PDRN_edg" = data.frame(edg, "PDregrate" = numeric(), stringsAsFactors = F),
+             "PTMRN_edg" = data.frame(edg, "PTMregrate" = numeric(), stringsAsFactors = F),
+             "complexes" = list(),
+             "complexeskinetics" = list())
+
+  return(list("mosystem" = res, "genes" = genes, "edg" = edg))
 }

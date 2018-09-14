@@ -16,18 +16,31 @@ createMultiOmicNetwork(genes, sysargs, ev = getJuliaEvaluator())
 \value{
 An in silico multi omic network, that is a list of:
 \itemize{
-\item \code{genes} the modified data-frame of genes;
-\item \code{edg} A data-frame of edges in the multi-omic network (see details below).
-\item \code{mosystem} A list of the different regulation networks in the system and associated information.
+\item \code{genes}: the modified data-frame of genes;
+\item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
+\item \code{mosystem}: A list of the different regulation networks in the system and associated information.
 }
 The \code{mosystem} list is composed of:
-\code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
+\itemize{
+\item \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
 regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
 regulation.
-\code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
+\item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 values are vectors of gene IDs constituting each regulatory complex.
-\code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+\item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+}
 }
 \description{
 Creates an in silico multi omic network from a data-frame of genes in the system.
+}
+\details{
+The \code{edg} data-frame represents the edges in a regulatory network (1 row = 1 edge). It contains the following parameters:
+\itemize{
+\item \code{from}: gene ID of the origin of the edge (character).
+\item \code{to}: gene ID of the destination of the edge (integer).
+\item \code{TargetReaction}: Type of regulation (ID of the controlled reaction: "TC", "TL", "RD", "PD" or "PTM").
+\item \code{RegSign}: Sign of the reaction ("1" for positive regulation, "-1" for negative regulation).
+\item \code{RegBy}: Type of the regulator: "PC" for protein-coding regulation, "NC" for noncoding regulator,
+"C" for regulatory complex.
+}
 }
