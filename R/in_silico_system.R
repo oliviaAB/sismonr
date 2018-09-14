@@ -22,7 +22,7 @@
 #' \item \code{TCrate}: transcription rate of the genes;
 #' \item \code{TLrate}: translation rate of the genes (0 for noncoding genes);
 #' \item \code{RDrate}: RNA decay rate of the genes;
-#' \item \code{PDrate}: Protein decay rate of the genes (0 for noncoding genes);
+#' \item \code{PDrate}: Protein decay rate of the genes (0 for noncoding genes).
 #' }
 #' @export
 createGenes = function(sysargs){
@@ -61,9 +61,9 @@ createGenes = function(sysargs){
   return(genes)
 }
 
-#' Generates an in silico regulatory network
+#' Creates an in silico regulatory network
 #'
-#' Generates an in silico regulatory network given a list of regulators and targets
+#' Creates an in silico regulatory network given a list of regulators and targets
 #'
 #' @param regsList A named list of length 2. Element "PC" (resp."NC") is a vector of gene ID of the protein-coding (resp. noncoding) regulators
 #' for the network.
@@ -123,4 +123,185 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
   rownames(edg) = NULL
   complexes = lapply(juliaedg$complexes, unlist)
   return(list("edg" = edg, "complexes" = complexes))
+}
+
+
+#' Creates an in silico multi omic network
+#'
+#' Creates an in silico multi omic network from a data-frame of genes in the system.
+#'
+#' @param genes A data-frame of genes in the system (see \code{\link{createGenes}}).
+#' @param sysargs An object of class \code{insilicosystemargs} (i.e. a list with parameters for in silico system generation).
+#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @return An in silico multi omic network, that is a list of:
+#' \itemize{
+#' \item \code{genes} the modified data-frame of genes;
+#' \item \code{edg} A data-frame of edges in the multi-omic network (see details below).
+#' \item \code{mosystem} A list of the different regulation networks in the system and associated information.
+#' }
+#' The \code{mosystem} list is composed of:
+#' \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
+#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
+#' regulation.
+#' \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
+#' values are vectors of gene IDs constituting each regulatory complex.
+#' \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+#' @export
+createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
+  complexes = list()
+
+  ## Define transcription regulatory network (TCRN) ----
+
+  ## Identify transcription regulators in the system
+  PCreg_id = genes$id[genes$coding == "PC" & genes$TargetReaction == "TC"] ## protein-coding regulators
+  NCreg_id = genes$id[genes$coding == "NC" & genes$TargetReaction == "TC"] ## noncoding regulators
+
+  ## Identify targets of transcription regulators in the system - here any gene
+  PCtarget_id = genes$id
+  NCtarget_id = genes$id
+#  NCtarget_id = genes$id[genes$coding == "PC"]
+
+  ## Construct the regulatory network
+  TCRN = createRegulatoryNetwork(regsList = list("PC" = PCreg_id, "NC" = NCreg_id),
+                                 tarsList = list("PC" = PCtarget_id, "NC" = NCtarget_id),
+                                 reaction = "TC", sysargs = sysargs, ev = ev)
+  TCRN_edg = TCRN[["edg"]]
+  complexes = c(complexes, TCRN[["complexes"]])
+
+  ## Sample the kinetic parameters of each regulatory interaction
+  ##    Kinetic parameters for transcription regulation include the binding and unbinding rate of regulators to gene promoter,
+  ##    and the fold change induced on transcription rate by a regulator bound to the promoter
+  TCRN_edg = data.frame(TCRN_edg, "TCbindingrate" = sysargs[["TCbindingrate_samplingfct"]](nrow(TCRN_edg)),
+                                  "TCunbindingrate" = sysargs[["TCunbindingrate_samplingfct"]](nrow(TCRN_edg)),
+                                  "TCfoldchange" = rep(0, nrow(TCRN_edg)), stringsAsFactors = F)
+  TCRN_edg$TCfoldchange[TCRN_edg$RegSign == "1"] = sysargs[["TCfoldchange_samplingfct"]](sum(TCRN_edg$RegSign == "1"))  ## Repressors induce a fold change of 0
+
+  ## Define translation regulatory network (TLRN) ----
+
+  ## Identify translation regulators in the system
+  PCreg_id = genes$id[genes$coding == "PC" & genes$TargetReaction == "TL"] ## protein-coding regulators
+  NCreg_id = genes$id[genes$coding == "NC" & genes$TargetReaction == "TL"] ## noncoding regulators
+
+  ## Identify targets of translation regulators in the system - here any protein-coding gene
+  PCtarget_id = genes$id[genes$coding == "PC"]
+  NCtarget_id = genes$id[genes$coding == "PC"]
+
+  ## Construct the regulatory network
+  TLRN = createRegulatoryNetwork(regsList = list("PC" = PCreg_id, "NC" = NCreg_id),
+                                 tarsList = list("PC" = PCtarget_id, "NC" = NCtarget_id),
+                                 reaction = "TL", sysargs = sysargs, ev = ev)
+  TLRN_edg = TLRN[["edg"]]
+  complexes = c(complexes, TLRN[["complexes"]])
+
+  ## Sample the kinetic parameters of each regulatory interaction
+  ##    Kinetic parameters for translation regulation include the binding and unbinding rate of regulators to gene promoter,
+  ##    and the fold change induced on translation rate by a regulator bound to the promoter
+  TLRN_edg = data.frame(TLRN_edg, "TLbindingrate" = sysargs[["TLbindingrate_samplingfct"]](nrow(TLRN_edg)),
+                        "TLunbindingrate" = sysargs[["TLunbindingrate_samplingfct"]](nrow(TLRN_edg)),
+                        "TLfoldchange" = rep(0, nrow(TLRN_edg)), stringsAsFactors = F)
+  TLRN_edg$TLfoldchange[TLRN_edg$RegSign == "1"] = sysargs[["TLfoldchange_samplingfct"]](sum(TLRN_edg$RegSign == "1"))  ## Repressors induce a fold change of 0
+
+
+  ## Define RNA decay regulatory network (RDRN) ----
+
+  ## Identify RNA decay regulators in the system
+  PCreg_id = genes$id[genes$coding == "PC" & genes$TargetReaction == "RD"] ## protein-coding regulators
+  NCreg_id = genes$id[genes$coding == "NC" & genes$TargetReaction == "RD"] ## noncoding regulators
+
+  ## Identify targets of RNA decay regulators in the system - here any gene
+  PCtarget_id = genes$id
+  NCtarget_id = genes$id
+
+  ## Construct the regulatory network
+  RDRN = createRegulatoryNetwork(regsList = list("PC" = PCreg_id, "NC" = NCreg_id),
+                                 tarsList = list("PC" = PCtarget_id, "NC" = NCtarget_id),
+                                 reaction = "RD", sysargs = sysargs, ev = ev)
+  RDRN_edg = RDRN[["edg"]]
+  complexes = c(complexes, RDRN[["complexes"]])
+
+  ## Sample the kinetic parameters of each regulatory interaction
+  ##    Kinetic parameter for RNA decay regulation is the decay rate induced by the regulators
+  RDRN_edg = data.frame(RDRN_edg, "RDregrate" = sysargs[["RDregrate_samplingfct"]](nrow(RDRN_edg)), stringsAsFactors = F)
+
+
+  ## Define protein decay regulatory network (PDRN) ----
+
+  ## Identify protein decay regulators in the system
+  PCreg_id = genes$id[genes$coding == "PC" & genes$TargetReaction == "PD"] ## protein-coding regulators
+  NCreg_id = genes$id[genes$coding == "NC" & genes$TargetReaction == "PD"] ## noncoding regulators
+
+  ## Identify targets of protein decay regulators in the system - here any protein-coding gene
+  PCtarget_id = genes$id[genes$coding == "PC"]
+  NCtarget_id = genes$id[genes$coding == "PC"]
+
+  ## Construct the regulatory network
+  PDRN = createRegulatoryNetwork(regsList = list("PC" = PCreg_id, "NC" = NCreg_id),
+                                 tarsList = list("PC" = PCtarget_id, "NC" = NCtarget_id),
+                                 reaction = "PD", sysargs = sysargs, ev = ev)
+  PDRN_edg = PDRN[["edg"]]
+  complexes = c(complexes, PDRN[["complexes"]])
+
+  ## Sample the kinetic parameters of each regulatory interaction
+  ##    Kinetic parameter for protein decay regulation is the decay rate induced by the regulators
+  PDRN_edg = data.frame(PDRN_edg, "PDregrate" = sysargs[["PDregrate_samplingfct"]](nrow(PDRN_edg)), stringsAsFactors = F)
+
+
+  ## Define protein post-translational modification regulatory network (PTMRN) ----
+
+  ## Identify protein post-translational modification regulators in the system
+  PCreg_id = genes$id[genes$coding == "PC" & genes$TargetReaction == "PTM"] ## protein-coding regulators
+  NCreg_id = genes$id[genes$coding == "NC" & genes$TargetReaction == "PTM"] ## noncoding regulators
+
+  ## Identify targets of protein post-translational modification in the system - here any protein-coding gene
+  PCtarget_id = genes$id[genes$coding == "PC"]
+  NCtarget_id = genes$id[genes$coding == "PC"]
+
+  ## Construct the regulatory network
+  PTMRN = createRegulatoryNetwork(regsList = list("PC" = PCreg_id, "NC" = NCreg_id),
+                                 tarsList = list("PC" = PCtarget_id, "NC" = NCtarget_id),
+                                 reaction = "PTM", sysargs = sysargs, ev = ev)
+  PTMRN_edg = PTMRN[["edg"]]
+  complexes = c(complexes, PTMRN[["complexes"]])
+
+  ## Sample the kinetic parameters of each regulatory interaction
+  ##    Kinetic parameter for protein post-translational modification regulation is the decay rate induced by the regulators
+  PTMRN_edg = data.frame(PTMRN_edg, "PTMregrate" = sysargs[["PTMregrate_samplingfct"]](nrow(PTMRN_edg)), stringsAsFactors = F)
+
+  ## Uptade the PTM status of genes ----
+  PTMtargets = unique(PTMRN_edg$to)
+  genes[PTMtargets, "PTMform"] = "1"
+  genes[PTMtargets, "ActiveForm"] = "Pm"
+  genes$ActiveForm = sapply(1:nrow(genes), function(x){paste0(genes$ActiveForm[x], genes$id[x])})
+
+  ## Define regulatory complexes kinetic parameters ----
+
+  complexeskinetics = list()
+  if(length(complexes)>0){
+    formrates = sysargs[["complexesformationrate_samplingfct"]](length(complexes))
+    dissrates = sysargs[["complexesdissociationrate_samplingfct"]](length(complexes))
+    for(c in 1:length(complexes)){
+      complexeskinetics[[names(complexes)[c]]] = list("formationrate" = formrates[c], "dissociationrate" = dissrates[c])
+    }}
+
+
+  ## Return the in silico system ----
+
+  edg = do.call(rbind, list(TCRN_edg[, c("from", "to", "TargetReaction", "RegSign", "RegBy")],
+                            TLRN_edg[, c("from", "to", "TargetReaction", "RegSign", "RegBy")],
+                            RDRN_edg[, c("from", "to", "TargetReaction", "RegSign", "RegBy")],
+                            PDRN_edg[, c("from", "to", "TargetReaction", "RegSign", "RegBy")],
+                            PTMRN_edg[, c("from", "to", "TargetReaction", "RegSign", "RegBy")]))
+
+  ## Return
+  res = list("TCRN_edg" = TCRN_edg,
+             "TLRN_edg" = TLRN_edg,
+             "RDRN_edg" = RDRN_edg,
+             "RDRN_edg" = RDRN_edg,
+             "PDRN_edg" = PDRN_edg,
+             "PTMRN_edg" = PTMRN_edg,
+             "complexes" = complexes,
+             "complexeskinetics" = complexeskinetics)
+
+  return(list("mosystem" = res, "genes" = genes, "edg" = edg))
+
 }

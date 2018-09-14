@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{createRegulatoryNetwork}
 \alias{createRegulatoryNetwork}
-\title{Generates an in silico regulatory network}
+\title{Creates an in silico regulatory network}
 \usage{
 createRegulatoryNetwork(regsList, tarsList, reaction, sysargs,
   ev = getJuliaEvaluator())
@@ -36,5 +36,5 @@ The \code{edg} data-frame has the following variables:
 }
 }
 \description{
-Generates an in silico regulatory network given a list of regulators and targets
+Creates an in silico regulatory network given a list of regulators and targets
 }

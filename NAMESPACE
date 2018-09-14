@@ -2,6 +2,7 @@
 
 export(createGenes)
 export(createIndividual)
+export(createMultiOmicNetwork)
 export(createPopulation)
 export(createRegulatoryNetwork)
 export(createVariants)

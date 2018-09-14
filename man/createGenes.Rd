@@ -22,7 +22,7 @@ regulator, "PD": protein decay regulator, "PTM": post-translational modification
 \item \code{TCrate}: transcription rate of the genes;
 \item \code{TLrate}: translation rate of the genes (0 for noncoding genes);
 \item \code{RDrate}: RNA decay rate of the genes;
-\item \code{PDrate}: Protein decay rate of the genes (0 for noncoding genes);
+\item \code{PDrate}: Protein decay rate of the genes (0 for noncoding genes).
 }
 }
 \description{
