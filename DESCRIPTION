@@ -1,4 +1,4 @@
-Package: sismon
+Package: sismonr
 Type: Package
 Title: Simulation of In Silico Multi-Omic Networks
 Version: 0.1.0
