@@ -1,5 +1,6 @@
 
 using StatsBase
+using JLD ## temporary
 
 ## Test if the file is sourced in a Julia evaluator in R
 function juliatest()
@@ -267,4 +268,18 @@ function compreg(edg, compsize, compprob, reacname)
   	edg[:,1] = [string(i) for i in edg[:,1]] ## Transform the integer ID of regulators into String ID 
 
   	return Dict("newedg" => edg, "complexes" => complexes)
+end
+
+
+
+# ------------------------------------------------------------------------------------------------ #
+##                    FUNCTIONS FOR CREATING THE TEMPLATE STOCHASTIC SYSTEM                       ##
+# ------------------------------------------------------------------------------------------------ #
+
+function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, edgPTMRN, complexes, complexeskinetics, complexsize, gcnList)
+
+  save("/home/oangelin/Documents/testsismonr/mysystem.jld", "genes", genes, "edgTCRN", edgTCRN, "edgTLRN", edgTLRN, "edgRDRN", edgRDRN,
+                                                            "edgPDRN", edgPDRN, "edgPTMRN", edgPTMRN, "complexes", complexes, "complexeskinetics", complexeskinetics,
+                                                            "complexsize", complexsize, "gcnList", gcnList)
+
 end

@@ -148,16 +148,13 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #' \item \code{genes}: the modified data-frame of genes;
 #' \item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
 #' \item \code{mosystem}: A list of the different regulation networks in the system and associated information.
-#' }
-#' The \code{mosystem} list is composed of:
-#' \itemize{
-#' \item \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
-#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
-#' regulation.
 #' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
 #' }
+#' The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
+#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
+#' regulation.
 #' @export
 createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 
@@ -309,13 +306,10 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   res = list("TCRN_edg" = TCRN_edg,
              "TLRN_edg" = TLRN_edg,
              "RDRN_edg" = RDRN_edg,
-             "RDRN_edg" = RDRN_edg,
              "PDRN_edg" = PDRN_edg,
-             "PTMRN_edg" = PTMRN_edg,
-             "complexes" = complexes,
-             "complexeskinetics" = complexeskinetics)
+             "PTMRN_edg" = PTMRN_edg)
 
-  return(list("mosystem" = res, "genes" = genes, "edg" = edg))
+  return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = complexes, "complexeskinetics" = complexeskinetics))
 
 }
 
@@ -330,16 +324,13 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 #' \item \code{genes}: the modified data-frame of genes;
 #' \item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
 #' \item \code{mosystem}: A list of the different regulation networks in the system and associated information.
-#' }
-#' The \code{mosystem} list is composed of:
-#' \itemize{
-#' \item \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg}, \code{PTMRN_edg}: data-frames of edges for the different
-#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
-#' regulation. All empty.
 #' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex. Empty list.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters. Empty list.
 #' }
+#' The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
+#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
+#' regulation. All empty.
 #' @export
 createEmptyMultiOmicNetwork = function(genes){
 
@@ -348,11 +339,9 @@ createEmptyMultiOmicNetwork = function(genes){
              "TLRN_edg" = data.frame(edg,  "TLbindingrate" = numeric(), "TLunbindingrate" = numeric(), "TLfoldchange" = numeric(), stringsAsFactors = F),
              "RDRN_edg" = data.frame(edg, "RDregrate" = numeric(), stringsAsFactors = F),
              "PDRN_edg" = data.frame(edg, "PDregrate" = numeric(), stringsAsFactors = F),
-             "PTMRN_edg" = data.frame(edg, "PTMregrate" = numeric(), stringsAsFactors = F),
-             "complexes" = list(),
-             "complexeskinetics" = list())
+             "PTMRN_edg" = data.frame(edg, "PTMregrate" = numeric(), stringsAsFactors = F))
 
-  return(list("mosystem" = res, "genes" = genes, "edg" = edg))
+  return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = list(), "complexeskinetics" = list()))
 }
 
 #' Creates an in silico system.

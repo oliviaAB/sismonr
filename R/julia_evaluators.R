@@ -14,8 +14,8 @@ newJuliaEvaluator <- function(port = NULL) {
     ev <- RJulia(port = as.integer(port), .makeNew = T)  ## create a new julia evaluator with a given port
   }
   juliaUsing("ClobberingReload")
-  juliaCommand(paste0("sinclude(\"", system.file("julia", "sismon.jl",
-                                                          package = "sismon"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+  juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
+                                                          package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
   return(ev)
 }
 
@@ -24,18 +24,18 @@ newJuliaEvaluator <- function(port = NULL) {
 #' Returns the current Julia evaluator; if none, starts a new one
 #'
 #' \code{getJuliaEvaluator} is similar to the \code{XRJulia} function \code{RJulia},
-#' but if no evaluator exists, creates a new one and load \code{sismon} Julia functions
+#' but if no evaluator exists, creates a new one and load \code{sismonr} Julia functions
 #' on it.
 #'
 #'@return A Julia evalutator from \code{XRJulia} package.
 #'@export
 getJuliaEvaluator <- function(){
   ev = RJulia() ## returns the current evaluator or creates one
-  if(!juliaEval("isdefined(:juliatest)")){ ## we want to know if the sismon Julia functions are already sourced on the evaluator
+  if(!juliaEval("isdefined(:juliatest)")){ ## we want to know if the sismonr Julia functions are already sourced on the evaluator
                                                     ## (faster than sourcing them everytime)
     juliaUsing("ClobberingReload", evaluator = ev)
-    juliaCommand(paste0("sinclude(\"", system.file("julia", "sismon.jl",
-                                                            package = "sismon"), "\")"), evaluator = ev)  # load the julia functions of the package in the new evaluator
+    juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
+                                                            package = "sismonr"), "\")"), evaluator = ev)  # load the julia functions of the package in the new evaluator
 
   }
   return(ev)

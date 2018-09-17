@@ -14,6 +14,6 @@ Returns the current Julia evaluator; if none, starts a new one
 }
 \details{
 \code{getJuliaEvaluator} is similar to the \code{XRJulia} function \code{RJulia},
-but if no evaluator exists, creates a new one and load \code{sismon} Julia functions
+but if no evaluator exists, creates a new one and load \code{sismonr} Julia functions
 on it.
 }
