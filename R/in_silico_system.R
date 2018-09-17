@@ -160,6 +160,7 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #' }
 #' @export
 createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
+
   complexes = list()
 
   ## Define transcription regulatory network (TCRN) ----
@@ -352,4 +353,35 @@ createEmptyMultiOmicNetwork = function(genes){
              "complexeskinetics" = list())
 
   return(list("mosystem" = res, "genes" = genes, "edg" = edg))
+}
+
+#' Creates an in silico system.
+#'
+#' Creates an in silico system, i.e. the genes and the regulatory networks defining the system.
+#'
+#' @param empty Logical. Does the regulatory network is empty (= no regulation)? Default value is \code{FALSE}.
+#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @return An object of class \code{insilicosystem}, that is a list composed of:
+#' \itemize{
+#' \item \code{genes}: a data-frame of genes (see \code{\link{createGenes}});
+#' \item \code{edg}: a data-frame of edges in the regulatory network (see \code{\link{createMultiOmicNetwork}});
+#' \item \code{mosystem}: a list defining the multi-omic regulatory network (see \code{\link{createMultiOmicNetwork}});
+#' \item \code{sysargs}: An object of class \code{insilicosystemargs}; the parameters used to create the system.
+#' }
+#' @export
+createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
+
+  sysargs = insilicosystemargs(...)
+  genes = createGenes(sysargs)
+
+  if(empty){
+    monw = createEmptyMultiOmicNetwork(genes)
+  }else{
+    monw = createMultiOmicNetwork(genes, sysargs, ev)
+  }
+
+  value = c(monw, list("sysargs" = sysargs))
+  attr(value, "class") = "insilicosystem"
+
+  return(value)
 }

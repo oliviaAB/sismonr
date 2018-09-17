@@ -21,14 +21,6 @@
 #' @param TL.pos.p Numeric. Probability that the translation is positively regulated by regulators. Default value is 0.5.
 #' @param PTM.pos.p Numeric. Probability that the regulators transform the original protein into its modified form
 #' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
-# #' @param TC.PC.pos.p Numeric. Probability that the transcription is positively regulated by protein regulators. Default value is 0.5.
-# #' @param TC.NC.pos.p Numeric. Probability that the transcription is positively regulated by noncoding regulators. Default value is 0.5.
-# #' @param TL.PC.pos.p Numeric. Probability that the translation is positively regulated by protein regulators. Default value is 0.5.
-# #' @param TL.NC.pos.p Numeric. Probability that the translation is positively regulated by noncoding regulators. Default value is 0.5.
-# #' @param PTM.PC.pos.p Numeric. Probability that the protein regulators transform the original protein into its modified form
-# #' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
-# #' @param PTM.NC.pos.p Numeric. Probability that the noncoding regulators transform the original protein into its modified form
-# #' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
 #' @param basal_transcription_rate_samplingfct Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
 #' Values from Schwanhausser et al., 2013: transcription rate distribution log-normal, from 0.1 to 100 mRNA/hour -> we want the transcription rate in seconds. Default value is
 #' @param basal_translation_rate_samplingfct Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is

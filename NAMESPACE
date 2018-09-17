@@ -2,6 +2,7 @@
 
 export(createEmptyMultiOmicNetwork)
 export(createGenes)
+export(createInSilicoSystem)
 export(createIndividual)
 export(createMultiOmicNetwork)
 export(createPopulation)
