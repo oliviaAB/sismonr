@@ -20,7 +20,7 @@ Create variants that segregate in the in silico population for each gene in the 
 }
 \details{
 Returns a list that gives for each gene in the system the existing variants segregating in the in silico population.
-A variant is defined by a set of QTL effect coefficients ("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDbindreg",
-"qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregbind") that correspond to the impact of genetic
+A variant is defined by a set of QTL effect coefficients ("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDregrate",
+"qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregrate") that correspond to the impact of genetic
 mutations on the variant.
 }

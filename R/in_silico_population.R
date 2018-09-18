@@ -21,7 +21,7 @@ createVariants = function(genes, indargs){
 
   if(indargs$ngenevariants > 1){  ## if the user requests more that one variant per gene
     for(i in genes$id){
-      potentialqtls = 1:(5 + 4*(genes[i, "coding"] == "PC")) ## protein-coding genes can have mutations affecting more parameters compared to noncoding genes
+      potentialqtls = 1:(5 + 5*(genes[i, "coding"] == "PC")) ## protein-coding genes can have mutations affecting more parameters compared to noncoding genes
       nchanges = sample(potentialqtls, indargs$ngenevariants - 1, replace = T) ## Select the number of "mutations" from the original allele for each variant (minimum 1 otherwise we would have several copies of the original allele)
       ## the 1st variant is the original allele - no mutation
       qtlchanges = unlist(sapply(1:(indargs$ngenevariants-1), function(x){ length(indargs$qtlnames)*x + sample(potentialqtls, nchanges[x], replace = F)})) ## sample which qtl are affected by mutations for each variant, and convert it into matrix coordinates
@@ -103,11 +103,13 @@ createIndividual = function(variantsList, indargs, sameInit = F){
 #'
 #' @param nInd Integer. The number of in silico individuals to create.
 #' @param insilicosystem An \code{insilicosystem} object. The in silico system from which individuals are created.
-#' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
 #' @param sameInit Logical. Do the individuals in the population have the same initial abundance for the different molecules? Default value is \code{FALSE}.
+#' @param ... Other arguments to be passed to the function \code{\link{insilicosystemargs}}.
+#' @return An object of class \code{insilicopopulation}, that is a list composed of:
 #' @export
-createPopulation = function(nInd, insilicosystem, indargs, sameInit = F){
+createInSilicoPopulation = function(nInd, insilicosystem, sameInit = F, ...){
 
+  indargs = insilicoindividualargs(...)
   genvariants = createVariants(insilicosystem$genes, indargs)
   indnames = sapply(1:nInd, function(x){paste0("Ind", x)})
   individualsList = vector("list", nInd)

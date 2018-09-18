@@ -350,6 +350,7 @@ createEmptyMultiOmicNetwork = function(genes){
 #'
 #' @param empty Logical. Does the regulatory network is empty (= no regulation)? Default value is \code{FALSE}.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @param ... Other arguments to be passed to the function \code{\link{insilicosystemargs}}.
 #' @return An object of class \code{insilicosystem}, that is a list composed of:
 #' \itemize{
 #' \item \code{genes}: a data-frame of genes (see \code{\link{createGenes}});

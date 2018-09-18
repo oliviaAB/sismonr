@@ -10,6 +10,8 @@ createInSilicoSystem(empty = F, ev = getJuliaEvaluator(), ...)
 \item{empty}{Logical. Does the regulatory network is empty (= no regulation)? Default value is \code{FALSE}.}
 
 \item{ev}{A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.}
+
+\item{...}{Other arguments to be passed to the function \code{\link{insilicosystemargs}}.}
 }
 \value{
 An object of class \code{insilicosystem}, that is a list composed of:
