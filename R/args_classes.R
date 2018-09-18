@@ -346,7 +346,7 @@ insilicoindividualargs <- function(
   gcnList = sapply(1:ploidy, function(x){paste0("GCN", x)})
   ## qtlnames: names of the qtl effect coefficients
   ## The first 5 are the qtl affecting all genes, the last 4 only affect protein coding genes
-  qtlnames = c("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDbindreg", "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregbind")
+  qtlnames = c("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDregrate", "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregrate")
 
   value = list("ploidy" = ploidy,
                "gcnList" = gcnList,
