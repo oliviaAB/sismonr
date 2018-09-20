@@ -4,12 +4,19 @@
 \alias{createStochSystem}
 \title{Creates a stochastic system from an in silico system.}
 \usage{
-createStochSystem(insilicosystem, indargs, ev = getJuliaEvaluator())
+createStochSystem(insilicosystem, indargs, writefile, filepath, filename,
+  ev = getJuliaEvaluator())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}
 
 \item{indargs}{An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).}
+
+\item{writefile}{Does the julia function write the species and reactions lists in a text file?}
+
+\item{filepath}{If writefile = \code{TRUE}, path to the folder in the which the files will be created.}
+
+\item{filename}{If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.}
 
 \item{ev}{A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.}
 }

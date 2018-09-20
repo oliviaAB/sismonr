@@ -144,7 +144,7 @@ end
 
 ## Output:
 ##    - edg: A 2D array of edges, 1st column: from, 2nd column: to, 3rd column: regBy
-function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autoregproba, twonodesloop, edg = Array{Int64}(0,2))
+function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autoregproba, twonodesloop, edg = Array{Any}(0,2))
 
   # Ensure that reg and target are arrays
   if typeof(reg) == Int64
@@ -332,7 +332,7 @@ end
 
 
 ## Creates the regulatory complexes binding and unbding reactions
-function createComplexesReactions(complexes, complexeskinetics, complexvariants, activeform)
+function createComplexesReactions(complexes, complexeskinetics, complexsize, complexvariants, activeform)
 
   spec = []
   initcond = []
@@ -850,7 +850,7 @@ function createPTMregReactions(edg, genes, activeform, complexes, complexsize, c
   return Dict("reactions" => reac, "reactionsnames" => reacnames, "propensities" => prop)
 end
 
-function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, edgPTMRN, complexes, complexeskinetics, complexsize, gcnList)
+function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, edgPTMRN, complexes, complexeskinetics, complexsize, gcnList, writefile, filepath, filename)
 
   #  save("/home/oangelin/Documents/testsismonr/mysystem.jld", "genes", genes, "edgTCRN", edgTCRN, "edgTLRN", edgTLRN, "edgRDRN", edgRDRN,
   #                                                            "edgPDRN", edgPDRN, "edgPTMRN", edgPTMRN, "complexes", complexes, "complexeskinetics", complexeskinetics,
@@ -877,41 +877,51 @@ end
   complexvariants = allposscomb(gcnList, complexsize)
 
   ## Generates the formation and dissociation reactions of the different regulatory complexes
-  complexesReactions = createComplexesReactions(complexes, complexeskinetics, complexvariants, activeform)
+  complexesReactions = createComplexesReactions(complexes, complexeskinetics, complexsize, complexvariants, activeform)
+  println("complexes done")
 
   ## Generates the list of all possible binding and unbinding reactions of transcription regulators on promoter binding sites
   regTCreactions = createTCregReactions(edgTCRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
   promactiveTC = regTCreactions["promActiveStates"]
   promallTC = regTCreactions["promAllStates"]
+  println("regTCreactions done")
 
   ## Generates the list of all possible binding and unbinding reactions of transcription regulators on promoter binding sites
   regTLreactions = createTLregReactions(edgTLRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
   promactiveTL = regTLreactions["promActiveStates"]
   promallTL = regTLreactions["promAllStates"]
+  println("regTLreactions done")
 
   ## Generates the list of all possible transcription reactions for the genes
   transcriptionReactions = createTranscriptionReactions(genes, promactiveTC, promallTL, gcnList)
   RNAforms = transcriptionReactions["RNAforms"]
+  println("transcriptionReactions done")
 
   ## Generates the list of all possible RNA decay reactions for the genes
   ## In this model, when RNAs are represented by the sum of RBS (translation regulator binding sites), only the free form of the RNA
   ## (= all binding sites are free) decays
   rnaDecayReactions = createRNADecayReactions(genes, RNAforms, gcnList)
+  println("rnaDecayReactions done")
 
   ## Generates the list of all possible regulator-mediated RNA decay reactions for the genes
   regRDreactions = createRDregReactions(edgRDRN, genes, RNAforms, activeform, complexes, complexsize, complexvariants, gcnList)
+  println("regRDreactions done")
 
   ## Generates the list of all possible translation reactions for the genes
   translationReactions = createTranslationReactions(genes, promactiveTL, gcnList)
+  println("translationReactions done")
 
   ## Generates the list of all possible protein decay reactions for the genes
   proteinDecayReactions = createProteinDecayReactions(genes, gcnList)
+  println("proteinDecayReactions done")
 
   ## Generates the list of all possible regulator-mediated protein decay reactions for the genes
   regPDreactions = createPDregReactions(edgPDRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
+  println("regPDreactions done")
 
   ## Generates the list of all possible protein post-translational modification reactions for the genes
   regPTMreactions = createPTMregReactions(edgPTMRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
+  println("regPTMreactions done")
 
   ## Output of the function
   species = vcat(complexesReactions["species"],
@@ -961,6 +971,19 @@ end
                       regPDreactions["propensities"],
                       regPTMreactions["propensities"])
 
+  if writefile
+    open(filepath*filename*"_species.txt", "w") do f
+      for i in 1:length(species)
+        write(f, species[i]*"\t"*initialconditions[i]*"\n")
+      end
+    end
+
+    open(filepath*filename*"_reactions.txt", "w") do f
+      for i in 1:length(reactions)
+        write(f, reactionsnames[i]*"\t"*reactions[i]*"\t"*propensities[i]*"\n")
+      end
+    end
+  end
 
   return Dict("species" => species, "initialconditions" => initialconditions, "reactions" => reactions, "reactionsnames" => reactionsnames, "propensities" => propensities, "TCproms" => promallTC, "TLproms" => promallTL)
 end

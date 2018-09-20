@@ -25,10 +25,13 @@ df2list = function(mydf){
 #'
 #' @param insilicosystem The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).
 #' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
+#' @param writefile Does the julia function write the species and reactions lists in a text file?
+#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created.
+#' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @export
-createStochSystem = function(insilicosystem, indargs, ev = getJuliaEvaluator()){
+createStochSystem = function(insilicosystem, indargs, writefile, filepath, filename, ev = getJuliaEvaluator()){
 
   ## Creating the networks lists to be sent to Julia (converted to dictionaries in Julia)
   temp = names(insilicosystem$mosystem)
@@ -49,7 +52,8 @@ createStochSystem = function(insilicosystem, indargs, ev = getJuliaEvaluator()){
   juliastochsystem = juliaCall("juliaCreateStochasticSystem",
                           genes, TCRN_edg, TLRN_edg, RDRN_edg, PDRN_edg, PTMRN_edg,
                           complexes, complexeskinetics,
-                          as.integer(insilicosystem$sysargs$regcomplexes.size), indargs$gcnList, evaluator = ev)
+                          as.integer(insilicosystem$sysargs$regcomplexes.size), indargs$gcnList,
+                          writefile, filepath, filename, evaluator = ev)
   message("Done.")
 
   return(juliastochsystem)

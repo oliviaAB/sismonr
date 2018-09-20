@@ -99,9 +99,9 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
                              evaluator = ev), evaluator = ev)
 
   if(nrow(juliaedg$edg) == 0){
-    edg = data.frame("from" = integer(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
+    edg = data.frame("from" = character(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
   } else{
-    edg = data.frame("from" = unlist(juliaedg$edg[,1]), "to" = unlist(juliaedg$edg[,2]), "TargetReaction" = rep(reaction, nrow(juliaedg$edg)), "RegSign" = rep("", nrow(juliaedg$edg)), "RegBy" = unlist(juliaedg$edg[,3]), stringsAsFactors = F)
+    edg = data.frame("from" = sapply(unlist(juliaedg$edg[,1]), toString), "to" = unlist(juliaedg$edg[,2]), "TargetReaction" = rep(reaction, nrow(juliaedg$edg)), "RegSign" = rep("", nrow(juliaedg$edg)), "RegBy" = unlist(juliaedg$edg[,3]), stringsAsFactors = F)
 
     ## Sample the sign of the edges
     if(reaction == "PTM"){ ## we want to make sure that for each gene targeted by PTM regulation at least one edge is positive (i.e. the target
@@ -334,7 +334,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 #' @export
 createEmptyMultiOmicNetwork = function(genes){
 
-  edg = data.frame("from" = integer(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
+  edg = data.frame("from" = character(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
   res = list("TCRN_edg" = data.frame(edg,  "TCbindingrate" = numeric(), "TCunbindingrate" = numeric(), "TCfoldchange" = numeric(), stringsAsFactors = F),
              "TLRN_edg" = data.frame(edg,  "TLbindingrate" = numeric(), "TLunbindingrate" = numeric(), "TLfoldchange" = numeric(), stringsAsFactors = F),
              "RDRN_edg" = data.frame(edg, "RDregrate" = numeric(), stringsAsFactors = F),
