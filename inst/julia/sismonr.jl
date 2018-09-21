@@ -1,6 +1,13 @@
+## If module bioSimulator is not installed, clone it from GitHub
+if !haskey(Pkg.installed(), "BioSimulator") 
+  Pkg.clone("https://github.com/alanderos91/biosimulator.jl.git", "BioSimulator")
+end
+
 
 using StatsBase
 using JLD ## temporary
+using BioSimulator
+using DataFrames
 
 ## Test if the file is sourced in a Julia evaluator in R
 function juliatest()
@@ -852,19 +859,6 @@ end
 
 function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, edgPTMRN, complexes, complexeskinetics, complexsize, gcnList, writefile, filepath, filename)
 
-  #  save("/home/oangelin/Documents/testsismonr/mysystem.jld", "genes", genes, "edgTCRN", edgTCRN, "edgTLRN", edgTLRN, "edgRDRN", edgRDRN,
-  #                                                            "edgPDRN", edgPDRN, "edgPTMRN", edgPTMRN, "complexes", complexes, "complexeskinetics", complexeskinetics,
-  #                                                            "complexsize", complexsize, "gcnList", gcnList)
-
-#=
-mysystem = load("/home/oangelin/Documents/testsismonr/mysystem.jld")
-for i in collect(keys(mysystem))
-       s = Symbol(i)
-       v = mysystem[i]
-       @eval (($s) = ($v))
-end
-=#
-
   ## Ensures that gcnList is a vector (not true if there is only one allele for each gene)
   if typeof(gcnList) == String
     gcnList = [gcnList]
@@ -878,50 +872,50 @@ end
 
   ## Generates the formation and dissociation reactions of the different regulatory complexes
   complexesReactions = createComplexesReactions(complexes, complexeskinetics, complexsize, complexvariants, activeform)
-  println("complexes done")
+  # println("complexes done")
 
   ## Generates the list of all possible binding and unbinding reactions of transcription regulators on promoter binding sites
   regTCreactions = createTCregReactions(edgTCRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
   promactiveTC = regTCreactions["promActiveStates"]
   promallTC = regTCreactions["promAllStates"]
-  println("regTCreactions done")
+  # println("regTCreactions done")
 
   ## Generates the list of all possible binding and unbinding reactions of transcription regulators on promoter binding sites
   regTLreactions = createTLregReactions(edgTLRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
   promactiveTL = regTLreactions["promActiveStates"]
   promallTL = regTLreactions["promAllStates"]
-  println("regTLreactions done")
+  # println("regTLreactions done")
 
   ## Generates the list of all possible transcription reactions for the genes
   transcriptionReactions = createTranscriptionReactions(genes, promactiveTC, promallTL, gcnList)
   RNAforms = transcriptionReactions["RNAforms"]
-  println("transcriptionReactions done")
+  # println("transcriptionReactions done")
 
   ## Generates the list of all possible RNA decay reactions for the genes
   ## In this model, when RNAs are represented by the sum of RBS (translation regulator binding sites), only the free form of the RNA
   ## (= all binding sites are free) decays
   rnaDecayReactions = createRNADecayReactions(genes, RNAforms, gcnList)
-  println("rnaDecayReactions done")
+  # println("rnaDecayReactions done")
 
   ## Generates the list of all possible regulator-mediated RNA decay reactions for the genes
   regRDreactions = createRDregReactions(edgRDRN, genes, RNAforms, activeform, complexes, complexsize, complexvariants, gcnList)
-  println("regRDreactions done")
+  # println("regRDreactions done")
 
   ## Generates the list of all possible translation reactions for the genes
   translationReactions = createTranslationReactions(genes, promactiveTL, gcnList)
-  println("translationReactions done")
+  # println("translationReactions done")
 
   ## Generates the list of all possible protein decay reactions for the genes
   proteinDecayReactions = createProteinDecayReactions(genes, gcnList)
-  println("proteinDecayReactions done")
+  # println("proteinDecayReactions done")
 
   ## Generates the list of all possible regulator-mediated protein decay reactions for the genes
   regPDreactions = createPDregReactions(edgPDRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
-  println("regPDreactions done")
+  # println("regPDreactions done")
 
   ## Generates the list of all possible protein post-translational modification reactions for the genes
   regPTMreactions = createPTMregReactions(edgPTMRN, genes, activeform, complexes, complexsize, complexvariants, gcnList)
-  println("regPTMreactions done")
+  # println("regPTMreactions done")
 
   ## Output of the function
   species = vcat(complexesReactions["species"],
@@ -972,6 +966,11 @@ end
                       regPTMreactions["propensities"])
 
   if writefile
+
+    if !ismatch(r"/$", filepath) ## because R function getwd() gives the path to the directory folder without a "/" at the end
+      filepath = filepath*"/"
+    end
+
     open(filepath*filename*"_species.txt", "w") do f
       for i in 1:length(species)
         write(f, species[i]*"\t"*initialconditions[i]*"\n")
@@ -989,20 +988,165 @@ end
 end
 
 
+# ------------------------------------------------------------------------------------------------ #
+##                       FUNCTIONS FOR SIMULATING THE STOCHASTIC SYSTEM                           ##
+# ------------------------------------------------------------------------------------------------ #
+
+function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
+       
+  model = BioSimulator.Network(modelname)
+
+  ## Add the species in the model, with their initial abundance
+  for i in 1:length(stochmodel["species"])
+    i0 = replace(stochmodel["initialconditions"][i], "QTLeffects", "$QTLeffects")
+    i0 = replace(i0, "InitVar", "$InitVar")
+    i0 = eval(parse(i0))
+    #println(stochmodel["species"][i]* "\t"*string(i0))
+    model <= BioSimulator.Species(stochmodel["species"][i], round(Int, i0))
+
+    if !isa(i0, Number)
+      println(stochmodel["initialconditions"][i])
+      error("Pb during the construction of the Julia BioSimulator model: initial abundance is not numeric.")
+    end
+    if typeof(stochmodel["species"][i]) != String
+      println(stochmodel["species"][i])
+      error("Pb during the construction of the Julia BioSimulator model: species name is not a String.")
+    end
+  end
+
+
+  ## Add the reactions in the model, with their name and rate
+  for i in eachindex(stochmodel["reactions"])
+    prop = replace(stochmodel["propensities"][i], "QTLeffects", "$QTLeffects")
+    #println(prop)
+    prop = eval(parse(prop))
+    model <= BioSimulator.Reaction(stochmodel["reactionsnames"][i], prop, stochmodel["reactions"][i])
+
+    if !isa(prop, Number)
+      println(stochmodel["propensities"][i])
+      error("Pb during the construction of the Julia BioSimulator model: propensity is not numeric.")
+    end
+    if typeof(stochmodel["reactionsnames"][i]) != String
+      println(stochmodel["reactionsnames"][i])
+      error("Pb during the construction of the Julia BioSimulator model: reaction name is not a String.")
+    end
+    if typeof(stochmodel["reactions"][i]) != String
+      println(stochmodel["reactions"][i])
+      error("Pb during the construction of the Julia BioSimulator model: reaction is not a String.")
+    end
+  end
+
+  return model
+end
+
+function allequal(x)
+    all(y->y==x[1], x)
+end
+
+## Transforms the results of the simulation into the abundance profile of the different molecules over time
+## This is beause in the simulation each regulator binding site is a distinct molecule, but in our system 
+## they can belong to a same RNA molecule
+function transformSimRes2Abundance(resultdf, genes, stochmodel)
+  
+  abundancedf = resultdf[:, [:time, :trial]]
+
+  for g in collect(keys(stochmodel["TCproms"]))
+    gid = parse(Int64, replace(g, r"GCN.+$","")) ## gives the gene id
+
+    ## Check that for each binding site on the promoter of each gene, at each time the sum of the abundance
+    ## of all species corresponding to all possible binding site states equals 1 (bc only 1 binding site per gene)
+    for i in eachindex(stochmodel["TCproms"][g])
+      prabundance = resultdf[:, map(Symbol, stochmodel["TCproms"][g][i])]
+      sumprom = [sum(convert(Array, row)) for row in eachrow(prabundance)]
+      if any(sumprom .!=1)
+        error("The sum of promoter states for "*stochmodel["TCproms"][g][i][1]*"not equal to 1.")
+      end
+    end
+
+    if length(stochmodel["TLproms"][g]) > 0        
+      ## Check for each RNA that the different binding sites on the RNA are in equal abundance at each time of the simulation
+      rbsabundance = [sum(convert(Array, resultdf[t, map(Symbol, x)]))for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
+                  
+      if !all(mapslices(allequal, rbsabundance, 2))
+        error("The abundance of the different binding sites on the RNA "*g*"are not equal.")
+      end
+
+      ## Add to abundancedf a column corresponding to the abundance of the RNA associated with g
+      abundancedf[Symbol("R"*g)] = rbsabundance[:,1]
+    else
+      abundancedf[Symbol("R"*g)] = resultdf[:, Symbol("R"*g)]
+    end
+
+    ## MAYBE to change if we don't make the disctinction between original and modified protein
+    if genes["coding"][gid] == "PC"
+      abundancedf[Symbol("P"*g)] = resultdf[:, Symbol("P"*g)]
+
+      if genes["PTMform"][gid] == "1"
+        abundancedf[Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)]
+      end
+    end
+  end
+
+  ## Include the abundance of the different regulatory complexes
+  for comp in names(resultdf)[find(x -> ismatch(r"^C", x), map(String, names(resultdf)))]
+    abundancedf[comp] = resultdf[:, comp]
+  end
+
+  return abundancedf
+end
+
+
+function juliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes, simtime;  modelname = "MySimulation", ntrials = 1, nepochs = -1, simalgorithm = "Direct")
+
+  try
+
+    ## If no nepochs provided, record abundance at each time units of the simulation
+    if nepochs == -1
+      nepochs = simtime
+    end
+
+    ## Convert the String name of the simulator to use into a BioSimulator object of type inheriting from Algorithm
+    if in(simalgorithm, ["Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation"])
+      simalgorithm = eval(parse("BioSimulator."*simalgorithm*"()"))
+    else
+      error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"FirstReaction\", \"NextReaction\", \"OptimizedDirect\", \"TauLeaping\" or \"StepAnticipation\".")
+    end
+
+    model = createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
+
+
+    #println("JULIA> Running simulation ...")
+    result = simulate(model, simalgorithm, time = convert(Float64, simtime), epochs = round(Int64, nepochs), trials = convert(Int64, ntrials))
+    #println("JULIA> Done!")
+
+    resultdf = DataFrame(result)
+
+    abundancedf = transformSimRes2Abundance(resultdf, genes, stochmodel)
+
+    catch err
+        isa(err, InterruptException) || rethrow(err)
+        return nothing
+    end
+
+end
+
+
+
+
+
+
+
+
+
+  #  save("/home/oangelin/Documents/testsismonr/mysystem.jld", "genes", genes, "edgTCRN", edgTCRN, "edgTLRN", edgTLRN, "edgRDRN", edgRDRN,
+  #                                                            "edgPDRN", edgPDRN, "edgPTMRN", edgPTMRN, "complexes", complexes, "complexeskinetics", complexeskinetics,
+  #                                                            "complexsize", complexsize, "gcnList", gcnList)
 
 #=
-for i in 1:length(temp["reactions"])
-       println(temp["reactionsnames"][i])
-       println(temp["reactions"][i])
-       println(temp["propensities"][i])
-       println("-----------")
-       end
-
-
-for i in 1:length(temp["species"])
-       println(temp["species"][i])
-       println(temp["initialconditions"][i])
-       println("-----------")
-       end
-
+mysystem = load("/home/oangelin/Documents/testsismonr/mysystem.jld")
+for i in collect(keys(mysystem))
+       s = Symbol(i)
+       v = mysystem[i]
+       @eval (($s) = ($v))
+end
 =#

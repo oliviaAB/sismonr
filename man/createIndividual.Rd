@@ -15,7 +15,15 @@ for a given gene in the system.}
 \item{sameInit}{Boolean. Does the individual have identical initial abundance to the rest of the population?}
 }
 \value{
-An object of class \code{insilicoindividual}.
+An object of class \code{insilicoindividual}, that is a list composed of:
+\itemize{
+\item \code{QTLeffects}: a list of the variants carried by the individual. 1st level of the list: the different "GCN" (Gene Copy Number)
+that is the different copies of the genes or homologues (= ploidy of the individuals); 2nd levels the different QTL effect coefficients. The elements
+in this 2 level list are vectors of QTL effect coefficients for the different genes (coefficient for gene \code{i} at the \code{i}-th position
+in the vector).
+\item \code{haplotype}: data-frame (rows = genes, columns = Gene copy number) of the gene variants carried by the individual for each gene copy number (homologue)
+\item \code{InitVar}
+}
 }
 \description{
 Creates a in silico individual to be simulated (object of class \code{insilicoindividual}).

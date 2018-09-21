@@ -13,7 +13,7 @@ createVariants(genes, indargs)
 }
 \value{
 A list of size G (number of genes in the system) where each element is a matrix corresponding to the QTL effect
-coefficients of the different variants for the corresponding gene.
+coefficients (rows) of the different variants (columns) segregating in the in silico population for the corresponding gene.
 }
 \description{
 Create variants that segregate in the in silico population for each gene in the system.

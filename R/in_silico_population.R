@@ -10,7 +10,7 @@
 #' @param genes A data frame of genes in the system (created by the function \code{\link{createGenes}}).
 #' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
 #' @return A list of size G (number of genes in the system) where each element is a matrix corresponding to the QTL effect
-#' coefficients of the different variants for the corresponding gene.
+#' coefficients (rows) of the different variants (columns) segregating in the in silico population for the corresponding gene.
 #' @export
 createVariants = function(genes, indargs){
 
@@ -47,7 +47,15 @@ createVariants = function(genes, indargs){
 #' for a given gene in the system.
 #' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
 #' @param sameInit Boolean. Does the individual have identical initial abundance to the rest of the population?
-#' @return An object of class \code{insilicoindividual}.
+#' @return An object of class \code{insilicoindividual}, that is a list composed of:
+#' \itemize{
+#' \item \code{QTLeffects}: a list of the variants carried by the individual. 1st level of the list: the different "GCN" (Gene Copy Number)
+#' that is the different copies of the genes or homologues (= ploidy of the individuals); 2nd levels the different QTL effect coefficients. The elements
+#' in this 2 level list are vectors of QTL effect coefficients for the different genes (coefficient for gene \code{i} at the \code{i}-th position
+#' in the vector).
+#' \item \code{haplotype}: data-frame (rows = genes, columns = Gene copy number) of the gene variants carried by the individual for each gene copy number (homologue)
+#' \item \code{InitVar}
+#' }
 #' @export
 createIndividual = function(variantsList, indargs, sameInit = F){
 
@@ -106,6 +114,11 @@ createIndividual = function(variantsList, indargs, sameInit = F){
 #' @param sameInit Logical. Do the individuals in the population have the same initial abundance for the different molecules? Default value is \code{FALSE}.
 #' @param ... Other arguments to be passed to the function \code{\link{insilicosystemargs}}.
 #' @return An object of class \code{insilicopopulation}, that is a list composed of:
+#' \itemize{
+#' \item \code{GenesVariants} A list of variants segregating in the population for each genes (see \code{\link{createVariants}}).
+#' \item \code{individualsList} A list of In Silico individuals (see \code{\link{createIndividual}}).
+#' \item \code{indargs} An object of class \code{insilicoindividualargs}; the parameters used to create the in silico individuals.
+#' }
 #' @export
 createInSilicoPopulation = function(nInd, insilicosystem, sameInit = F, ...){
 

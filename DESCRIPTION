@@ -12,5 +12,6 @@ LazyData: true
 Imports: 
     XRJulia,
     parallel,
-    truncnorm
+    truncnorm,
+    tictoc
 RoxygenNote: 6.1.0
