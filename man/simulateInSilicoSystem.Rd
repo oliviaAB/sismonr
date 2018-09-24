@@ -40,5 +40,5 @@ A list composed of:
 }
 }
 \description{
-Simulates (stochastically) the behavious of an in silico system over time
+Simulates (stochastically) the behaviour of an in silico system over time
 }

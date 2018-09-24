@@ -104,7 +104,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 
 #' Simulates a in-silico system
 #'
-#' Simulates (stochastically) the behavious of an in silico system over time
+#' Simulates (stochastically) the behaviour of an in silico system over time
 #'
 #' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
 #' @param insilicopopulation The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).

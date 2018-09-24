@@ -14,8 +14,15 @@ newJuliaEvaluator <- function(port = NULL) {
     ev <- RJulia(port = as.integer(port), .makeNew = T)  ## create a new julia evaluator with a given port
   }
   juliaUsing("ClobberingReload")
-  juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
-                                                          package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+#  juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
+#                                                          package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+  juliaCommand(paste0("sinclude(\"", system.file("julia", "network.jl",
+                                                  package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+  juliaCommand(paste0("sinclude(\"", system.file("julia", "stochastic_model.jl",
+                                                 package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+  juliaCommand(paste0("sinclude(\"", system.file("julia", "stochastic_simulation.jl",
+                                                 package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+
   return(ev)
 }
 
@@ -34,9 +41,14 @@ getJuliaEvaluator <- function(){
   if(!juliaEval("isdefined(:juliatest)")){ ## we want to know if the sismonr Julia functions are already sourced on the evaluator
                                                     ## (faster than sourcing them everytime)
     juliaUsing("ClobberingReload", evaluator = ev)
-    juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
-                                                            package = "sismonr"), "\")"), evaluator = ev)  # load the julia functions of the package in the new evaluator
-
+    #  juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
+    #                                                          package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+    juliaCommand(paste0("sinclude(\"", system.file("julia", "network.jl",
+                                                   package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+    juliaCommand(paste0("sinclude(\"", system.file("julia", "stochastic_model.jl",
+                                                   package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
+    juliaCommand(paste0("sinclude(\"", system.file("julia", "stochastic_simulation.jl",
+                                                   package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
   }
   return(ev)
 }
