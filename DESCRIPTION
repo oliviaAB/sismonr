@@ -13,5 +13,7 @@ Imports:
     XRJulia,
     parallel,
     truncnorm,
-    tictoc
+    tictoc,
+    stats,
+    utils
 RoxygenNote: 6.1.0

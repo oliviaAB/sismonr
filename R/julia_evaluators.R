@@ -13,7 +13,7 @@ newJuliaEvaluator <- function(port = NULL) {
   } else {
     ev <- RJulia(port = as.integer(port), .makeNew = T)  ## create a new julia evaluator with a given port
   }
-  juliaUsing("ClobberingReload")
+  juliaUsing("ClobberingReload", evaluator = ev)
 #  juliaCommand(paste0("sinclude(\"", system.file("julia", "sismonr.jl",
 #                                                          package = "sismonr"), "\")"), evaluator = ev)  ## load the julia functions of the package in the new evaluator
   juliaCommand(paste0("sinclude(\"", system.file("julia", "network.jl",

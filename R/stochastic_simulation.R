@@ -127,14 +127,14 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct", writefile = T, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
 
   stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, ev = ev)
-  cat("\n")
+  message("\n")
 
   ## Store the running time of each simulation
   runningtime = vector("numeric", length(insilicopopulation$individualsList)*ntrialsPerInd)
   ri = 1
 
   ## Set a progress bar
-  cat("Starting simulations at", format(Sys.time(), usetz = T), "\n")
+  message("Starting simulations at", format(Sys.time(), usetz = T), "\n")
   progress = utils::txtProgressBar(min = 0, max = length(insilicopopulation$individualsList), style = 3)
 
   resTable = vector("list", length(insilicopopulation$individualsList))
@@ -153,6 +153,97 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
     resTable[[ind]] = simJulia
   }
 
-  cat("\nMean running time per simulation: ", mean(runningtime),"seconds. \n")
+  message("\nMean running time per simulation: ", mean(runningtime),"seconds. \n")
   return(list("resTable" = resTable, "runningtime" = runningtime, "stochmodel" = stochmodel))
 }
+
+
+## function to start a Julia evaluator on a node of the cluster, given the port id (for parallel simulation)
+startJuliaEvCluster = function(portid, stochmodel_string){
+  myev = newJuliaEvaluator(port = portid) ## start on the node a Julia evaluator with specified port number
+  mystochmodel = juliaEval("eval(parse(%s))", stochmodel_string, .get = F, evaluator = myev) ## create in the Julia process the stochmodel object
+  return(list("myev" = myev, "mystochmodelvar" = mystochmodel@.Data)) ## return the Julia evaluator ID and the name on the Julia process of the stochmodel object
+}
+
+## function to run a simulation on a cluster (for parallel simulation)
+simulateInCluster = function(i, infocores, individualsList, genes, simtime, ntrialsPerInd, nepochs, simalgorithm){
+  myinfocore = infocores[[i - no_cores*(i-1)%/%no_cores]] ## get the infos of the corresponding cluster node
+  myev = myinfocore$myev ## get the Julia evaluator corresponding to the current cluster node
+  mystochmodel = juliaEval(paste0(myinfocore$mystochmodel), .get = F) ## get a proxy object corresponding to the stochmodel object on the Julia process using the variable name
+  ind = names(individualsList)[i]
+
+  simJulia = callJuliaStochasticSimulation(mystochmodel, individualsList[[ind]]$QTLeffects,
+                                           individualsList[[ind]]$InitVar,
+                                           genes, simtime, modelname = ind, ntrials = ntrialsPerInd,
+                                           nepochs = nepochs, simalgorithm = simalgorithm, myev)
+
+  if(i %%no_cores == 1){
+    utils::setTxtProgressBar(progress, min(i + (no_cores-1), maxprogress))
+  }
+  return(simJulia)
+}
+
+
+#' Simulates a in-silico system in parallel
+#'
+#' Simulates (stochastically) the behaviour of an in silico system over time using parallelisation
+#'
+#' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
+#' @param insilicopopulation The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @param simtime The amount of time to simulate the model (in seconds).
+#' @param nepochs The number of times to record the state of the system during the simulation.
+#' @param ntrialsPerInd The number of times the simulation must be replicated.
+#' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
+#' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
+#' @param writefile Does the julia function write the species and reactions lists in a text file?
+#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created.
+#' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
+#' @param no_cores THe number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
+#' package to detect the number of available cores, and use this number-1 for the simulation.
+#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @return A list composed of:
+#' \itemize{
+#' \item \code{resTable}: A list where each element is the data-frame of simulated expression profiles for an individual in the in silico population.
+#' \item \code{runningtime}: A vector of running time of all simulations
+#' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
+#' }
+#' @export
+simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct", writefile = T, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
+
+  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, ev = ev)
+  message("\n")
+
+  stochmodel_string = juliaEval("string(%s)", stochmodel, evaluator = ev)
+
+  mybaseport = ev$port ## Get the port of the current Julia evaluator
+  portList = sapply(1:no_cores, sum, mybaseport) ## Assign to each core a port number, starting from 1+port number of the current evaluator
+
+  mycluster = parallel::makeCluster(no_cores, outfile = "")
+
+  parallel::clusterEvalQ(mycluster, library(XRJulia))
+  parallel::clusterEvalQ(mycluster, library(utils))
+  parallel::clusterExport(mycluster, "newJuliaEvaluator")
+  parallel::clusterExport(mycluster, "callJuliaStochasticSimulation")
+  parallel::clusterExport(mycluster, "stochmodel_string", envir = environment())
+  parallel::clusterExport(mycluster, "no_cores", envir = environment())
+
+  message("Starting Julia evaluators on each cluster node ... \n")
+  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster, stochmodel_string = stochmodel_string)
+  message("Done.\n")
+
+  message("Starting simulations at", format(Sys.time(), usetz = T), "\n")
+  maxprogress = length(insilicopopulation$individualsList)
+  progress = utils::txtProgressBar(min = 0, max = maxprogress, style = 3)
+  parallel::clusterExport(mycluster, "progress", envir = environment())
+  parallel::clusterExport(mycluster, "maxprogress", envir = environment())
+  startsim = tic()
+  resTable = parallel::clusterApply(mycluster, 1:length(insilicopopulation$individualsList), simulateInCluster, infocores = infocores, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime, ntrialsPerInd, nepochs, simalgorithm)
+  names(resTable) = names(insilicopopulation$individualsList)
+  stopsim = toc(quiet = T)$toc
+  message("\nRunning time of parallel simulations: ", stopsim - startsim, " seconds\n")
+
+  parallel::stopCluster(mycluster)
+
+  return(resTable)
+}
+
