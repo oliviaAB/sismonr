@@ -60,6 +60,7 @@ end
 function transformSimRes2Abundance(resultdf, genes, stochmodel)
   
   abundancedf = resultdf[:, [:time, :trial]]
+  #abundancedf = Dict("time" => resultdf[:, :time], "trial" => resultdf[:, :trial])
 
   for g in collect(keys(stochmodel["TCproms"]))
     gid = parse(Int64, replace(g, r"GCN.+$","")) ## gives the gene id
@@ -84,16 +85,20 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
 
       ## Add to abundancedf a column corresponding to the abundance of the RNA associated with g
       abundancedf[Symbol("R"*g)] = rbsabundance[:,1]
+      #abundancedf["R"*g] = rbsabundance[:,1]
     else
       abundancedf[Symbol("R"*g)] = resultdf[:, Symbol("R"*g)]
+      #abundancedf["R"*g] = resultdf[:, Symbol("R"*g)]
     end
 
     ## MAYBE to change if we don't make the disctinction between original and modified protein
     if genes["coding"][gid] == "PC"
       abundancedf[Symbol("P"*g)] = resultdf[:, Symbol("P"*g)]
+      #abundancedf["P"*g] = resultdf[:, Symbol("P"*g)]
 
       if genes["PTMform"][gid] == "1"
         abundancedf[Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)]
+        #abundancedf["Pm"*g] = resultdf[:, Symbol("Pm"*g)]
       end
     end
   end
@@ -101,6 +106,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
   ## Include the abundance of the different regulatory complexes
   for comp in names(resultdf)[find(x -> ismatch(r"^C", x), map(String, names(resultdf)))]
     abundancedf[comp] = resultdf[:, comp]
+    #abundancedf[string(comp)] = resultdf[:, comp]
   end
 
   return abundancedf
@@ -133,6 +139,8 @@ function juliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes, simti
     resultdf = DataFrame(result)
 
     abundancedf = transformSimRes2Abundance(resultdf, genes, stochmodel)
+
+    return abundancedf
 
     catch err
         isa(err, InterruptException) || rethrow(err)
