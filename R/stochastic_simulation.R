@@ -167,21 +167,22 @@ startJuliaEvCluster = function(portid){
 }
 
 ## function to run a simulation on a cluster (for parallel simulation)
-simulateInCluster = function(i, infocores, individualsList, genes, simtime, ntrialsPerInd, nepochs, simalgorithm){
+simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, individualsList, genes, simtime, nepochs, simalgorithm){
   myinfocore = infocores[[i - no_cores*(i-1)%/%no_cores]] ## get the infos of the corresponding cluster node
   myev = myinfocore$myev ## get the Julia evaluator corresponding to the current cluster node
   mystochmodel = juliaEval(paste0(myinfocore$mystochmodel), .get = F) ## get a proxy object corresponding to the stochmodel object on the Julia process using the variable name
-  ind = names(individualsList)[i]
-
+  ind = indtosimulate[i]
+  ntrials = ntrialstosimulate[i]
   simJulia = callJuliaStochasticSimulation(mystochmodel, individualsList[[ind]]$QTLeffects,
                                            individualsList[[ind]]$InitVar,
-                                           genes, simtime, modelname = ind, ntrials = ntrialsPerInd,
+                                           genes, simtime, modelname = ind, ntrials = ntrials,
                                            nepochs = nepochs, simalgorithm = simalgorithm, myev)
+
 
   if(i %%no_cores == 1){
     utils::setTxtProgressBar(progress, min(i + (no_cores-1), maxprogress))
   }
-  return(simJulia %>% mutate("Ind" = ind))
+  return(simJulia %>% mutate(trial = trial + increment[i], Ind = ind))
 }
 
 
@@ -228,19 +229,44 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   parallel::clusterExport(mycluster, "stochmodel_string", envir = environment())
   parallel::clusterExport(mycluster, "no_cores", envir = environment())
 
+  ## Start a Julia evaluator on each cluster
   message("Starting Julia evaluators on each cluster node ... \n")
   infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster)
   message("Done.\n")
+  parallel::clusterExport(mycluster, "infocores", envir = environment())
+
+  ## Split the workload for the different cluster nodes
+  ## Case 1: there are more individuals than cluster nodes: in this case each node will be used to simulate a different individual
+  ## Case 2: there are less individuals than cluster nodes: in this case each node will simulate approx ntrials/nnodes trials for each individual
+  if(length(insilicopopulation$individualsList) >= no_cores){
+    indtosimulate = names(insilicopopulation$individualsList)
+    ntrialstosimulate = rep(ntrialsPerInd, length(insilicopopulation$individualsList))
+    increment = rep(0, length(insilicopopulation$individualsList)) ## no use here
+  }else{
+    split = rep(ntrialsPerInd %/% no_cores, no_cores) ## vector with no_cores elements, giving the # of trials that each node has to run for an individual
+    remain = ntrialsPerInd %% no_cores ## we start by splitting equally the number of trials over the different cores
+    split[min(1, remain):remain] = split[min(1, remain):remain] + 1 ## then if there is some remaining trial, we split them over the first cores
+    split = split[split!=0] ## if ntrialsPerInd<no_cores, we will have some cores that do nothing for an individual
+    indtosimulate = rep(names(insilicopopulation$individualsList), each = length(split))
+    ntrialstosimulate = rep(split, times = length(insilicopopulation$individualsList))
+    increment = rep(c(0, cumsum(split)[-length(split)]), times = length(insilicopopulation$individualsList)) ## each node will increment the trials ID by the number provided in increment[i]
+                                                                                                             ## so that if we have to simulate Ind1 10 times in total, and we split as following
+                                                                                                             ## node 1 = 4 trials, node2 = 3 trials, node 3 = 3 trials
+                                                                                                             ## node 1 will return trials 1 to 4, node 2: 5 to 7, node 3: 8 to 10
+    }
 
   message("Starting simulations at", format(Sys.time(), usetz = T), "\n")
-  maxprogress = length(insilicopopulation$individualsList)
+
+  ## Create the progress bar
+  maxprogress = length(indtosimulate)
   progress = utils::txtProgressBar(min = 0, max = maxprogress, style = 3)
   parallel::clusterExport(mycluster, "progress", envir = environment())
   parallel::clusterExport(mycluster, "maxprogress", envir = environment())
+
+  ## Run the simulation on the cluster
   startsim = tic()
-  resTable = parallel::clusterApply(mycluster, 1:length(insilicopopulation$individualsList), simulateInCluster, infocores = infocores, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime, ntrialsPerInd, nepochs, simalgorithm)
+  resTable = parallel::clusterApply(mycluster, 1:length(indtosimulate), simulateInCluster, indtosimulate = indtosimulate, ntrialstosimulate = ntrialstosimulate, increment = increment, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime = simtime, nepochs = nepochs, simalgorithm = simalgorithm)
   stopsim = toc(quiet = T)$toc
-  #names(resTable) = names(insilicopopulation$individualsList)
   res = dplyr::bind_rows(resTable)
   message("\nRunning time of parallel simulations: ", stopsim - startsim, " seconds\n")
 
