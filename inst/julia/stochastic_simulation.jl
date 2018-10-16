@@ -1,3 +1,7 @@
+using StatsBase
+using JLD ## temporary
+using BioSimulator
+using DataFrames
 
 # ------------------------------------------------------------------------------------------------ #
 ##                       FUNCTIONS FOR SIMULATING THE STOCHASTIC SYSTEM                           ##

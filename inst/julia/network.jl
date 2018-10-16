@@ -5,9 +5,6 @@ end
 
 
 using StatsBase
-using JLD ## temporary
-using BioSimulator
-using DataFrames
 
 ## Test if the file is sourced in a Julia evaluator in R
 function juliatest()
