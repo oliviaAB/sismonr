@@ -6,7 +6,7 @@
 \usage{
 simulateParallelInSilicoSystem(insilicosystem, insilicopopulation, simtime,
   nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct",
-  writefile = T, filepath = getwd(), filename = "simulation",
+  writefile = F, filepath = getwd(), filename = "simulation",
   no_cores = parallel::detectCores() - 1, ev = getJuliaEvaluator())
 }
 \arguments{
@@ -37,8 +37,8 @@ package to detect the number of available cores, and use this number-1 for the s
 \value{
 A list composed of:
 \itemize{
-\item \code{resTable}: A list where each element is the data-frame of simulated expression profiles for an individual in the in silico population.
-\item \code{runningtime}: A vector of running time of all simulations
+\item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
+\item \code{runningtime}: The running time (elapsed seconds) of the parallel simulation (only 1 value).
 \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 }
 }
