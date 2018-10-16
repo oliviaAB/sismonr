@@ -15,5 +15,7 @@ Imports:
     truncnorm,
     tictoc,
     stats,
-    utils
+    utils,
+    dplyr,
+    magrittr
 RoxygenNote: 6.1.0

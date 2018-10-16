@@ -119,7 +119,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A list composed of:
 #' \itemize{
-#' \item \code{resTable}: A list where each element is the data-frame of simulated expression profiles for an individual in the in silico population.
+#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
 #' \item \code{runningtime}: A vector of running time of all simulations
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
@@ -150,11 +150,12 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
     runningtime[ri]  = temp$toc - temp$tic
     utils::setTxtProgressBar(progress, ri)
     ri = ri + 1
-    resTable[[ind]] = simJulia
+    resTable[[ind]] = simJulia %>% mutate("Ind" = ind)
   }
+  res = dplyr::bind_rows(resTable)
 
   message("\nMean running time per simulation: ", mean(runningtime),"seconds. \n")
-  return(list("resTable" = resTable, "runningtime" = runningtime, "stochmodel" = stochmodel))
+  return(list("Simulation" = res, "runningtime" = runningtime, "stochmodel" = stochmodel))
 }
 
 

@@ -6,7 +6,7 @@
 \usage{
 simulateInSilicoSystem(insilicosystem, insilicopopulation, simtime,
   nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct",
-  writefile = T, filepath = getwd(), filename = "simulation",
+  writefile = F, filepath = getwd(), filename = "simulation",
   ev = getJuliaEvaluator())
 }
 \arguments{
@@ -34,7 +34,7 @@ Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "Tau
 \value{
 A list composed of:
 \itemize{
-\item \code{resTable}: A list where each element is the data-frame of simulated expression profiles for an individual in the in silico population.
+\item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
 \item \code{runningtime}: A vector of running time of all simulations
 \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 }
