@@ -152,7 +152,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
     ri = ri + 1
     resTable[[ind]] = simJulia %>% mutate("Ind" = ind)
   }
-  res = dplyr::bind_rows(resTable)
+  res = bind_rows(resTable)
 
   message("\nMean running time per simulation: ", mean(runningtime),"seconds. \n")
   return(list("Simulation" = res, "runningtime" = runningtime, "stochmodel" = stochmodel))
@@ -267,7 +267,7 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   startsim = tic()
   resTable = parallel::clusterApply(mycluster, 1:length(indtosimulate), simulateInCluster, indtosimulate = indtosimulate, ntrialstosimulate = ntrialstosimulate, increment = increment, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime = simtime, nepochs = nepochs, simalgorithm = simalgorithm)
   stopsim = toc(quiet = T)$toc
-  res = dplyr::bind_rows(resTable)
+  res = bind_rows(resTable)
   message("\nRunning time of parallel simulations: ", stopsim - startsim, " seconds\n")
 
   parallel::stopCluster(mycluster)
@@ -275,3 +275,54 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   return(list("Simulation" = res, "runningtime" = stopsim - startsim, "stochmodel" = stochmodel))
 }
 
+
+sumColAbundance = function(df, colsid){
+  if(length(colsid) == 1){
+    return(df[[colsid]])
+  }else{
+    return(rowSums(df[,colsid]))
+  }
+}
+
+#' Merge the different allelic versions of the molecules.
+#'
+#' Sum the abundance of the different allelic versions of each molecule.
+#'
+#' @param simulation The result of \code{\link{simulateInSilicoSystem}} or \code{\link{simulateParallelInSilicoSystem}}, that is
+#' a list in which one element named "Simulation" is a dataframe with the abundance of the different molecules over time
+#' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been added.
+#' @export
+mergeAlleleAbundance = function(simulation){
+  df = simulation$Simulation
+  mergeddf = df %>% select(time, trial, Ind)
+  molsGCN = colnames(df)
+  mols = stringr::str_replace(molsGCN, "GCN[[:digit:]]+", "")
+  mols = stringr::str_replace(mols, "_.+", "")
+
+  for(m in setdiff(unique(mols), c("time", "trial", "Ind"))){
+    mergeddf[[m]] = sumColAbundance(df,which(mols == m))
+  }
+
+  return(mergeddf)
+}
+
+#' Merge the original and PTM versions of the proteins.
+#'
+#' Sum the abundance of the original and modified (PTM) versions of each protein.
+#'
+#' @param simulation The result of \code{\link{simulateInSilicoSystem}} or \code{\link{simulateParallelInSilicoSystem}}, that is
+#' a list in which one element named "Simulation" is a dataframe with the abundance of the different molecules over time
+#' @return A dataframe in which the abundance of original and modified versions of a protein have been added.
+#' @export
+mergePTMAbundance = function(simulation){
+  df = simulation$Simulation
+  mergeddf = df %>% select(time, trial, Ind)
+  molsPTM = colnames(df)
+  mols = stringr::str_replace(molsPTM, "^Pm", "P")
+
+  for(m in setdiff(unique(mols), c("time", "trial", "Ind"))){
+    mergeddf[[m]] = sumColAbundance(df,which(mols == m))
+  }
+
+  return(mergeddf)
+}

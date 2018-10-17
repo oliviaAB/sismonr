@@ -17,5 +17,6 @@ Imports:
     stats,
     utils,
     dplyr,
-    magrittr
+    magrittr,
+    stringr
 RoxygenNote: 6.1.0
