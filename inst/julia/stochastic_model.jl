@@ -69,7 +69,7 @@ function createComplexesReactions(complexes, complexeskinetics, complexsize, com
   prop = []
 
   for compl in keys(complexes), t in 1:size(complexvariants)[1]
-    complvar = compl*join(["_"*string(complexes[compl][i])*complexvariants[t, i] for i in 1:complexsize])
+    complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvariants[t, i] for i in 1:complexsize])
     push!(spec, complvar) ## adding the complex form to the list of species
     push!(initcond, "0") ## adding the initial abundance of the complex form to the list of initial conditions. For complexes, initial abundance set to 0
     ## Creates the reaction of complex formation
@@ -169,7 +169,7 @@ function createTCregReactions(edg, genes, activeform, complexes, complexsize, co
     push!(initcond, "1")
 
     for t in 1:size(complexvariants)[1]
-      complvar = compl*join(["_"*string(complexes[compl][i])*complexvariants[t, i] for i in 1:complexsize])
+      complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvariants[t, i] for i in 1:complexsize])
         
       prombound = prom*join(complexvariants[t, :])*"B"
       push!(spec, prombound)
@@ -284,7 +284,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexsize, co
     push!(initcond, """$(genes["TCrate"][tarid]/genes["RDrate"][tarid])*InitVar["$(gcn)"]["R"][$(tarid)]""")
 
     for t in 1:size(complexvariants)[1]
-      complvar = compl*join(["_"*string(complexes[compl][i])*complexvariants[t, i] for i in 1:complexsize])
+      complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvariants[t, i] for i in 1:complexsize])
         
       prombound = prom*join(complexvariants[t, :])*"B"
       push!(spec, prombound)
@@ -406,7 +406,7 @@ function createRDregReactions(edg, genes, RNAforms, activeform, complexes, compl
     compl = edg["from"][r]
 
     for t in 1:size(complexvariants)[1]
-      complvar = compl*join(["_"*string(complexes[compl][i])*complexvariants[t, i] for i in 1:complexsize])
+      complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvariants[t, i] for i in 1:complexsize])
       push!(reac, reactBioSim(vcat(tarRNA, complvar), [complvar]))
       push!(reacnames, "RNAdecay"*join(tarRNA)*"reg"*complvar)
       tempprop = """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]"""*join(["*"*"""QTLeffects["$(complexvariants[t, i])"]["qtlactivity"][$(complexes[compl][i])]""" for i in 1:complexsize])
@@ -517,7 +517,7 @@ function createPDregReactions(edg, genes, activeform, complexes, complexsize, co
     end
 
     for p in pform, t in 1:size(complexvariants)[1]
-      complvar = compl*join(["_"*string(complexes[compl][i])*complexvariants[t, i] for i in 1:complexsize])
+      complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvariants[t, i] for i in 1:complexsize])
       push!(reac, reactBioSim([p, complvar], [complvar]))
       push!(reacnames, "proteindecay"*p*"reg"*complvar)
       tempprop = """$(edg["PDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlPDregrate")"][$(tarid)]"""*join(["*"*"""QTLeffects["$(complexvariants[t, i])"]["qtlactivity"][$(complexes[compl][i])]""" for i in 1:complexsize])
@@ -561,7 +561,7 @@ function createPTMregReactions(edg, genes, activeform, complexes, complexsize, c
     ispos = edg["RegSign"][r] == "1" ## is the regulator transforming the orginal protein into its modified form (RegSign = "1") or the opposite (RegSign = "-1")
 
     for t in 1:size(complexvariants)[1]
-      complvar = compl*join(["_"*string(complexes[compl][i])*complexvariants[t, i] for i in 1:complexsize])
+      complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvariants[t, i] for i in 1:complexsize])
 
       if ispos
         push!(reac, reactBioSim([ "P"*tar, complvar], ["Pm"*tar, complvar]))

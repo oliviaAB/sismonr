@@ -288,16 +288,14 @@ sumColAbundance = function(df, colsid){
 #'
 #' Sum the abundance of the different allelic versions of each molecule.
 #'
-#' @param simulation The result of \code{\link{simulateInSilicoSystem}} or \code{\link{simulateParallelInSilicoSystem}}, that is
-#' a list in which one element named "Simulation" is a dataframe with the abundance of the different molecules over time
+#' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
+#' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been added.
 #' @export
-mergeAlleleAbundance = function(simulation){
-  df = simulation$Simulation
+mergeAlleleAbundance = function(df){
   mergeddf = df %>% select(time, trial, Ind)
   molsGCN = colnames(df)
-  mols = stringr::str_replace(molsGCN, "GCN[[:digit:]]+", "")
-  mols = stringr::str_replace(mols, "_.+", "")
+  mols = stringr::str_replace_all(molsGCN, "GCN[[:digit:]]+", "")
 
   for(m in setdiff(unique(mols), c("time", "trial", "Ind"))){
     mergeddf[[m]] = sumColAbundance(df,which(mols == m))
@@ -310,18 +308,37 @@ mergeAlleleAbundance = function(simulation){
 #'
 #' Sum the abundance of the original and modified (PTM) versions of each protein.
 #'
-#' @param simulation The result of \code{\link{simulateInSilicoSystem}} or \code{\link{simulateParallelInSilicoSystem}}, that is
-#' a list in which one element named "Simulation" is a dataframe with the abundance of the different molecules over time
+#' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
+#' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of original and modified versions of a protein have been added.
 #' @export
-mergePTMAbundance = function(simulation){
-  df = simulation$Simulation
+mergePTMAbundance = function(df){
   mergeddf = df %>% select(time, trial, Ind)
   molsPTM = colnames(df)
   mols = stringr::str_replace(molsPTM, "^Pm", "P")
 
   for(m in setdiff(unique(mols), c("time", "trial", "Ind"))){
     mergeddf[[m]] = sumColAbundance(df,which(mols == m))
+  }
+
+  return(mergeddf)
+}
+
+#' Merge the free and in complexe versions of molecules.
+#'
+#' Sum the abundance of the free and in complexe versions of each molecule.
+#'
+#' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
+#' or \code{\link{simulateParallelInSilicoSystem}}).
+#' @return A dataframe in which the abundance of free and in complexe versions of a molecule have been added.
+#' @export
+mergeComplexesAbundance = function(df){
+  molsComp = colnames(df)[stringr::str_detect(colnames(df), "^C")]
+  mergeddf = df %>% select(-molsComp)
+
+  for(i in molsComp){
+    splt = stringr::str_split(i, "_")[[1]]
+    mergeddf[, splt[-1]] = mergeddf[, splt[-1]] + df[, i]
   }
 
   return(mergeddf)

@@ -4,11 +4,11 @@
 \alias{mergePTMAbundance}
 \title{Merge the original and PTM versions of the proteins.}
 \usage{
-mergePTMAbundance(simulation)
+mergePTMAbundance(df)
 }
 \arguments{
-\item{simulation}{The result of \code{\link{simulateInSilicoSystem}} or \code{\link{simulateParallelInSilicoSystem}}, that is
-a list in which one element named "Simulation" is a dataframe with the abundance of the different molecules over time}
+\item{df}{A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
+or \code{\link{simulateParallelInSilicoSystem}}).}
 }
 \value{
 A dataframe in which the abundance of original and modified versions of a protein have been added.
