@@ -710,8 +710,8 @@ removeEdg = function(insilicosystem, regID, tarID){
     stop("More than one edge in the system meets the criterion! There must be a mistake somewhere.")
   }else{ ## If no problem, remove the edge from the data frames edg and XXRN_edg
     targetreaction = theedg[1, "TargetReaction"]
-    insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != regID | to != tarID)
-    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], from != regID | to != tarID)
+    insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != paste(regID) | to != tarID)
+    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], from != paste(regID) | to != tarID)
   }
 
   return(insilicosystem)
