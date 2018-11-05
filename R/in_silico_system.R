@@ -569,6 +569,18 @@ addEdg = function(insilicosystem, regID, tarID, targetreaction, regsign, kinetic
     stop("Interation sign must be either \"1\" or \"-1\".")
   }
 
+  abbr = c("TC" = "transcription (TC)", "TL" = "translation (TL)", "RD" = "RNA decay (RD)", "PD" = "protein decay (PD)", "PTM" = "post-translational modification (PTM)")
+
+  ## Later, maybe allow with only a warning?
+  biofunc = insilicosystem$genes[insilicosystem$genes$id == regID, "TargetReaction"]
+  if(targetreaction != biofunc){
+    stop("Gene ", regID, " is labelled as a regulator of ", abbr[biofunc],", not ", abbr[targetreaction]".")
+  }
+  codtar = insilicosystem$genes[insilicosystem$genes$id == tarID, "coding"]
+  if(codtar == "NC" & targetreaction %in% c("TL", "PD", "PTM")){
+    stop("Target gene ", tarID, " is a noncoding gene. Cannot be regulated at the level of ", abbr[targetreaction], ".")
+  }
+
   regby = dplyr::filter(insilicosystem$genes, id == as.character(regID))[1,"coding"]
 
   ## Checking if an edge already exists between the 2 genes ----
