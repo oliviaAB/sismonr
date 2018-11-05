@@ -475,6 +475,63 @@ addGene = function(insilicosystem, id = NULL, coding = NULL, TargetReaction = NU
   return(insilicosystem)
 }
 
+#' Add an edge in the in silico system.
+#'
+#' Add an edge in the in silico system between specified genes. Any edge involving this gene is removed from the system,
+#' and the composition of the complexes comprising this gene are adjusted.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param id Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.
+#' @return The modified in silico system.
+#' @export
+removeGene = function(insilicosystem, id){
+  id2rem = id ## to avoid confusion when using dplyr::filter
+
+  ## Checking the input values ----
+  if(class(insilicosystem) != "insilicosystem"){
+    stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  }
+
+  if(!(id2rem %in% insilicosystem$genes$id)){
+      stop("Gene ", id2rem, " is not in the system.")
+  }
+
+  ## Remove the gene from the gene list
+  targetreaction = paste0(insilicosystem$genes[insilicosystem$genes$id == id2rem, "TargetReaction"], "RN_edg")
+    insilicosystem$genes = dplyr::filter(insilicosystem$genes, id != id2rem)
+
+  ## Remove any edge involving the gene in the general edges list
+  insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != paste(id2rem) & to != id2rem)
+
+  ## Remove any edge involving the gene in the specific multi-omic edges list
+  for(rn in names(insilicosystem$mosystem)){
+    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], from != paste(id2rem) & to != id2rem)
+  }
+
+  ## If the gene is involved in a complex:
+  for(comp in names(insilicosystem$complexes)){
+    if(id2rem %in% insilicosystem$complexes[[comp]]){
+      newcompo = setdiff(insilicosystem$complexes[[comp]], id2rem)
+      if(length(newcompo) > 1){ ## if there are still at least 2 components in the complex, simply remove the gene from the complex component list
+        insilicosystem$complexes[[comp]] = newcompo
+      }else{
+        insilicosystem$complexes[[comp]] = NULL
+        insilicosystem$complexeskinetics[[comp]] = NULL
+
+        ## Replace all instances of the complex by the remaining component
+        newcoding = insilicosystem$genes[insilicosystem$genes$id == newcompo, "coding"]
+        rows2change = which(insilicosystem$edg$from == comp)
+        insilicosystem$edg[rows2change, "from"] = paste(newcompo)
+        insilicosystem$edg[rows2change, "RegBy"] = newcoding
+        rows2change = which(insilicosystem$mosystem[[targetreaction]]$from == comp)
+        insilicosystem$mosystem[[targetreaction]][rows2change, "from"] = paste(newcompo)
+        insilicosystem$mosystem[[targetreaction]][rows2change, "RegBy"] = newcoding
+      }
+    }
+  }
+  return(insilicosystem)
+}
+
 
 #' Add an edge in the in silico system.
 #'
