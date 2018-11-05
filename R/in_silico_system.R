@@ -376,6 +376,105 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
   return(value)
 }
 
+#' Add an edge in the in silico system.
+#'
+#' Add an edge in the in silico system between specified genes.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param id Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.
+#' @param coding String. The coding status of the gene (either "PC" or "NC"). If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @param TargetReaction String. The biological function of the gene, i.e. the gene expression step targeted by the active product
+#' of the gene.
+#' @param TCrate Numeric. The transcription rate of the gene. If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @param TLrate Numeric. The translation rate of the gene. If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @param RDrate Numeric. The RNA decay rate of the gene. If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @param PDrate Numeric. The protein decay rate of the gene. If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @return The modified in silico system.
+#' @export
+addGene = function(insilicosystem, id = NULL, coding = NULL, TargetReaction = NULL, TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL){
+
+  ## Checking the input values ----
+  if(class(insilicosystem) != "insilicosystem"){
+    stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  }
+
+  if(is.null(id)){
+    id = max(insilicosystem$genes$id) + 1
+  }else{
+    if(id %in% insilicosystem$genes$id){
+      stop("Gene ", id, " already in the system.")
+    }
+  }
+
+  if(!is.null(coding)){
+    if(!(coding %in% c("PC", "NC"))){
+      stop("\"coding\" argument must either be \"PC\" or \"NC\".")
+    }
+  }else{
+    coding = sample(c("PC", "NC"), 1, prob = c(insilicosystem$sysargs[["PC.p"]], insilicosystem$sysargs[["NC.p"]]), replace = T)
+  }
+
+  ## If not provided, sampling kinetic parameters ----
+  if(is.null(TCrate)){
+    TCrate = insilicosystem$sysargs[["basal_transcription_rate_samplingfct"]](1)
+  }
+
+  if(is.null(RDrate)){
+    RDrate = 1/insilicosystem$sysargs[["basal_RNAlifetime_samplingfct"]](1)
+  }
+
+  if(coding == "NC"){
+    TLrate = 0.0
+    PDrate = 0.0
+    ActiveForm = paste0("R", id)
+
+    ## Biological function of the gene
+    if(is.null(TargetReaction)){
+      TargetReaction = sample(c("TC", "TL", "RD", "PD", "PTM"), 1, prob = c(insilicosystem$sysargs[["NC.TC.p"]], insilicosystem$sysargs[["NC.TL.p"]],
+                                                                            insilicosystem$sysargs[["NC.RD.p"]], insilicosystem$sysargs[["NC.PD.p"]],
+                                                                            insilicosystem$sysargs[["NC.PTM.p"]]), replace = T)
+    }else{
+      if(!(TargetReaction %in% c("TC", "TL", "RD", "PD", "PTM"))){
+        stop("Argument \"TargetReaction\" must be either \"TC\", \"TL\", \"RD\", \"PD\" or \"PTM\".")
+      }
+    }
+  }else{ ## if coding == "PC"
+    if(is.null(TLrate)){
+      TLrate = insilicosystem$sysargs[["basal_translation_rate_samplingfct"]](1)
+    }
+
+    if(is.null(PDrate)){
+      PDrate = 1/insilicosystem$sysargs[["basal_protlifetime_samplingfct"]](1)
+    }
+    ActiveForm = paste0("P", id)
+
+    ## Biological function of the gene
+    if(is.null(TargetReaction)){
+      TargetReaction = sample(c("TC", "TL", "RD", "PD", "PTM", "MR"), 1, prob = c(insilicosystem$sysargs[["PC.TC.p"]], insilicosystem$sysargs[["PC.TL.p"]],
+                                                                                  insilicosystem$sysargs[["PC.RD.p"]], insilicosystem$sysargs[["PC.PD.p"]],
+                                                                                  insilicosystem$sysargs[["PC.PTM.p"]], insilicosystem$sysargs[["PC.MR.p"]]), replace = T)
+    }else{
+      if(!(TargetReaction %in% c("TC", "TL", "RD", "PD", "PTM", "MR"))){
+        stop("Argument \"TargetReaction\" must be either \"TC\", \"TL\", \"RD\", \"PD\", \"PTM\" or \"MR\".")
+      }
+    }
+
+  }
+
+  PTMform = "0"
+
+  insilicosystem$genes = dplyr::add_row(insilicosystem$genes, id = id, coding = coding, TargetReaction = TargetReaction,
+                                                              PTMform = PTMform, ActiveForm = ActiveForm, TCrate = TCrate,
+                                                              TLrate = TLrate, RDrate = RDrate, PDrate = PDrate)
+
+  return(insilicosystem)
+}
+
 
 #' Add an edge in the in silico system.
 #'
