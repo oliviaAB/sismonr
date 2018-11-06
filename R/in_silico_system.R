@@ -628,140 +628,93 @@ removeComplex = function(insilicosystem, name){
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param regID Integer. The ID of the regulator gene.
 #' @param tarID Integer. The ID of the target gene.
-#' @param targetreaction The type of regulation exerted ("TC", "TL", "RD", "PD" or "PTM").
-#' @param regsign The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation).
-#' @param kinetics Optional: list of kinetics parameters of the reaction. If not provided, they will be sampled
-#' according to the distributions specified in \code{sysargs} (parameters of the simulation - an attribute of the in silico system).
+#' @param regsign The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
+#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @param kinetics Optional: named vector of kinetics parameters of the reaction. If none provided,
+#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
 #' @return The modified in silico system.
 #' @export
-addEdg = function(insilicosystem, regID, tarID, targetreaction, regsign, kinetics = NULL){
-
+addEdg = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list()){
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
   if(!(regID %in% insilicosystem$genes$id)){
-    stop("Regulator id does not exist in the system.")
+    if(!(regID %in% names(insilicosystem$complexes))){
+      stop("Regulator ", regID, "does not exist in the system.")
+    }else{
+      targetreaction = insilicosystem$genes[insilicosystem$genes$id == insilicosystem$complexes[[regID]][1], "TargetReaction"]
+      regby = "C"
+    }
+  }else{
+    targetreaction = insilicosystem$genes[insilicosystem$genes$id == regID, "TargetReaction"]
+    regby = dplyr::filter(insilicosystem$genes, id == regID)[1,"coding"]
   }
+
 
   if(!(tarID %in% insilicosystem$genes$id)){
-    stop("Target id does not exist in the system.")
+    stop("Target ", tarID, " does not exist in the system.")
   }
-
-  if(!(targetreaction %in% c("TC", "TL", "RD", "PD", "PTM"))){
-    stop("Target reaction unknown.")
-  }
-
-  if(!(regsign %in% c("1", "-1"))){
-    stop("Interation sign must be either \"1\" or \"-1\".")
-  }
-
-  abbr = c("TC" = "transcription (TC)", "TL" = "translation (TL)", "RD" = "RNA decay (RD)", "PD" = "protein decay (PD)", "PTM" = "post-translational modification (PTM)")
-
-  ## Later, maybe allow with only a warning?
-  biofunc = insilicosystem$genes[insilicosystem$genes$id == regID, "TargetReaction"]
-  if(targetreaction != biofunc){
-    stop("Gene ", regID, " is labelled as a regulator of ", abbr[biofunc],", not ", abbr[targetreaction], ".")
-  }
-  codtar = insilicosystem$genes[insilicosystem$genes$id == tarID, "coding"]
-  if(codtar == "NC" & targetreaction %in% c("TL", "PD", "PTM")){
-    stop("Target gene ", tarID, " is a noncoding gene. Cannot be regulated at the level of ", abbr[targetreaction], ".")
-  }
-
-  regby = dplyr::filter(insilicosystem$genes, id == as.character(regID))[1,"coding"]
 
   ## Checking if an edge already exists between the 2 genes ----
   if(nrow(dplyr::filter(insilicosystem$edg, from == regID & to == tarID)) != 0){
     stop(paste0("An edge already exists from gene ", regID, " to gene ", tarID, "."))
   }
 
+  abbr = c("TC" = "transcription (TC)", "TL" = "translation (TL)", "RD" = "RNA decay (RD)", "PD" = "protein decay (PD)", "PTM" = "post-translational modification (PTM)")
+
+  codtar = insilicosystem$genes[insilicosystem$genes$id == tarID, "coding"]
+  if(codtar == "NC" & targetreaction %in% c("TL", "PD", "PTM")){
+    stop("Target gene ", tarID, " is a noncoding gene. Cannot be regulated at the level of ", abbr[targetreaction], ".")
+  }
+
+  if(!is.null(regsign)){
+    if(!(regsign %in% c("1", "-1"))){
+      stop("Interation sign must be either \"1\" or \"-1\".")
+    }else if(targetreaction %in% c("RD", "PD")){
+      regsign = "-1"
+    }
+  }else{
+    regsign = sample(c("1","-1"), 1, prob = c(insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]],
+                                              1 - insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]]), replace = T)
+  }
+
+  ## which kinetic parameters must be created for the edge
+  params = list("TC" = c("TCbindingrate" , "TCunbindingrate", "TCfoldchange"),
+                "TL" = c("TLbindingrate" , "TLunbindingrate", "TLfoldchange"),
+                "RD" = c("RDregrate"),
+                "PD" = c("PDregrate"),
+                "PTM" = c("PTMregrate"))
+
   ## Adding the interaction in the edg data-frame ----
   insilicosystem$edg = dplyr::add_row(insilicosystem$edg, from = as.character(regID), to = as.integer(tarID),
-                 TargetReaction = targetreaction, RegSign = regsign,
-                 RegBy = regby)
+                                      TargetReaction = targetreaction, RegSign = regsign, RegBy = regby)
 
-  if(targetreaction == "TC"){
-    if(is.null(kinetics)){ ## if no values are given for the kinetic parameters
-      myTCbindingrate = insilicosystem$sysargs[["TCbindingrate_samplingfct"]](1)
-      myTCunbindingrate = insilicosystem$sysargs[["TCunbindingrate_samplingfct"]](1)
-      myTCfoldchange = insilicosystem$sysargs[["TCfoldchange_samplingfct"]](1) * (regsign == "1") ## if regsign = "-1" (repression) the fold change is 0
-    }else if(length(setdiff(c("TCbindingrate", "TCunbindingrate", "TCfoldchange"), names(kinetics))) == 0){ ## if values are given for the appropriate kinetic parameters
-      myTCbindingrate = kinetics$TCbindingrate
-      myTCunbindingrate = kinetics$TCunbindingrate
-      myTCfoldchange = kinetics$TCfoldchange
-    }else{ ## if the kinetic vector does not provide values with appropriate kinetic parameter names
-      stop("Vector kinetics does not provide the correct parameters: TCbindingrate, TCunbindingrate, TCfoldchange.")
-    }
-    insilicosystem$mosystem$TCRN_edg = dplyr::add_row(insilicosystem$mosystem$TCRN_edg, from = as.character(regID), to = as.integer(tarID),
-                   TargetReaction = targetreaction, RegSign = regsign,
-                   RegBy = regby,
-                   TCbindingrate = myTCbindingrate, TCunbindingrate = myTCunbindingrate, TCfoldchange = myTCfoldchange)
+  ## Retrieving/sampling the kinetic parameters
+  kin2sample = setdiff(params[[targetreaction]], names(kinetics)) ## kinetic parameters not provided by the user
+  kingiven = intersect(params[[targetreaction]], names(kinetics)) ## kinetic parameters provided by the user
+
+  ## sampling the values for the parameters not provided
+  kinsampled = sapply(kin2sample, function(i){
+    insilicosystem$sysargs[[paste0(i,"_samplingfct")]](1)
+  })
+
+  kin = unlist(c(kinsampled, kinetics[kingiven]))
+  names(kin) = c(kin2sample, kingiven)
+
+  if(targetreaction %in% c("TC", "TL") & regsign == "-1"){
+    kin[paste0(targetreaction, "foldchange")] = 0
   }
 
-  if(targetreaction == "TL"){
-    if(is.null(kinetics)){ ## if no values are given for the kinetic parameters
-      myTLbindingrate = insilicosystem$sysargs[["TLbindingrate_samplingfct"]](1)
-      myTLunbindingrate = insilicosystem$sysargs[["TLunbindingrate_samplingfct"]](1)
-      myTLfoldchange = insilicosystem$sysargs[["TLfoldchange_samplingfct"]](1) * (regsign == "1") ## if regsign = "-1" (repression) the fold change is 0
-    }else if(length(setdiff(c("TLbindingrate", "TLunbindingrate", "TLfoldchange"), names(kinetics))) == 0){ ## if values are given for the appropriate kinetic parameters
-      myTLbindingrate = kinetics$TLbindingrate
-      myTLunbindingrate = kinetics$TLunbindingrate
-      myTLfoldchange = kinetics$TLfoldchange
-    }else{ ## if the kinetic vector does not provide values with appropriate kinetic parameter names
-      stop("Vector kinetics does not provide the correct parameters: TLbindingrate, TLunbindingrate, TLfoldchange.")
-    }
-    insilicosystem$mosystem$TLRN_edg = dplyr::add_row(insilicosystem$mosystem$TLRN_edg, from = as.character(regID), to = as.integer(tarID),
-                   TargetReaction = targetreaction, RegSign = regsign,
-                   RegBy = regby,
-                   TLbindingrate = myTLbindingrate, TLunbindingrate = myTLunbindingrate, TLfoldchange = myTLfoldchange)
-  }
+  ## add the edg and kinetic parameters to the adequate mutli-omic edge list
+  edg2add = data.frame("from" = as.character(regID), "to" = as.integer(tarID), "TargetReaction" = targetreaction,
+              "RegSign" = regsign, "RegBy" = regby, t(kin), stringsAsFactors = F)
 
-  if(targetreaction == "RD"){
-    if(is.null(kinetics)){ ## if no values are given for the kinetic parameters
-      myRDregrate = insilicosystem$sysargs[["RDregrate_samplingfct"]](1)
-    }else if(length(setdiff(c("RDbindingrate"), names(kinetics))) == 0){ ## if values are given for the appropriate kinetic parameters
-      myRDregrate = kinetics$RDregrate
-    }else{ ## if the kinetic vector does not provide values with appropriate kinetic parameter names
-      stop("Vector kinetics does not provide the correct parameters: RDbindingrate.")
-    }
-    insilicosystem$mosystem$RDRN_edg = dplyr::add_row(insilicosystem$mosystem$RDRN_edg, from = as.character(regID), to = as.integer(tarID),
-                   TargetReaction = targetreaction, RegSign = regsign,
-                   RegBy = regby,
-                   RDregrate = myRDregrate)
-  }
-
-  if(targetreaction == "PD"){
-    if(is.null(kinetics)){ ## if no values are given for the kinetic parameters
-      myPDregrate = insilicosystem$sysargs[["PDregrate_samplingfct"]](1)
-    }else if(length(setdiff(c("PDbindingrate"), names(kinetics))) == 0){ ## if values are given for the appropriate kinetic parameters
-      myPDregrate = kinetics$PDregrate
-    }else{ ## if the kinetic vector does not provide values with appropriate kinetic parameter names
-      stop("Vector kinetics does not provide the correct parameters: PDbindingrate.")
-    }
-    insilicosystem$mosystem$PDRN_edg = dplyr::add_row(insilicosystem$mosystem$PDRN_edg, from = as.character(regID), to = as.integer(tarID),
-                   TargetReaction = targetreaction, RegSign = regsign,
-                   RegBy = regby,
-                   PDregrate = myPDregrate)
-  }
-
-
-  if(targetreaction == "PTM"){
-    if(is.null(kinetics)){ ## if no values are given for the kinetic parameters
-      myPTMregrate = insilicosystem$sysargs[["PTMregrate_samplingfct"]](1)
-    }else if(length(setdiff(c("PTMbindingrate"), names(kinetics))) == 0){ ## if values are given for the appropriate kinetic parameters
-      myPTMregrate = kinetics$PTMregrate
-    }else{ ## if the kinetic vector does not provide values with appropriate kinetic parameter names
-      stop("Vector kinetics does not provide the correct parameters: PTMbindingrate.")
-    }
-    insilicosystem$mosystem$PTMRN_edg = dplyr::add_row(insilicosystem$mosystem$PTMRN_edg, from = as.character(regID), to = as.integer(tarID),
-                   TargetReaction = targetreaction, RegSign = regsign,
-                   RegBy = regby,
-                   PTMregrate = myPTMregrate)
-  }
+  insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = bind_rows(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]],
+                                                                          edg2add)
 
   return(insilicosystem)
-
 }
 
 #' Removes an edge from the in silico system.

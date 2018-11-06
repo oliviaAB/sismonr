@@ -4,8 +4,7 @@
 \alias{addEdg}
 \title{Adds an edge in the in silico system.}
 \usage{
-addEdg(insilicosystem, regID, tarID, targetreaction, regsign,
-  kinetics = NULL)
+addEdg(insilicosystem, regID, tarID, regsign = NULL, kinetics = list())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
@@ -14,12 +13,11 @@ addEdg(insilicosystem, regID, tarID, targetreaction, regsign,
 
 \item{tarID}{Integer. The ID of the target gene.}
 
-\item{targetreaction}{The type of regulation exerted ("TC", "TL", "RD", "PD" or "PTM").}
+\item{regsign}{The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
+will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
 
-\item{regsign}{The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation).}
-
-\item{kinetics}{Optional: list of kinetics parameters of the reaction. If not provided, they will be sampled
-according to the distributions specified in \code{sysargs} (parameters of the simulation - an attribute of the in silico system).}
+\item{kinetics}{Optional: named vector of kinetics parameters of the reaction. If none provided,
+will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
 }
 \value{
 The modified in silico system.
