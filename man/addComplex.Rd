@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{addComplex}
 \alias{addComplex}
-\title{Add a regulatory complex in the in silico system.}
+\title{Adds a regulatory complex in the in silico system.}
 \usage{
 addComplex(insilicosystem, compo, name = NULL, formationrate = NULL,
   dissociationrate = NULL)
@@ -26,5 +26,5 @@ parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
 The modified in silico system.
 }
 \description{
-Add a regulatory complex in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+Adds a regulatory complex in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
 }

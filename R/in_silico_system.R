@@ -376,9 +376,9 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
   return(value)
 }
 
-#' Add a gene in the in silico system.
+#' Adds a gene in the in silico system.
 #'
-#' Add a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+#' Adds a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param id Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.
@@ -475,13 +475,13 @@ addGene = function(insilicosystem, id = NULL, coding = NULL, TargetReaction = NU
   return(insilicosystem)
 }
 
-#' Remove a gene from the in silico system.
+#' Removes a gene from the in silico system.
 #'
-#' Remove a gene from the in silico system. Any edge involving this gene is removed from the system,
+#' Removes a gene from the in silico system. Any edge involving this gene is removed from the system,
 #' and the composition of the complexes comprising this gene are adjusted.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
-#' @param id Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.
+#' @param id Integer. The id of the gene to remove.
 #' @return The modified in silico system.
 #' @export
 removeGene = function(insilicosystem, id){
@@ -498,7 +498,7 @@ removeGene = function(insilicosystem, id){
 
   ## Remove the gene from the gene list
   targetreaction = paste0(insilicosystem$genes[insilicosystem$genes$id == id2rem, "TargetReaction"], "RN_edg")
-    insilicosystem$genes = dplyr::filter(insilicosystem$genes, id != id2rem)
+  insilicosystem$genes = dplyr::filter(insilicosystem$genes, id != id2rem)
 
   ## Remove any edge involving the gene in the general edges list
   insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != paste(id2rem) & to != id2rem)
@@ -532,9 +532,9 @@ removeGene = function(insilicosystem, id){
   return(insilicosystem)
 }
 
-#' Add a regulatory complex in the in silico system.
+#' Adds a regulatory complex in the in silico system.
 #'
-#' Add a regulatory complex in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+#' Adds a regulatory complex in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param compo An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
@@ -587,10 +587,43 @@ addComplex = function(insilicosystem, compo, name = NULL, formationrate = NULL, 
   return(insilicosystem)
 }
 
-
-#' Add an edge in the in silico system.
+#' Removes a regulatory complex from the in silico system.
 #'
-#' Add an edge in the in silico system between specified genes.
+#' Removes a regulatory complex from the in silico system. Any edge involving this complex is removed from the system.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param name String. The name of the regulatory complex to remove.
+#' @return The modified in silico system.
+#' @export
+removeComplex = function(insilicosystem, name){
+
+  ## Checking the input values ----
+  if(class(insilicosystem) != "insilicosystem"){
+    stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  }
+
+  if(!(name %in% names(insilicosystem$complexes))){
+    stop("Complex ", name, " does not exist in the system.")
+  }
+
+  insilicosystem$complexes[[name]] = NULL
+  insilicosystem$complexeskinetics[[name]] = NULL
+
+  ## Remove any edge involving the complex in the general edges list
+  insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != name)
+
+  ## Remove any edge involving the gene in the specific multi-omic edges list
+  for(rn in names(insilicosystem$mosystem)){
+    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], from != name)
+  }
+
+  return(insilicosystem)
+
+}
+
+#' Adds an edge in the in silico system.
+#'
+#' Adds an edge in the in silico system between specified genes.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param regID Integer. The ID of the regulator gene.

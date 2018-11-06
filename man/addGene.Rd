@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{addGene}
 \alias{addGene}
-\title{Add a gene in the in silico system.}
+\title{Adds a gene in the in silico system.}
 \usage{
 addGene(insilicosystem, id = NULL, coding = NULL,
   TargetReaction = NULL, TCrate = NULL, TLrate = NULL,
@@ -35,5 +35,5 @@ parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
 The modified in silico system.
 }
 \description{
-Add a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+Adds a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
 }

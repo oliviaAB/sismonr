@@ -2,19 +2,19 @@
 % Please edit documentation in R/in_silico_system.R
 \name{removeGene}
 \alias{removeGene}
-\title{Remove a gene from the in silico system.}
+\title{Removes a gene from the in silico system.}
 \usage{
 removeGene(insilicosystem, id)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{id}{Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.}
+\item{id}{Integer. The id of the gene to remove.}
 }
 \value{
 The modified in silico system.
 }
 \description{
-Remove a gene from the in silico system. Any edge involving this gene is removed from the system,
+Removes a gene from the in silico system. Any edge involving this gene is removed from the system,
 and the composition of the complexes comprising this gene are adjusted.
 }

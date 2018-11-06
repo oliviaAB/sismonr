@@ -17,5 +17,5 @@ removeEdg(insilicosystem, regID, tarID)
 The modified in silico system.
 }
 \description{
-Add an edge in the in silico system between specified genes.
+Removes an edge in the in silico system between specified genes.
 }

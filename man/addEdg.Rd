@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{addEdg}
 \alias{addEdg}
-\title{Add an edge in the in silico system.}
+\title{Adds an edge in the in silico system.}
 \usage{
 addEdg(insilicosystem, regID, tarID, targetreaction, regsign,
   kinetics = NULL)
@@ -25,5 +25,5 @@ according to the distributions specified in \code{sysargs} (parameters of the si
 The modified in silico system.
 }
 \description{
-Add an edge in the in silico system between specified genes.
+Adds an edge in the in silico system between specified genes.
 }
