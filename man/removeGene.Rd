@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{removeGene}
 \alias{removeGene}
-\title{Add an edge in the in silico system.}
+\title{Remove a gene from the in silico system.}
 \usage{
 removeGene(insilicosystem, id)
 }
@@ -15,6 +15,6 @@ removeGene(insilicosystem, id)
 The modified in silico system.
 }
 \description{
-Add an edge in the in silico system between specified genes. Any edge involving this gene is removed from the system,
+Remove a gene from the in silico system. Any edge involving this gene is removed from the system,
 and the composition of the complexes comprising this gene are adjusted.
 }

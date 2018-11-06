@@ -376,9 +376,9 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
   return(value)
 }
 
-#' Add an edge in the in silico system.
+#' Add a gene in the in silico system.
 #'
-#' Add an edge in the in silico system between specified genes.
+#' Add a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param id Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.
@@ -475,9 +475,9 @@ addGene = function(insilicosystem, id = NULL, coding = NULL, TargetReaction = NU
   return(insilicosystem)
 }
 
-#' Add an edge in the in silico system.
+#' Remove a gene from the in silico system.
 #'
-#' Add an edge in the in silico system between specified genes. Any edge involving this gene is removed from the system,
+#' Remove a gene from the in silico system. Any edge involving this gene is removed from the system,
 #' and the composition of the complexes comprising this gene are adjusted.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
@@ -529,6 +529,61 @@ removeGene = function(insilicosystem, id){
       }
     }
   }
+  return(insilicosystem)
+}
+
+#' Add a regulatory complex in the in silico system.
+#'
+#' Add a regulatory complex in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param compo An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
+#' specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemsargs}}). All genes composing the compex must
+#' have the same biological function (i.e. same "TargetReaction" parameter).
+#' @param name String. Name of the complex. If non provided, will be created according to the name of the existing complexes.
+#' @param formationrate The formation rate of the complex. If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @param dissociationrate The dissociation rate of the complex. If none provided, randomly chosen according to the
+#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' @return The modified in silico system.
+#' @export
+addComplex = function(insilicosystem, compo, name = NULL, formationrate = NULL, dissociationrate = NULL){
+  ## Checking the input values ----
+  if(class(insilicosystem) != "insilicosystem"){
+    stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  }
+
+  if(!all(compo %in% insilicosystem$genes$id)){
+    stop("The components of the complex do not exist in the system.")
+  }
+
+  if(length(compo) != insilicosystem$sysargs$regcomplexes.size){
+    stop("Wrong number of components. The complex must be of size ", insilicosystem$sysargs$regcomplexes.size,".")
+  }
+
+  targetreactions = insilicosystem$genes[which(insilicosystem$genes$id %in% compo), "TargetReaction"]
+  if(!all(targetreactions == targetreactions[1])){
+    stop("The different components do not all have the same biological function.")
+  }
+
+  if(!is.null(name)){
+    if(name %in% names(insilicosystem$complexes)){
+      stop("Complex ", name, " already exists in the system.")
+    }
+  }else{
+    exnames = names(insilicosystem$complexes)[stringr::str_detect(names(insilicosystem$complexes), paste0("C", targetreactions[1]))] ## names of the complexes in the system targeting the same reaction/expression step
+    exnum = ifelse(length(exnames)>0, as.numeric(stringr::str_extract(exnames, "(\\d)+")), 0)
+    name = paste0("C", targetreactions[1], max(exnum)+1)
+  }
+
+  if(is.null(formationrate)){
+    formationrate = insilicosystem$sysargs[["complexesformationrate_samplingfct"]](1)
+    dissociationrate = insilicosystem$sysargs[["complexesdissociationrate_samplingfct"]](1)
+  }
+
+  insilicosystem$complexes[[name]] = compo
+  insilicosystem$complexeskinetics[[name]] = list("formationrate" = formationrate, "dissociationrate" = dissociationrate)
+
   return(insilicosystem)
 }
 
@@ -678,7 +733,7 @@ addEdg = function(insilicosystem, regID, tarID, targetreaction, regsign, kinetic
 
 #' Removes an edge from the in silico system.
 #'
-#' Add an edge in the in silico system between specified genes.
+#' Removes an edge in the in silico system between specified genes.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param regID Integer. The ID of the regulator gene.
