@@ -103,8 +103,8 @@ function createTCregReactions(edg, genes, activeform, complexes, complexesvarian
   reacnames = []
   prop = []
 
-  regsingl = find( x -> !in('C', x), edg["from"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> in('C', x), edg["from"]) ## identify regulatory complexes
+  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   promActiveStates = Dict(string(i)*j => [] for i in genes["id"], j in gcnList) ## dictionary, 1 element for each allele version of each gene. Value is an array with m elements, 1 for each regulator. 
                                                                               ## The j-th element of this array is a matrix: rows: all possible active states of the binding site of regulator j (column 1: name of the binding site state, column 2 fold-change associated with this state)
@@ -217,8 +217,8 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
   reacnames = []
   prop = []
 
-  regsingl = find( x -> !in('C', x), edg["from"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> in('C', x), edg["from"]) ## identify regulatory complexes
+  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   promActiveStates = Dict(string(i)*j => [] for i in genes["id"], j in gcnList) ## dictionary, 1 element for each allele version of each gene. Value is an array with m elements, 1 for each regulator. 
                                                                               ## The j-th element of this array is a matrix: rows: all possible active states of the binding site of regulator j (column 1: name of the binding site state, column 2 fold-change associated with this state)
@@ -390,8 +390,8 @@ function createRDregReactions(edg, genes, RNAforms, activeform, complexes, compl
   reacnames = []
   prop = []
 
-  regsingl = find( x -> !in('C', x), edg["from"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> in('C', x), edg["from"]) ## identify regulatory complexes
+  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   for r in regsingl, gcn in gcnList 
     tarid = edg["to"][r]
@@ -492,9 +492,9 @@ function createPDregReactions(edg, genes, activeform, complexes, complexesvarian
   reacnames = []
   prop = []
 
-  regsingl = find( x -> !in('C', x), edg["from"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> in('C', x), edg["from"]) ## identify regulatory complexes
-
+  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  
   for r in regsingl, gcn in gcnList 
     tarid = edg["to"][r]
     tar = string(tarid) * gcn
@@ -539,9 +539,9 @@ function createPTMregReactions(edg, genes, activeform, complexes, complexesvaria
   reacnames = []
   prop = []
 
-  regsingl = find( x -> !in('C', x), edg["from"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> in('C', x), edg["from"]) ## identify regulatory complexes
-
+  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  
   for r in regsingl, gcn in gcnList 
     tarid = edg["to"][r]
     tar = string(tarid) * gcn
