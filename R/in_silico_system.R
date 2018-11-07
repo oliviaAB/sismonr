@@ -625,7 +625,7 @@ removeComplex = function(insilicosystem, name){
 #' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
 #' @return The modified in silico system.
 #' @export
-addEdg = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list()){
+addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list()){
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
@@ -717,7 +717,7 @@ addEdg = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list(
 #' @param tarID Integer. The ID of the target gene.
 #' @return The modified in silico system.
 #' @export
-removeEdg = function(insilicosystem, regID, tarID){
+removeEdge = function(insilicosystem, regID, tarID){
 
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
