@@ -75,16 +75,16 @@ function createComplexesReactions(complexes, complexeskinetics, activeform, gcnL
     complexvar = allposscomb(gcnList, complexsize)
     complexesvariants[compl] = []
     for t in 1:size(complexvar)[1]
-      complvar = compl*join(["_"*activeform[string(complexes[compl][i])]*complexvar[t, i] for i in 1:complexsize])
+      complvar = compl*join(["_"*activeform[complexes[compl][i]]*complexvar[t, i] for i in 1:complexsize])
       push!(spec, complvar) ## adding the complex form to the list of species
       push!(complexesvariants[compl], complvar) ## adding the complex variant to the list of possible complex variants for the complex 
-      complexesqtlactivity[complvar] = join(["""QTLeffects["$(complexvar[t, i])"]["qtlactivity"][$(complexes[compl][i])]""" for i in 1:complexsize], "*")
+      complexesqtlactivity[complvar] = join(["""QTLeffects["$(complexvar[t, i])"]["qtlactivity"][$(parse(Int, complexes[compl][i]))]""" for i in 1:complexsize], "*")
       push!(initcond, "0") ## adding the initial abundance of the complex form to the list of initial conditions. For complexes, initial abundance set to 0
       ## Creates the reaction of complex formation
-      push!(reac, reactBioSim([activeform[string(complexes[compl][i])]*complexvar[t, i] for i in 1:complexsize], [complvar])) ## sum of complex components -> compl
+      push!(reac, reactBioSim([activeform[complexes[compl][i]]*complexvar[t, i] for i in 1:complexsize], [complvar])) ## sum of complex components -> compl
       push!(reacnames, "formation"*complvar) 
       push!(prop, """$(complexeskinetics[compl]["formationrate"])""")
-      push!(reac, reactBioSim([complvar], [activeform[string(complexes[compl][i])]*complexvar[t, i] for i in 1:complexsize])) ## compl -> sum of complex components
+      push!(reac, reactBioSim([complvar], [activeform[complexes[compl][i]]*complexvar[t, i] for i in 1:complexsize])) ## compl -> sum of complex components
       push!(reacnames, "dissociation"*complvar) 
       push!(prop, """$(complexeskinetics[compl]["dissociationrate"])""")
     end
@@ -113,8 +113,8 @@ function createTCregReactions(edg, genes, activeform, complexes, complexesvarian
 
   ## Loop over all the edges in the transcription regulatory network with single genes as regulators
   for r in regsingl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     reg = edg["from"][r]
 
     ## Create the binding site for regulator
@@ -159,8 +159,8 @@ function createTCregReactions(edg, genes, activeform, complexes, complexesvarian
 
   ## Loop over all the edges in the transcription regulatory network with complexes as regulators
   for r in regcompl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     compl = edg["from"][r]
 
     ## Create the binding site for regulator
@@ -227,8 +227,8 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
 
   ## Loop over all the edges in the translation regulatory network with single genes as regulators
   for r in regsingl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     reg = edg["from"][r]
 
     ## Create the binding site for regulator
@@ -273,8 +273,8 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
 
   ## Loop over all the edges in the translation regulatory network with complexes as regulators
   for r in regcompl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     compl = edg["from"][r]
 
     ## Create the binding site for regulator
@@ -394,8 +394,8 @@ function createRDregReactions(edg, genes, RNAforms, activeform, complexes, compl
   regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   for r in regsingl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     tarRNA = RNAforms[tar]
     reg = edg["from"][r]
 
@@ -407,8 +407,8 @@ function createRDregReactions(edg, genes, RNAforms, activeform, complexes, compl
   end
 
   for r in regcompl, gcn in gcnList
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     tarRNA = RNAforms[tar]
     compl = edg["from"][r]
 
@@ -496,8 +496,8 @@ function createPDregReactions(edg, genes, activeform, complexes, complexesvarian
   regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
   
   for r in regsingl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     reg = edg["from"][r]
 
     pform = ["P"*tar]
@@ -513,8 +513,8 @@ function createPDregReactions(edg, genes, activeform, complexes, complexesvarian
   end
 
   for r in regcompl, gcn in gcnList
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     compl = edg["from"][r]
 
     pform = ["P"*tar]
@@ -543,8 +543,8 @@ function createPTMregReactions(edg, genes, activeform, complexes, complexesvaria
   regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
   
   for r in regsingl, gcn in gcnList 
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     reg = edg["from"][r]
     ispos = edg["RegSign"][r] == "1" ## is the regulator transforming the orginal protein into its modified form (RegSign = "1") or the opposite (RegSign = "-1")
     for gcnreg in gcnList
@@ -560,8 +560,8 @@ function createPTMregReactions(edg, genes, activeform, complexes, complexesvaria
   end
 
   for r in regcompl, gcn in gcnList
-    tarid = edg["to"][r]
-    tar = string(tarid) * gcn
+    tarid = parse(Int, edg["to"][r])
+    tar = edg["to"][r] * gcn
     compl = edg["from"][r]
     ispos = edg["RegSign"][r] == "1" ## is the regulator transforming the orginal protein into its modified form (RegSign = "1") or the opposite (RegSign = "-1")
 
