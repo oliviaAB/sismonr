@@ -4,7 +4,7 @@
 \alias{addComplex}
 \title{Adds a regulatory complex in the in silico system.}
 \usage{
-addComplex(insilicosystem, compo, name = NULL, formationrate = NULL,
+addComplex(insilicosystem, compo, formationrate = NULL,
   dissociationrate = NULL)
 }
 \arguments{
@@ -13,8 +13,6 @@ addComplex(insilicosystem, compo, name = NULL, formationrate = NULL,
 \item{compo}{An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
 specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemsargs}}). All genes composing the compex must
 have the same biological function (i.e. same "TargetReaction" parameter).}
-
-\item{name}{String. Name of the complex. If non provided, will be created according to the name of the existing complexes.}
 
 \item{formationrate}{The formation rate of the complex. If none provided, randomly chosen according to the
 parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}

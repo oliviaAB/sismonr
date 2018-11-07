@@ -4,14 +4,11 @@
 \alias{addGene}
 \title{Adds a gene in the in silico system.}
 \usage{
-addGene(insilicosystem, id = NULL, coding = NULL,
-  TargetReaction = NULL, TCrate = NULL, TLrate = NULL,
-  RDrate = NULL, PDrate = NULL)
+addGene(insilicosystem, coding = NULL, TargetReaction = NULL,
+  TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
-
-\item{id}{Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.}
 
 \item{coding}{String. The coding status of the gene (either "PC" or "NC"). If none provided, randomly chosen according to the
 parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}

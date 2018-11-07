@@ -381,7 +381,6 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #' Adds a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
-#' @param id Integer. The id of the gene to add. Default value: maximum(existing ids) + 1.
 #' @param coding String. The coding status of the gene (either "PC" or "NC"). If none provided, randomly chosen according to the
 #' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
 #' @param TargetReaction String. The biological function of the gene, i.e. the gene expression step targeted by the active product
@@ -396,20 +395,15 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
 #' @return The modified in silico system.
 #' @export
-addGene = function(insilicosystem, id = NULL, coding = NULL, TargetReaction = NULL, TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL){
+addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL){
 
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
-  if(is.null(id)){
-    id = max(insilicosystem$genes$id) + 1
-  }else{
-    if(id %in% insilicosystem$genes$id){
-      stop("Gene ", id, " already in the system.")
-    }
-  }
+  id = max(insilicosystem$genes$id) + 1
+
 
   if(!is.null(coding)){
     if(!(coding %in% c("PC", "NC"))){
@@ -540,14 +534,13 @@ removeGene = function(insilicosystem, id){
 #' @param compo An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
 #' specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemsargs}}). All genes composing the compex must
 #' have the same biological function (i.e. same "TargetReaction" parameter).
-#' @param name String. Name of the complex. If non provided, will be created according to the name of the existing complexes.
 #' @param formationrate The formation rate of the complex. If none provided, randomly chosen according to the
 #' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
 #' @param dissociationrate The dissociation rate of the complex. If none provided, randomly chosen according to the
 #' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
 #' @return The modified in silico system.
 #' @export
-addComplex = function(insilicosystem, compo, name = NULL, formationrate = NULL, dissociationrate = NULL){
+addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationrate = NULL){
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
@@ -566,15 +559,11 @@ addComplex = function(insilicosystem, compo, name = NULL, formationrate = NULL, 
     stop("The different components do not all have the same biological function.")
   }
 
-  if(!is.null(name)){
-    if(name %in% names(insilicosystem$complexes)){
-      stop("Complex ", name, " already exists in the system.")
-    }
-  }else{
-    exnames = names(insilicosystem$complexes)[stringr::str_detect(names(insilicosystem$complexes), paste0("C", targetreactions[1]))] ## names of the complexes in the system targeting the same reaction/expression step
-    exnum = ifelse(length(exnames)>0, as.numeric(stringr::str_extract(exnames, "(\\d)+")), 0)
-    name = paste0("C", targetreactions[1], max(exnum)+1)
-  }
+
+  exnames = names(insilicosystem$complexes)[stringr::str_detect(names(insilicosystem$complexes), paste0("C", targetreactions[1]))] ## names of the complexes in the system targeting the same reaction/expression step
+  exnum = ifelse(length(exnames)>0, as.numeric(stringr::str_extract(exnames, "(\\d)+")), 0)
+  name = paste0("C", targetreactions[1], max(exnum)+1)
+
 
   if(is.null(formationrate)){
     formationrate = insilicosystem$sysargs[["complexesformationrate_samplingfct"]](1)
