@@ -51,8 +51,7 @@ createStochSystem = function(insilicosystem, indargs, writefile, filepath, filen
   message("Generating the stochastic system...")
   juliastochsystem = juliaCall("juliaCreateStochasticSystem",
                           genes, TCRN_edg, TLRN_edg, RDRN_edg, PDRN_edg, PTMRN_edg,
-                          complexes, complexeskinetics,
-                          as.integer(insilicosystem$sysargs$regcomplexes.size), indargs$gcnList,
+                          complexes, complexeskinetics, indargs$gcnList,
                           writefile, filepath, filename, evaluator = ev)
   message("Done.")
 

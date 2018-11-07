@@ -341,6 +341,8 @@ createEmptyMultiOmicNetwork = function(genes){
              "PDRN_edg" = data.frame(edg, "PDregrate" = numeric(), stringsAsFactors = F),
              "PTMRN_edg" = data.frame(edg, "PTMregrate" = numeric(), stringsAsFactors = F))
 
+  genes$ActiveForm = sapply(1:nrow(genes), function(x){paste0(genes$ActiveForm[x], genes$id[x])})
+
   return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = list(), "complexeskinetics" = list()))
 }
 
@@ -462,7 +464,7 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
 
   PTMform = "0"
 
-  insilicosystem$genes = dplyr::add_row(insilicosystem$genes, id = id, coding = coding, TargetReaction = TargetReaction,
+  insilicosystem$genes = dplyr::add_row(insilicosystem$genes, id = as.integer(id), coding = coding, TargetReaction = TargetReaction,
                                                               PTMform = PTMform, ActiveForm = ActiveForm, TCrate = TCrate,
                                                               TLrate = TLrate, RDrate = RDrate, PDrate = PDrate)
 
@@ -550,9 +552,9 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
     stop("The components of the complex do not exist in the system.")
   }
 
-  if(length(compo) != insilicosystem$sysargs$regcomplexes.size){
-    stop("Wrong number of components. The complex must be of size ", insilicosystem$sysargs$regcomplexes.size,".")
-  }
+  # if(length(compo) != insilicosystem$sysargs$regcomplexes.size){
+  #  stop("Wrong number of components. The complex must be of size ", insilicosystem$sysargs$regcomplexes.size,".")
+  # }
 
   targetreactions = insilicosystem$genes[which(insilicosystem$genes$id %in% compo), "TargetReaction"]
   if(!all(targetreactions == targetreactions[1])){
@@ -570,7 +572,7 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
     dissociationrate = insilicosystem$sysargs[["complexesdissociationrate_samplingfct"]](1)
   }
 
-  insilicosystem$complexes[[name]] = compo
+  insilicosystem$complexes[[name]] = sapply(compo, as.integer)
   insilicosystem$complexeskinetics[[name]] = list("formationrate" = formationrate, "dissociationrate" = dissociationrate)
 
   return(insilicosystem)
