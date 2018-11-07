@@ -568,16 +568,23 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
 
 
   exnames = names(insilicosystem$complexes)[stringr::str_detect(names(insilicosystem$complexes), paste0("C", targetreactions[1]))] ## names of the complexes in the system targeting the same reaction/expression step
-  exnum = ifelse(length(exnames)>0, as.numeric(stringr::str_extract(exnames, "(\\d)+")), 0)
+  if(length(exnames)>0){
+    exnum = as.numeric(stringr::str_extract(exnames, "(\\d)+"))
+  }else{
+    exnum = 0
+  }
   name = paste0("C", targetreactions[1], max(exnum)+1)
 
 
   if(is.null(formationrate)){
     formationrate = insilicosystem$sysargs[["complexesformationrate_samplingfct"]](1)
+  }
+  if(is.null(dissociationrate)){
     dissociationrate = insilicosystem$sysargs[["complexesdissociationrate_samplingfct"]](1)
   }
 
   insilicosystem$complexes[[name]] = compo
+
   insilicosystem$complexeskinetics[[name]] = list("formationrate" = formationrate, "dissociationrate" = dissociationrate)
 
   return(insilicosystem)
