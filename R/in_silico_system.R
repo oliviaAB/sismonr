@@ -99,9 +99,9 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
                              evaluator = ev), evaluator = ev)
 
   if(nrow(juliaedg$edg) == 0){
-    edg = data.frame("from" = character(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
+    edg = data.frame("from" = character(), "to" = character(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
   } else{
-    edg = data.frame("from" = sapply(unlist(juliaedg$edg[,1]), toString), "to" = unlist(juliaedg$edg[,2]), "TargetReaction" = rep(reaction, nrow(juliaedg$edg)), "RegSign" = rep("", nrow(juliaedg$edg)), "RegBy" = unlist(juliaedg$edg[,3]), stringsAsFactors = F)
+    edg = data.frame("from" = sapply(unlist(juliaedg$edg[,1]), toString), "to" = sapply(unlist(juliaedg$edg[,2]), toString), "TargetReaction" = rep(reaction, nrow(juliaedg$edg)), "RegSign" = rep("", nrow(juliaedg$edg)), "RegBy" = unlist(juliaedg$edg[,3]), stringsAsFactors = F)
 
     ## Sample the sign of the edges
     if(reaction == "PTM"){ ## we want to make sure that for each gene targeted by PTM regulation at least one edge is positive (i.e. the target
@@ -122,6 +122,7 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 
   rownames(edg) = NULL
   complexes = lapply(juliaedg$complexes, unlist)
+  complexes = lapply(complexes, as.character)
   return(list("edg" = edg, "complexes" = complexes))
 }
 
@@ -334,7 +335,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 #' @export
 createEmptyMultiOmicNetwork = function(genes){
 
-  edg = data.frame("from" = character(), "to" = integer(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
+  edg = data.frame("from" = character(), "to" = character(), "TargetReaction" = character(), "RegSign" = character(), "RegBy" = character(), stringsAsFactors = F)
   res = list("TCRN_edg" = data.frame(edg,  "TCbindingrate" = numeric(), "TCunbindingrate" = numeric(), "TCfoldchange" = numeric(), stringsAsFactors = F),
              "TLRN_edg" = data.frame(edg,  "TLbindingrate" = numeric(), "TLunbindingrate" = numeric(), "TLfoldchange" = numeric(), stringsAsFactors = F),
              "RDRN_edg" = data.frame(edg, "RDregrate" = numeric(), stringsAsFactors = F),
@@ -481,7 +482,8 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
 #' @return The modified in silico system.
 #' @export
 removeGene = function(insilicosystem, id){
-  id2rem = id ## to avoid confusion when using dplyr::filter
+  id2rem = as.integer(id) ## to avoid confusion when using dplyr::filter
+  id2rem.c = as.character(id)
 
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
@@ -497,17 +499,17 @@ removeGene = function(insilicosystem, id){
   insilicosystem$genes = dplyr::filter(insilicosystem$genes, id != id2rem)
 
   ## Remove any edge involving the gene in the general edges list
-  insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != paste(id2rem) & to != id2rem)
+  insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != id2rem.c & to != id2rem.c)
 
   ## Remove any edge involving the gene in the specific multi-omic edges list
   for(rn in names(insilicosystem$mosystem)){
-    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], from != paste(id2rem) & to != id2rem)
+    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], from != id2rem.c & to != id2rem.c)
   }
 
   ## If the gene is involved in a complex:
   for(comp in names(insilicosystem$complexes)){
-    if(id2rem %in% insilicosystem$complexes[[comp]]){
-      newcompo = setdiff(insilicosystem$complexes[[comp]], id2rem)
+    if(id2rem.c %in% insilicosystem$complexes[[comp]]){
+      newcompo = setdiff(insilicosystem$complexes[[comp]], id2rem.c )
       if(length(newcompo) > 1){ ## if there are still at least 2 components in the complex, simply remove the gene from the complex component list
         insilicosystem$complexes[[comp]] = newcompo
       }else{
@@ -517,10 +519,10 @@ removeGene = function(insilicosystem, id){
         ## Replace all instances of the complex by the remaining component
         newcoding = insilicosystem$genes[insilicosystem$genes$id == newcompo, "coding"]
         rows2change = which(insilicosystem$edg$from == comp)
-        insilicosystem$edg[rows2change, "from"] = paste(newcompo)
+        insilicosystem$edg[rows2change, "from"] = newcompo
         insilicosystem$edg[rows2change, "RegBy"] = newcoding
         rows2change = which(insilicosystem$mosystem[[targetreaction]]$from == comp)
-        insilicosystem$mosystem[[targetreaction]][rows2change, "from"] = paste(newcompo)
+        insilicosystem$mosystem[[targetreaction]][rows2change, "from"] = newcompo
         insilicosystem$mosystem[[targetreaction]][rows2change, "RegBy"] = newcoding
       }
     }
@@ -543,12 +545,15 @@ removeGene = function(insilicosystem, id){
 #' @return The modified in silico system.
 #' @export
 addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationrate = NULL){
+
+  compo = as.character(compo) ## make sure the id of the components are strings
+
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
-  if(!all(compo %in% insilicosystem$genes$id)){
+  if(!all(as.integer(compo) %in% insilicosystem$genes$id)){
     stop("The components of the complex do not exist in the system.")
   }
 
@@ -556,7 +561,7 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
   #  stop("Wrong number of components. The complex must be of size ", insilicosystem$sysargs$regcomplexes.size,".")
   # }
 
-  targetreactions = insilicosystem$genes[which(insilicosystem$genes$id %in% compo), "TargetReaction"]
+  targetreactions = insilicosystem$genes[which(insilicosystem$genes$id %in% as.integer(compo)), "TargetReaction"]
   if(!all(targetreactions == targetreactions[1])){
     stop("The different components do not all have the same biological function.")
   }
@@ -572,7 +577,7 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
     dissociationrate = insilicosystem$sysargs[["complexesdissociationrate_samplingfct"]](1)
   }
 
-  insilicosystem$complexes[[name]] = sapply(compo, as.integer)
+  insilicosystem$complexes[[name]] = compo
   insilicosystem$complexeskinetics[[name]] = list("formationrate" = formationrate, "dissociationrate" = dissociationrate)
 
   return(insilicosystem)
@@ -626,25 +631,29 @@ removeComplex = function(insilicosystem, name){
 #' @return The modified in silico system.
 #' @export
 addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list()){
+  regID = as.character(regID)
+  tarID = as.character(tarID)
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
-  if(!(regID %in% insilicosystem$genes$id)){
+  if(!(regID %in% as.character(insilicosystem$genes$id))){
     if(!(regID %in% names(insilicosystem$complexes))){
       stop("Regulator ", regID, "does not exist in the system.")
     }else{
-      targetreaction = insilicosystem$genes[insilicosystem$genes$id == insilicosystem$complexes[[regID]][1], "TargetReaction"]
+      targetreaction = insilicosystem$genes[insilicosystem$genes$id == as.integer(insilicosystem$complexes[[regID]][1]), "TargetReaction"]
       regby = "C"
     }
   }else{
-    targetreaction = insilicosystem$genes[insilicosystem$genes$id == regID, "TargetReaction"]
-    regby = dplyr::filter(insilicosystem$genes, id == regID)[1,"coding"]
+    targetreaction = insilicosystem$genes[insilicosystem$genes$id == as.integer(regID), "TargetReaction"]
+    regby = dplyr::filter(insilicosystem$genes, id == as.integer(regID))[1,"coding"]
   }
 
-
-  if(!(tarID %in% insilicosystem$genes$id)){
+  if(grepl("^C", tarID)){ ## if the tarID given is a complex
+    stop("Complexes cannot be regulated. Please provide a gene ID as target.")
+  }
+  if(!(as.integer(tarID) %in% insilicosystem$genes$id)){
     stop("Target ", tarID, " does not exist in the system.")
   }
 
@@ -655,7 +664,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 
   abbr = c("TC" = "transcription (TC)", "TL" = "translation (TL)", "RD" = "RNA decay (RD)", "PD" = "protein decay (PD)", "PTM" = "post-translational modification (PTM)")
 
-  codtar = insilicosystem$genes[insilicosystem$genes$id == tarID, "coding"]
+  codtar = insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "coding"]
   if(codtar == "NC" & targetreaction %in% c("TL", "PD", "PTM")){
     stop("Target gene ", tarID, " is a noncoding gene. Cannot be regulated at the level of ", abbr[targetreaction], ".")
   }
@@ -679,7 +688,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
                 "PTM" = c("PTMregrate"))
 
   ## Adding the interaction in the edg data-frame ----
-  insilicosystem$edg = dplyr::add_row(insilicosystem$edg, from = as.character(regID), to = as.integer(tarID),
+  insilicosystem$edg = dplyr::add_row(insilicosystem$edg, from = regID, to = tarID,
                                       TargetReaction = targetreaction, RegSign = regsign, RegBy = regby)
 
   ## Retrieving/sampling the kinetic parameters
@@ -699,7 +708,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
   }
 
   ## add the edg and kinetic parameters to the adequate mutli-omic edge list
-  edg2add = data.frame("from" = as.character(regID), "to" = as.integer(tarID), "TargetReaction" = targetreaction,
+  edg2add = data.frame("from" = regID, "to" = tarID, "TargetReaction" = targetreaction,
               "RegSign" = regsign, "RegBy" = regby, t(kin), stringsAsFactors = F)
 
   insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = bind_rows(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]],
@@ -719,21 +728,16 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 #' @export
 removeEdge = function(insilicosystem, regID, tarID){
 
+  regID = as.character(regID)
+  tarID = as.character(tarID)
+
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
-  if(!(regID %in% insilicosystem$genes$id)){
-    stop("Regulator id does not exist in the system.")
-  }
-
-  if(!(tarID %in% insilicosystem$genes$id)){
-    stop("Target id does not exist in the system.")
-  }
-
   ## The row to remove ----
-  theedg = dplyr::filter(insilicosystem$edg, from == paste(regID) & to == tarID)
+  theedg = dplyr::filter(insilicosystem$edg, from == regID & to == tarID)
 
   if(nrow(theedg) == 0){ ## if the edge doesn't exists, no need to remove it!
     message("No edge exists from gene ", regID, " to gene ", tarID,".", sep = "")
@@ -742,8 +746,8 @@ removeEdge = function(insilicosystem, regID, tarID){
     stop("More than one edge in the system meets the criterion! There must be a mistake somewhere.")
   }else{ ## If no problem, remove the edge from the data frames edg and XXRN_edg
     targetreaction = theedg[1, "TargetReaction"]
-    insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != paste(regID) | to != tarID)
-    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], from != paste(regID) | to != tarID)
+    insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != regID | to != tarID)
+    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], from != regID | to != tarID)
   }
 
   return(insilicosystem)
