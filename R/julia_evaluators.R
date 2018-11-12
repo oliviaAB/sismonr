@@ -9,7 +9,11 @@
 #' @export
 newJuliaEvaluator <- function(port = NULL) {
   if (is.null(port)) {
-    ev <- RJulia(.makeNew = T)  ## create a new julia evaluator
+    excon = showConnections()[,"description"] ## existing open connections
+    excon = excon[stringr::str_detect(excon, "->localhost:")]
+    excon = as.integer(stringr::str_replace(excon, "->localhost:", ""))
+    newport = ifelse(length(excon) == 0, 1118L, as.integer(max(excon)+1))
+    ev <- RJulia(port = newport, .makeNew = T)  ## create a new julia evaluator
   } else {
     ev <- RJulia(port = as.integer(port), .makeNew = T)  ## create a new julia evaluator with a given port
   }

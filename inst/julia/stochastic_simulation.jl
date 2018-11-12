@@ -17,7 +17,6 @@ function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
     i0 = replace(i0, "InitVar", "$InitVar")
     i0 = eval(parse(i0))
     #println(stochmodel["species"][i]* "\t"*string(i0))
-    model <= BioSimulator.Species(stochmodel["species"][i], round(Int, i0))
 
     if !isa(i0, Number)
       println(stochmodel["initialconditions"][i])
@@ -27,6 +26,13 @@ function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
       println(stochmodel["species"][i])
       error("Pb during the construction of the Julia BioSimulator model: species name is not a String.")
     end
+
+    if round(Int, i0)<0
+      error("Initial condition of species $(stochmodel["species"][i]) is negative ($(i0)).")
+    end
+
+    model <= BioSimulator.Species(stochmodel["species"][i], round(Int, i0))
+
   end
 
 
@@ -35,7 +41,6 @@ function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
     prop = replace(stochmodel["propensities"][i], "QTLeffects", "$QTLeffects")
     #println(prop)
     prop = eval(parse(prop))
-    model <= BioSimulator.Reaction(stochmodel["reactionsnames"][i], prop, stochmodel["reactions"][i])
 
     if !isa(prop, Number)
       println(stochmodel["propensities"][i])
@@ -49,6 +54,13 @@ function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
       println(stochmodel["reactions"][i])
       error("Pb during the construction of the Julia BioSimulator model: reaction is not a String.")
     end
+
+    if prop<0
+      error("Reaction rate of reaction $(stochmodel["reactionsnames"][i]) is negative ($(prop)).")
+    end
+
+    model <= BioSimulator.Reaction(stochmodel["reactionsnames"][i], prop, stochmodel["reactions"][i])
+
   end
 
   return model
