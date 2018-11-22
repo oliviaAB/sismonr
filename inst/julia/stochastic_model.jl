@@ -58,6 +58,61 @@ function reactBioSim(reacList, prodList)
   return join(reacList, " + ") * " --> " * join(prodList, " + ")
 end
 
+## Rank the complexes in the order they should be created 
+function rankComplexCreation(complexes)
+  complrank = Dict(zip(keys(complexes), [0 for i in 1:length(complexes)]))
+  compllist = Dict() ## For each complex gives as array its components that are complexes
+  complunlist = [] ## unlisted version of the compllist dictionary
+  searchlist = []
+  first2create = []
+
+  for y in keys(complexes)
+    comp2 = filter(x -> ismatch(r"^C", x), complexes[y]) ## list of components of complex y that are also complexes
+    if length(comp2) > 0 ## if complex y has components that are also complexes, we need to figure out its rank of creation
+      compllist[y] = comp2
+      push!(searchlist, y)
+      append!(complunlist, comp2)
+    else ## if not, it can be created first
+      push!(first2create, y)
+    end
+  end
+
+  roots = setdiff(searchlist, complunlist) ## Look for the "roots": take all complexes that are not components of other complexes
+  searchlist = setdiff(searchlist, roots)
+
+  r = 1
+  while length(searchlist) > 0
+    if length(roots) == 0
+      error("Please check your complexes list. Some complexes appear to be components or their own complex components.")
+    end
+    children = setdiff(mapreduce(x -> compllist[x], vcat, roots), first2create) ## take the children of the root complexes, their rank will be r 
+    if length(setdiff(children, searchlist)) > 0
+      error("Please check your complexes list. Some complexes appear to be components or their own complex components.")
+    end
+    for i in children ## their children will have rank r
+      complrank[i] = r
+    end
+    searchlist = setdiff(searchlist, children) ## reduce the searchlist, the complexes in children have been assigned a rank already
+    roots = children ## the new roots are the children
+    r = r + 1
+  end
+
+  if length(searchlist) == 0 && length(setdiff(mapreduce(x -> compllist[x], vcat, roots), first2create)) > 0 ## this is in case the last complexes you ranked still have children but the searchlist is empty
+    error("Please check your complexes list. Some complexes appear to be components or their own complex components.")
+  end
+
+  maxrank = maximum(mapreduce(x -> complrank[x], vcat, keys(complrank)))
+  for i in first2create
+    complrank[i] = maxrank + 1
+  end
+
+  ranks = mapreduce(x -> complrank[x], vcat, collect(keys(complrank)))
+  sortedrank = sortperm(ranks, rev = true)
+  orderedcomp = collect(keys(complrank))[sortedrank]
+
+  return(orderedcomp)
+end
+
 
 ## Creates the regulatory complexes binding and unbding reactions
 function createComplexesReactions(complexes, complexeskinetics, activeform, gcnList)
