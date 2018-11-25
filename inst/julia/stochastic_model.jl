@@ -5,6 +5,20 @@ using StatsBase
 # ------------------------------------------------------------------------------------------------ #
 
 
+## Gives all possible combinations of the elements of arrays of different size (the size of each array being stored in sizes)
+function combsizes(sizes)
+  sizes = Int64.(sizes)
+  n = length(sizes)
+  comb = Array{Int64}(prod(sizes), n)
+
+  for i in 1:n
+    comb[:,i] = repeat(1:sizes[i], inner = [prod(sizes[(i+1):end])], outer = [prod(sizes[1:(i-1)])])
+  end
+
+  return comb
+end
+
+
 ## Gives all the possible combinations of length l of the values of vector vect
 function allposscomb(vect, l)
 
@@ -83,11 +97,11 @@ function rankComplexCreation(complexes)
   r = 1
   while length(searchlist) > 0
     if length(roots) == 0
-      error("Please check your complexes list. Some complexes appear to be components or their own complex components.")
+      error("Please check your complexes list. Some complexes appear to be components of their own complex components.")
     end
     children = setdiff(mapreduce(x -> compllist[x], vcat, roots), first2create) ## take the children of the root complexes, their rank will be r 
     if length(setdiff(children, searchlist)) > 0
-      error("Please check your complexes list. Some complexes appear to be components or their own complex components.")
+      error("Please check your complexes list. Some complexes appear to be components of their own complex components.")
     end
     for i in children ## their children will have rank r
       complrank[i] = r
@@ -97,8 +111,10 @@ function rankComplexCreation(complexes)
     r = r + 1
   end
 
-  if length(searchlist) == 0 && length(setdiff(mapreduce(x -> compllist[x], vcat, roots), first2create)) > 0 ## this is in case the last complexes you ranked still have children but the searchlist is empty
-    error("Please check your complexes list. Some complexes appear to be components or their own complex components.")
+  if length(roots) > 0
+    if length(setdiff(mapreduce(x -> compllist[x], vcat, roots), first2create)) > 0 ## this is in case the last complexes you ranked still have children but the searchlist is empty
+      error("Please check your complexes list. Some complexes appear to be components of their own complex components.")
+    end
   end
 
   maxrank = maximum(mapreduce(x -> complrank[x], vcat, keys(complrank)))
@@ -114,6 +130,7 @@ function rankComplexCreation(complexes)
 end
 
 
+
 ## Creates the regulatory complexes binding and unbding reactions
 function createComplexesReactions(complexes, complexeskinetics, activeform, gcnList)
 
@@ -125,21 +142,32 @@ function createComplexesReactions(complexes, complexeskinetics, activeform, gcnL
   complexesvariants = Dict() ## a dictionary with each element being an array of all possible variants of a complex (key = complex name; value = array of complex variants name)
   complexesqtlactivity = Dict() ## a dictionary to store the QTL effect coefficient qtlactivity of each complex variant (key = complex variant name; values = value of qtlactivity for the complex variant)
 
-  for compl in keys(complexes)
-    complexsize = length(complexes[compl])
-    complexvar = allposscomb(gcnList, complexsize)
+  rankedcompl = rankComplexCreation(complexes) ## gives the order in which the different complexes should be created
+
+  for compl in rankedcompl
+    compG = filter(x -> !ismatch(r"^C", x), complexes[compl]) ## Components of the complex that are simply gene products
+    compC = filter(x -> ismatch(r"^C", x), complexes[compl]) ## Components of the complex that are also regulatory complexes
+    complexGsize = length(compG)
+    complexCsize = length(compC)
+
+    complexGvar = allposscomb(gcnList, complexGsize)
+    complexCvar = [length(complexesvariants[i]) for i in compC]
+    
+    compovar = combsizes(vcat(size(complexGvar)[1], complexCvar))
+
     complexesvariants[compl] = []
-    for t in 1:size(complexvar)[1]
-      complvar = compl*join(["_"*activeform[complexes[compl][i]]*complexvar[t, i] for i in 1:complexsize])
+    for t in 1:size(compovar)[1]
+      components = vcat([activeform[compG[i]]*complexGvar[compovar[t, 1], i] for i in 1:complexGsize], [complexesvariants[compC[i]][compovar[t, (i+1)]] for i in 1:complexCsize])
+      complvar = compl*join(["_"*i for i in components])
       push!(spec, complvar) ## adding the complex form to the list of species
       push!(complexesvariants[compl], complvar) ## adding the complex variant to the list of possible complex variants for the complex 
-      complexesqtlactivity[complvar] = join(["""QTLeffects["$(complexvar[t, i])"]["qtlactivity"][$(parse(Int, complexes[compl][i]))]""" for i in 1:complexsize], "*")
+      complexesqtlactivity[complvar] = join(["""QTLeffects["$(complexGvar[compovar[t, 1], i])"]["qtlactivity"][$(parse(Int, compG[i]))]""" for i in 1:complexGsize], "*")*join(String.(["*"*complexesqtlactivity[components[i]] for i in (complexGsize + 1):length(components)]))
       push!(initcond, "0") ## adding the initial abundance of the complex form to the list of initial conditions. For complexes, initial abundance set to 0
       ## Creates the reaction of complex formation
-      push!(reac, reactBioSim([activeform[complexes[compl][i]]*complexvar[t, i] for i in 1:complexsize], [complvar])) ## sum of complex components -> compl
+      push!(reac, reactBioSim( components, [complvar])) ## sum of complex components -> compl
       push!(reacnames, "formation"*complvar) 
       push!(prop, """$(complexeskinetics[compl]["formationrate"])""")
-      push!(reac, reactBioSim([complvar], [activeform[complexes[compl][i]]*complexvar[t, i] for i in 1:complexsize])) ## compl -> sum of complex components
+      push!(reac, reactBioSim([complvar], components)) ## compl -> sum of complex components
       push!(reacnames, "dissociation"*complvar) 
       push!(prop, """$(complexeskinetics[compl]["dissociationrate"])""")
     end
