@@ -22,6 +22,7 @@ An in silico multi omic network, that is a list of:
 \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 values are vectors of gene IDs constituting each regulatory complex.
 \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+\item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 }
 The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
 regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the

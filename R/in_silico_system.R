@@ -76,6 +76,7 @@ createGenes = function(sysargs){
 #' \itemize{
 #' \item \code{edg} a data-frame of edges of the networks;
 #' \item \code{complexes} a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
+#' \item \code{complexesTargetReaction} a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
 #' }
 #' The \code{edg} data-frame has the following variables:
 #' \itemize{
@@ -123,7 +124,9 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
   rownames(edg) = NULL
   complexes = lapply(juliaedg$complexes, unlist)
   complexes = lapply(complexes, as.character)
-  return(list("edg" = edg, "complexes" = complexes))
+  complexesTargetReaction = as.list(rep(reaction, length(complexes)))
+  names(complexesTargetReaction) = names(complexes)
+  return(list("edg" = edg, "complexes" = complexes, "complexesTargetReaction" = complexesTargetReaction))
 }
 
 
@@ -152,6 +155,7 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
+#' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 #' }
 #' The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
 #' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
@@ -160,6 +164,7 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 
   complexes = list()
+  complexesTargetReaction = list()
 
   ## Define transcription regulatory network (TCRN) ----
 
@@ -178,6 +183,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
                                  reaction = "TC", sysargs = sysargs, ev = ev)
   TCRN_edg = TCRN[["edg"]]
   complexes = c(complexes, TCRN[["complexes"]])
+  complexesTargetReaction = c(complexesTargetReaction, TCRN[["complexesTargetReaction"]])
 
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameters for transcription regulation include the binding and unbinding rate of regulators to gene promoter,
@@ -203,6 +209,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
                                  reaction = "TL", sysargs = sysargs, ev = ev)
   TLRN_edg = TLRN[["edg"]]
   complexes = c(complexes, TLRN[["complexes"]])
+  complexesTargetReaction = c(complexesTargetReaction, TLRN[["complexesTargetReaction"]])
 
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameters for translation regulation include the binding and unbinding rate of regulators to gene promoter,
@@ -229,6 +236,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
                                  reaction = "RD", sysargs = sysargs, ev = ev)
   RDRN_edg = RDRN[["edg"]]
   complexes = c(complexes, RDRN[["complexes"]])
+  complexesTargetReaction = c(complexesTargetReaction, RDRN[["complexesTargetReaction"]])
 
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameter for RNA decay regulation is the decay rate induced by the regulators
@@ -251,6 +259,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
                                  reaction = "PD", sysargs = sysargs, ev = ev)
   PDRN_edg = PDRN[["edg"]]
   complexes = c(complexes, PDRN[["complexes"]])
+  complexesTargetReaction = c(complexesTargetReaction, PDRN[["complexesTargetReaction"]])
 
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameter for protein decay regulation is the decay rate induced by the regulators
@@ -273,6 +282,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
                                  reaction = "PTM", sysargs = sysargs, ev = ev)
   PTMRN_edg = PTMRN[["edg"]]
   complexes = c(complexes, PTMRN[["complexes"]])
+  complexesTargetReaction = c(complexesTargetReaction, PTMRN[["complexesTargetReaction"]])
 
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameter for protein post-translational modification regulation is the decay rate induced by the regulators
@@ -310,7 +320,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
              "PDRN_edg" = PDRN_edg,
              "PTMRN_edg" = PTMRN_edg)
 
-  return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = complexes, "complexeskinetics" = complexeskinetics))
+  return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = complexes, "complexeskinetics" = complexeskinetics, "complexesTargetReaction" = complexesTargetReaction))
 
 }
 
@@ -328,6 +338,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 #' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex. Empty list.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters. Empty list.
+#' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 #' }
 #' The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
 #' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
@@ -344,7 +355,7 @@ createEmptyMultiOmicNetwork = function(genes){
 
   genes$ActiveForm = sapply(1:nrow(genes), function(x){paste0(genes$ActiveForm[x], genes$id[x])})
 
-  return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = list(), "complexeskinetics" = list()))
+  return(list("mosystem" = res, "genes" = genes, "edg" = edg, "complexes" = list(), "complexeskinetics" = list(), "complexesTargetReaction" = list()))
 }
 
 #' Creates an in silico system.
@@ -548,12 +559,18 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
 
   compo = as.character(compo) ## make sure the id of the components are strings
 
+  compoG = compo[!stringr::str_detect(compo, "^C")] ## components of the complex that are gene products
+  compoC = compo[stringr::str_detect(compo, "^C")] ## components of the complex that are regulatory complexes
+
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
-  if(!all(as.integer(compo) %in% insilicosystem$genes$id)){
+  if(!all(as.integer(compoG) %in% insilicosystem$genes$id)){
+    stop("The components of the complex do not exist in the system.")
+  }
+  if(!all(compoC %in% names(insilicosystem$complexes))){
     stop("The components of the complex do not exist in the system.")
   }
 
@@ -561,7 +578,8 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
   #  stop("Wrong number of components. The complex must be of size ", insilicosystem$sysargs$regcomplexes.size,".")
   # }
 
-  targetreactions = insilicosystem$genes[which(insilicosystem$genes$id %in% as.integer(compo)), "TargetReaction"]
+  targetreactions = c(insilicosystem$genes[which(insilicosystem$genes$id %in% as.integer(compoG)), "TargetReaction"],
+                      unname(unlist(insilicosystem$complexesTargetReaction[compoC])))
   if(!all(targetreactions == targetreactions[1])){
     stop("The different components do not all have the same biological function.")
   }
@@ -586,6 +604,8 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
   insilicosystem$complexes[[name]] = compo
 
   insilicosystem$complexeskinetics[[name]] = list("formationrate" = formationrate, "dissociationrate" = dissociationrate)
+
+  insilicosystem$complexesTargetReaction[[name]] = targetreactions[1]
 
   return(insilicosystem)
 }

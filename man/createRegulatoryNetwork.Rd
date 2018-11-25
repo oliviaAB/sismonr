@@ -25,6 +25,7 @@ A list of two elements:
 \itemize{
 \item \code{edg} a data-frame of edges of the networks;
 \item \code{complexes} a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
+\item \code{complexesTargetReaction} a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
 }
 The \code{edg} data-frame has the following variables:
 \itemize{
