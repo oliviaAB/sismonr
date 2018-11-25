@@ -631,6 +631,7 @@ removeComplex = function(insilicosystem, name){
 
   insilicosystem$complexes[[name]] = NULL
   insilicosystem$complexeskinetics[[name]] = NULL
+  insilicosystem$complexesTargetReaction[[name]] = NULL
 
   ## Remove any edge involving the complex in the general edges list
   insilicosystem$edg = dplyr::filter(insilicosystem$edg, from != name)
@@ -665,14 +666,14 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
-  if(!(regID %in% as.character(insilicosystem$genes$id))){
+  if(!(regID %in% as.character(insilicosystem$genes$id))){ ## if the regulator is not a gene product
     if(!(regID %in% names(insilicosystem$complexes))){
       stop("Regulator ", regID, "does not exist in the system.")
-    }else{
-      targetreaction = insilicosystem$genes[insilicosystem$genes$id == as.integer(insilicosystem$complexes[[regID]][1]), "TargetReaction"]
+    }else{ ## if the regulator is a regulatory complex
+      targetreaction = insilicosystem$complexesTargetReaction[[regID]]
       regby = "C"
     }
-  }else{
+  }else{ ## if the regulator is a gene product
     targetreaction = insilicosystem$genes[insilicosystem$genes$id == as.integer(regID), "TargetReaction"]
     regby = dplyr::filter(insilicosystem$genes, id == as.integer(regID))[1,"coding"]
   }
