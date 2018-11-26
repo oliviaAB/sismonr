@@ -1,9 +1,3 @@
-## If module bioSimulator is not installed, clone it from GitHub
-if !haskey(Pkg.installed(), "BioSimulator") 
-  Pkg.clone("https://github.com/alanderos91/biosimulator.jl.git", "BioSimulator")
-end
-
-
 using StatsBase
 
 ## Test if the file is sourced in a Julia evaluator in R
