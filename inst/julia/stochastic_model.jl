@@ -122,7 +122,7 @@ function rankComplexCreation(complexes)
     complrank[i] = maxrank + 1
   end
 
-  ranks = mapreduce(x -> complrank[x], vcat, collect(keys(complrank)))
+  ranks = vcat(mapreduce(x -> complrank[x], vcat, collect(keys(complrank))))
   sortedrank = sortperm(ranks, rev = true)
   orderedcomp = collect(keys(complrank))[sortedrank]
 
