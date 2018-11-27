@@ -480,6 +480,8 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
                                                               PTMform = PTMform, ActiveForm = ActiveForm, TCrate = TCrate,
                                                               TLrate = TLrate, RDrate = RDrate, PDrate = PDrate)
 
+  insilicosystem$sysargs$G = insilicosystem$sysargs$G + 1
+
   return(insilicosystem)
 }
 
