@@ -1,3 +1,12 @@
+importExprCR = parse("import ClobberingReload")
+try
+	eval(importExprCR)
+	print("Module ClobberingReload installed.\n")
+catch err
+	print("Installing Julia module ClobberingReload. This can take a few minutes.\n")
+	Pkg.add("ClobberingReload")
+end
+
 importExprDF = parse("import DataFrames")
 try
 	eval(importExprDF)
