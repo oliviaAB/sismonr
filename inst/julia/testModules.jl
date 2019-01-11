@@ -1,13 +1,15 @@
-importExprCR = parse("import ClobberingReload")
-try
-	eval(importExprCR)
-	print("Module ClobberingReload installed.\n")
-catch err
-	print("Installing Julia module ClobberingReload. This can take a few minutes.\n")
-	Pkg.add("ClobberingReload")
-end
+using Pkg
 
-importExprDF = parse("import DataFrames")
+# importExprCR = Meta.parse("import ClobberingReload")
+# try
+# 	eval(importExprCR)
+# 	print("Module ClobberingReload installed.\n")
+# catch err
+# 	print("Installing Julia module ClobberingReload. This can take a few minutes.\n")
+# 	Pkg.add("ClobberingReload")
+# end
+
+importExprDF = Meta.parse("import DataFrames")
 try
 	eval(importExprDF)
 	print("Module DataFrames installed.\n")
@@ -16,7 +18,7 @@ catch err
 	Pkg.add("DataFrames")
 end
 
-importExprBS = parse("import BioSimulator")
+importExprBS = Meta.parse("import BioSimulator")
 try
 	eval(importExprBS)
 	print("Module BioSimulator installed.\n")
@@ -25,7 +27,7 @@ catch err
 	Pkg.clone("https://github.com/alanderos91/biosimulator.jl.git", "BioSimulator")
  end
 
-importExprSB = parse("import StatsBase")
+importExprSB = Meta.parse("import StatsBase")
 try
 	eval(importExprSB)
 	print("Module StatsBase installed.\n")

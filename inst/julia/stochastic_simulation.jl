@@ -93,7 +93,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
 
     if length(stochmodel["TLproms"][g]) > 0        
       ## Check for each RNA that the different binding sites on the RNA are in equal abundance at each time of the simulation
-      rbsabundance = [sum(convert(Array, resultdf[t, map(Symbol, x)]))for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
+      rbsabundance = [sum(convert(Array, resultdf[t, map(Symbol, x)])) for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
                   
       if !all(mapslices(allequal, rbsabundance, 2))
         error("The abundance of the different binding sites on the RNA "*g*"are not equal.")
