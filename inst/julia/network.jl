@@ -41,7 +41,7 @@ end
 
 # Linear preferential attachment from Barabasi-Albert
 function probaPA(nodes, edg)
-  ki = getInDeg(nodes, edg) + 1 # in-degree of each node, add 1 so that nodes with 0 in-degree can still be picked
+  ki = getInDeg(nodes, edg) .+ 1 # in-degree of each node, add 1 so that nodes with 0 in-degree can still be picked
   res = ki/sum(ki)
   res = res/sum(res)
   return res
@@ -142,7 +142,7 @@ end
 
 ## Output:
 ##    - edg: A 2D array of edges, 1st column: from, 2nd column: to, 3rd column: regBy
-function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autoregproba, twonodesloop, edg = Array{Any}(0,2))
+function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autoregproba, twonodesloop, edg = Array{Any}(undef, 0,2))
 
   # Ensure that reg and target are arrays
   if typeof(reg) == Int64
@@ -155,9 +155,9 @@ function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autor
 
   ## Get the function for sampling from the desired out- degree distribution
   if outdeg == "exponential"
-    foutdeg = getfield(current_module(), Symbol("sampleexpon"))
+    foutdeg = getfield(@__MODULE__, Symbol("sampleexpon"))
   elseif outdeg == "powerlaw"
-    foutdeg = getfield(current_module(), Symbol("samplepowerlaw"))  
+    foutdeg = getfield(@__MODULE__, Symbol("samplepowerlaw"))  
   else
     error("Argument outdeg non-valid: must be \"exponential\" or \"powerlaw\"")
   end
@@ -166,9 +166,9 @@ function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autor
   ##  If in-degree is power law, use the model of preferential attachment from Barabasi-Albert
   ##  If in-degree is exponential, use the model of preferential attachment from Lachgar
   if indeg == "exponential"
-    findeg = getfield(current_module(), Symbol("probaInvPA"))
+    findeg = getfield(@__MODULE__, Symbol("probaInvPA"))
   elseif indeg == "powerlaw"
-    findeg = getfield(current_module(), Symbol("probaPA"))
+    findeg = getfield(@__MODULE__, Symbol("probaPA"))
   else
     error("Argument indeg non-valid: must be \"exponential\" or \"powerlaw\"")
   end
@@ -178,7 +178,7 @@ function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autor
   sort!(out, rev = true)
 
   ## Create the mx2 array of edges, 1st column = from, 2nd column = to
-  # edg = Array{Int64}(0,2)
+  # edg = Array{Int64}(undef, 0,2)
 
   ## For each regulator, sample from the target list its target according to its number of targets specified in the out variable
   for r in eachindex(reg)
@@ -195,7 +195,7 @@ function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autor
     ## if twonodesloop == false we don't authorise the regulator to target a node that controls it
     if !twonodesloop
       exEdg = isEdge(target, reg[r], edg)
-      probTar[exEdg] = 0
+      probTar[exEdg] .= 0
     end
 
     ## Make sure that the out-degree of regulator r doesn't exceed the number of targets with non-null proba 
@@ -235,7 +235,7 @@ function compreg(edg, compsize, compprob, reacname)
   complexes = Dict()
   complexid = 1 ## to give a unique ID to each created complex
     rowstoremove = []
-    edgtoadd = Array{Any}(0,3)
+    edgtoadd = Array{Any}(undef, 0,3)
     compsize = Int(compsize)
     edg = edg[sortperm(edg[:,2]),:]
 
