@@ -53,7 +53,7 @@ function probaInvPA(nodes, edg)
   if sum(ki) == 0
     res = fill(1, length(nodes))
   else
-    res = 1 - ki/sum(ki)
+    res = 1 .- ki/sum(ki)
   end
   res = res / sum(res)
   return res
@@ -100,6 +100,7 @@ end
 function juliaCreateNetwork(reacname, regPC, tarPC, indegPC, outdegPC, outdexexpPC, autoregprobaPC, twonodesloopPC,
   regNC, tarNC, indegNC, outdegNC, outdexexpNC, autoregprobaNC, twonodesloopNC,
   regcomplexes, compsize = nothing, compprob = nothing)
+
   
   edgPC = nwgeneration("PC", regPC, tarPC, indegPC, outdegPC, outdexexpPC, autoregprobaPC, twonodesloopPC)
   edgNC = nwgeneration("NC", regNC, tarNC, indegNC, outdegNC, outdexexpNC, autoregprobaNC, twonodesloopNC)
