@@ -5,7 +5,7 @@
 \title{Simulates a in-silico system in parallel}
 \usage{
 simulateParallelInSilicoSystem(insilicosystem, insilicopopulation, simtime,
-  nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct",
+  nepochs = -1, ntrials = 1, simalgorithm = "Direct",
   writefile = F, filepath = getwd(), filename = "simulation",
   no_cores = parallel::detectCores() - 1, ev = getJuliaEvaluator())
 }
@@ -18,7 +18,7 @@ simulateParallelInSilicoSystem(insilicosystem, insilicopopulation, simtime,
 
 \item{nepochs}{The number of times to record the state of the system during the simulation.}
 
-\item{ntrialsPerInd}{The number of times the simulation must be replicated.}
+\item{ntrials}{The number of times the simulation must be replicated.}
 
 \item{simalgorithm}{The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".}

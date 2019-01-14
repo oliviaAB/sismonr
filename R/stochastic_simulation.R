@@ -68,19 +68,19 @@ createStochSystem = function(insilicosystem, indargs, writefile, filepath, filen
 #' @param genes The data-frame of genes in the system.
 #' @param simtime The amount of time to simulate the model (in seconds).
 #' @param modelname The name of the model.
-#' @param ntrialsPerInd The number of times the simulation must be replicated.
+#' @param ntrials The number of times the simulation must be replicated.
 #' @param nepochs The number of times to record the state of the system during the simulation.
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return The result of the simulation (a data-frame).
 #' @export
-callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes, simtime, modelname, ntrialsPerInd, nepochs, simalgorithm, ev = getJuliaEvaluator()){
+callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes, simtime, modelname, ntrials, nepochs, simalgorithm, ev = getJuliaEvaluator()){
 
   genesdf = df2list(genes)
   evXR = XR::getInterface(getClass("JuliaInterface"))
   expr = gettextf("%s(%s)","juliaStochasticSimulation", evXR$ServerArglist(stochmodel, QTLeffects, InitVar, genesdf,
-                                                                           simtime, modelname = modelname, ntrials = ntrialsPerInd,
+                                                                           simtime, modelname = modelname, ntrials = ntrials,
                                                                            nepochs = nepochs, simalgorithm = simalgorithm))
   key = evXR$ProxyName()
   cmd = jsonlite::toJSON(c("eval", expr, key, T))
@@ -109,7 +109,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' @param insilicopopulation The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).
 #' @param simtime The amount of time to simulate the model (in seconds).
 #' @param nepochs The number of times to record the state of the system during the simulation.
-#' @param ntrialsPerInd The number of times the simulation must be replicated.
+#' @param ntrials The number of times the simulation must be replicated.
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
@@ -123,13 +123,13 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
 #' @export
-simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
+simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
 
   stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, ev = ev)
   message("\n")
 
   ## Store the running time of each simulation
-  runningtime = vector("numeric", length(insilicopopulation$individualsList)*ntrialsPerInd)
+  runningtime = vector("numeric", length(insilicopopulation$individualsList)*ntrials)
   ri = 1
 
   ## Set a progress bar
@@ -143,7 +143,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
     tic()
     simJulia = callJuliaStochasticSimulation(stochmodel, insilicopopulation$individualsList[[ind]]$QTLeffects,
                                              insilicopopulation$individualsList[[ind]]$InitVar,
-                                             insilicosystem$genes, simtime, modelname = ind, ntrials = ntrialsPerInd,
+                                             insilicosystem$genes, simtime, modelname = ind, ntrials = ntrials,
                                              nepochs = nepochs, simalgorithm = simalgorithm, ev)
     temp = toc(quiet = T)
     runningtime[ri]  = temp$toc - temp$tic
@@ -161,7 +161,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
 ## function to start a Julia evaluator on a node of the cluster, given the port id (for parallel simulation)
 startJuliaEvCluster = function(portid){
   myev = newJuliaEvaluator(port = portid) ## start on the node a Julia evaluator with specified port number
-  mystochmodel = juliaEval("eval(parse(%s))", stochmodel_string, .get = F, evaluator = myev) ## create in the Julia process the stochmodel object
+  mystochmodel = juliaEval("eval(Meta.parse(%s))", stochmodel_string, .get = F, evaluator = myev) ## create in the Julia process the stochmodel object
   return(list("myev" = myev, "mystochmodelvar" = mystochmodel@.Data)) ## return the Julia evaluator ID and the name on the Julia process of the stochmodel object
 }
 
@@ -171,10 +171,10 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
   myev = myinfocore$myev ## get the Julia evaluator corresponding to the current cluster node
   mystochmodel = juliaEval(paste0(myinfocore$mystochmodel), .get = F) ## get a proxy object corresponding to the stochmodel object on the Julia process using the variable name
   ind = indtosimulate[i]
-  ntrials = ntrialstosimulate[i]
+  ntrialsclus = ntrialstosimulate[i]
   simJulia = callJuliaStochasticSimulation(mystochmodel, individualsList[[ind]]$QTLeffects,
                                            individualsList[[ind]]$InitVar,
-                                           genes, simtime, modelname = ind, ntrials = ntrials,
+                                           genes, simtime, modelname = ind, ntrials = ntrialsclus,
                                            nepochs = nepochs, simalgorithm = simalgorithm, myev)
 
 
@@ -193,7 +193,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' @param insilicopopulation The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).
 #' @param simtime The amount of time to simulate the model (in seconds).
 #' @param nepochs The number of times to record the state of the system during the simulation.
-#' @param ntrialsPerInd The number of times the simulation must be replicated.
+#' @param ntrials The number of times the simulation must be replicated.
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
@@ -209,7 +209,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
 #' @export
-simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrialsPerInd = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
+simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
 
   stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, ev = ev)
   message("\n")
@@ -239,13 +239,13 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   ## Case 2: there are less individuals than cluster nodes: in this case each node will simulate approx ntrials/nnodes trials for each individual
   if(length(insilicopopulation$individualsList) >= no_cores){
     indtosimulate = names(insilicopopulation$individualsList)
-    ntrialstosimulate = rep(ntrialsPerInd, length(insilicopopulation$individualsList))
+    ntrialstosimulate = rep(ntrials, length(insilicopopulation$individualsList))
     increment = rep(0, length(insilicopopulation$individualsList)) ## no use here
   }else{
-    split = rep(ntrialsPerInd %/% no_cores, no_cores) ## vector with no_cores elements, giving the # of trials that each node has to run for an individual
-    remain = ntrialsPerInd %% no_cores ## we start by splitting equally the number of trials over the different cores
+    split = rep(ntrials %/% no_cores, no_cores) ## vector with no_cores elements, giving the # of trials that each node has to run for an individual
+    remain = ntrials %% no_cores ## we start by splitting equally the number of trials over the different cores
     split[min(1, remain):remain] = split[min(1, remain):remain] + 1 ## then if there is some remaining trial, we split them over the first cores
-    split = split[split!=0] ## if ntrialsPerInd<no_cores, we will have some cores that do nothing for an individual
+    split = split[split!=0] ## if ntrials<no_cores, we will have some cores that do nothing for an individual
     indtosimulate = rep(names(insilicopopulation$individualsList), each = length(split))
     ntrialstosimulate = rep(split, times = length(insilicopopulation$individualsList))
     increment = rep(c(0, cumsum(split)[-length(split)]), times = length(insilicopopulation$individualsList)) ## each node will increment the trials ID by the number provided in increment[i]

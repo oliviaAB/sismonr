@@ -5,7 +5,7 @@
 \title{Calls the Julia simulation}
 \usage{
 callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
-  simtime, modelname, ntrialsPerInd, nepochs, simalgorithm,
+  simtime, modelname, ntrials, nepochs, simalgorithm,
   ev = getJuliaEvaluator())
 }
 \arguments{
@@ -21,7 +21,7 @@ callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
 
 \item{modelname}{The name of the model.}
 
-\item{ntrialsPerInd}{The number of times the simulation must be replicated.}
+\item{ntrials}{The number of times the simulation must be replicated.}
 
 \item{nepochs}{The number of times to record the state of the system during the simulation.}
 
