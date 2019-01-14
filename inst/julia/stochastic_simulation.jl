@@ -13,9 +13,9 @@ function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
 
   ## Add the species in the model, with their initial abundance
   for i in 1:length(stochmodel["species"])
-    i0 = replace(stochmodel["initialconditions"][i], "QTLeffects", "$QTLeffects")
-    i0 = replace(i0, "InitVar", "$InitVar")
-    i0 = eval(parse(i0))
+    i0 = replace(stochmodel["initialconditions"][i], "QTLeffects" => "$QTLeffects")
+    i0 = replace(i0, "InitVar" => "$InitVar")
+    i0 = eval(Meta.parse(i0))
     #println(stochmodel["species"][i]* "\t"*string(i0))
 
     if !isa(i0, Number)
@@ -38,9 +38,9 @@ function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
 
   ## Add the reactions in the model, with their name and rate
   for i in eachindex(stochmodel["reactions"])
-    prop = replace(stochmodel["propensities"][i], "QTLeffects", "$QTLeffects")
+    prop = replace(stochmodel["propensities"][i], "QTLeffects" => "$QTLeffects")
     #println(prop)
-    prop = eval(parse(prop))
+    prop = eval(Meta.parse(prop))
 
     if !isa(prop, Number)
       println(stochmodel["propensities"][i])
@@ -79,7 +79,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
   #abundancedf = Dict("time" => resultdf[:, :time], "trial" => resultdf[:, :trial])
 
   for g in collect(keys(stochmodel["TCproms"]))
-    gid = parse(Int64, replace(g, r"GCN.+$","")) ## gives the gene id
+    gid = parse(Int64, replace(g, r"GCN.+$" => "")) ## gives the gene id
 
     ## Check that for each binding site on the promoter of each gene, at each time the sum of the abundance
     ## of all species corresponding to all possible binding site states equals 1 (bc only 1 binding site per gene)
@@ -95,7 +95,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
       ## Check for each RNA that the different binding sites on the RNA are in equal abundance at each time of the simulation
       rbsabundance = [sum(convert(Array, resultdf[t, map(Symbol, x)])) for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
                   
-      if !all(mapslices(allequal, rbsabundance, 2))
+      if !all(mapslices(allequal, rbsabundance, dims = 2))
         error("The abundance of the different binding sites on the RNA "*g*"are not equal.")
       end
 
@@ -120,7 +120,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
   end
 
   ## Include the abundance of the different regulatory complexes
-  for comp in names(resultdf)[find(x -> ismatch(r"^C", x), map(String, names(resultdf)))]
+  for comp in names(resultdf)[findall(x -> occursin(r"^C", x), map(String, names(resultdf)))]
     abundancedf[comp] = resultdf[:, comp]
     #abundancedf[string(comp)] = resultdf[:, comp]
   end
@@ -140,7 +140,7 @@ function juliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes, simti
 
     ## Convert the String name of the simulator to use into a BioSimulator object of type inheriting from Algorithm
     if in(simalgorithm, ["Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation"])
-      simalgorithm = eval(parse("BioSimulator."*simalgorithm*"()"))
+      simalgorithm = eval(Meta.parse("BioSimulator."*simalgorithm*"()"))
     else
       error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"FirstReaction\", \"NextReaction\", \"OptimizedDirect\", \"TauLeaping\" or \"StepAnticipation\".")
     end

@@ -9,7 +9,7 @@ using StatsBase
 function combsizes(sizes)
   sizes = Int64.(sizes)
   n = length(sizes)
-  comb = Array{Int64}(prod(sizes), n)
+  comb = Array{Int64}(undef, prod(sizes), n)
 
   for i in 1:n
     comb[:,i] = repeat(1:sizes[i], inner = [prod(sizes[(i+1):end])], outer = [prod(sizes[1:(i-1)])])
@@ -23,7 +23,7 @@ end
 function allposscomb(vect, l)
 
   nb = length(vect)
-  comb = Array{eltype(vect)}(nb^l, l)
+  comb = Array{eltype(vect)}(undef, nb^l, l)
 
   for i in 1:l
     comb[:,i] = repeat(vect, inner = [nb^(l-i)], outer = [nb^(i-1)])
@@ -36,7 +36,7 @@ end
 ## proms = array where each element corresponds to one binding site, and is an array with all possible states of the binding site (the 1st one being the free state)
 function combinallpromstates(proms)
   elsize = [length(t) for t in proms]
-  combproms = Array{String}(prod(elsize), length(elsize))
+  combproms = Array{String}(undef, prod(elsize), length(elsize))
 
   for i in eachindex(elsize)
     combproms[:, i] = repeat(proms[i], inner = prod(elsize[(i+1):end]), outer = prod(elsize[1:(i-1)]))
@@ -54,8 +54,8 @@ function combinactivepromstates(promList)
   proms = [t[:, 1] for t in promList]
   fcs = [t[:, 2] for t in promList]
   elsize = [length(t) for t in proms]
-  combproms = Array{String}(prod(elsize), length(elsize))
-  combfcs = Array{Float64}(prod(elsize), length(elsize))
+  combproms = Array{String}(undef, prod(elsize), length(elsize))
+  combfcs = Array{Float64}(undef, prod(elsize), length(elsize))
 
   for i in eachindex(elsize)
     combproms[:, i] = repeat(proms[i], inner = prod(elsize[(i+1):end]), outer = prod(elsize[1:(i-1)]))
@@ -81,7 +81,7 @@ function rankComplexCreation(complexes)
   first2create = []
 
   for y in keys(complexes)
-    comp2 = filter(x -> ismatch(r"^C", x), complexes[y]) ## list of components of complex y that are also complexes
+    comp2 = filter(x -> occursin(r"^C", x), complexes[y]) ## list of components of complex y that are also complexes
     if length(comp2) > 0 ## if complex y has components that are also complexes, we need to figure out its rank of creation
       compllist[y] = comp2
       push!(searchlist, y)
@@ -145,8 +145,8 @@ function createComplexesReactions(complexes, complexeskinetics, activeform, gcnL
   rankedcompl = rankComplexCreation(complexes) ## gives the order in which the different complexes should be created
 
   for compl in rankedcompl
-    compG = filter(x -> !ismatch(r"^C", x), complexes[compl]) ## Components of the complex that are simply gene products
-    compC = filter(x -> ismatch(r"^C", x), complexes[compl]) ## Components of the complex that are also regulatory complexes
+    compG = filter(x -> !occursin(r"^C", x), complexes[compl]) ## Components of the complex that are simply gene products
+    compC = filter(x -> occursin(r"^C", x), complexes[compl]) ## Components of the complex that are also regulatory complexes
     complexGsize = length(compG)
     complexCsize = length(compC)
 
@@ -186,8 +186,8 @@ function createTCregReactions(edg, genes, activeform, complexes, complexesvarian
   reacnames = []
   prop = []
 
-  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  regsingl = findall( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = findall( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   promActiveStates = Dict(string(i)*j => [] for i in genes["id"], j in gcnList) ## dictionary, 1 element for each allele version of each gene. Value is an array with m elements, 1 for each regulator. 
                                                                               ## The j-th element of this array is a matrix: rows: all possible active states of the binding site of regulator j (column 1: name of the binding site state, column 2 fold-change associated with this state)
@@ -300,8 +300,8 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
   reacnames = []
   prop = []
 
-  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  regsingl = findall( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = findall( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   promActiveStates = Dict(string(i)*j => [] for i in genes["id"], j in gcnList) ## dictionary, 1 element for each allele version of each gene. Value is an array with m elements, 1 for each regulator. 
                                                                               ## The j-th element of this array is a matrix: rows: all possible active states of the binding site of regulator j (column 1: name of the binding site state, column 2 fold-change associated with this state)
@@ -473,8 +473,8 @@ function createRDregReactions(edg, genes, RNAforms, activeform, complexes, compl
   reacnames = []
   prop = []
 
-  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  regsingl = findall( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = findall( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
 
   for r in regsingl, gcn in gcnList 
     tarid = parse(Int, edg["to"][r])
@@ -575,8 +575,8 @@ function createPDregReactions(edg, genes, activeform, complexes, complexesvarian
   reacnames = []
   prop = []
 
-  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  regsingl = findall( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = findall( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
   
   for r in regsingl, gcn in gcnList 
     tarid = parse(Int, edg["to"][r])
@@ -622,8 +622,8 @@ function createPTMregReactions(edg, genes, activeform, complexes, complexesvaria
   reacnames = []
   prop = []
 
-  regsingl = find( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
-  regcompl = find( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
+  regsingl = findall( x -> x != "C", edg["RegBy"]) ## identify single-molecule regulators (i.e. not regulatory complexes)
+  regcompl = findall( x -> x == "C", edg["RegBy"]) ## identify regulatory complexes
   
   for r in regsingl, gcn in gcnList 
     tarid = parse(Int, edg["to"][r])
@@ -777,7 +777,7 @@ function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, 
 
   if writefile
 
-    if !ismatch(r"/$", filepath) ## because R function getwd() gives the path to the directory folder without a "/" at the end
+    if !occursin(r"/$", filepath) ## because R function getwd() gives the path to the directory folder without a "/" at the end
       filepath = filepath*"/"
     end
 
