@@ -142,35 +142,39 @@ function createComplexesReactions(complexes, complexeskinetics, activeform, gcnL
   complexesvariants = Dict() ## a dictionary with each element being an array of all possible variants of a complex (key = complex name; value = array of complex variants name)
   complexesqtlactivity = Dict() ## a dictionary to store the QTL effect coefficient qtlactivity of each complex variant (key = complex variant name; values = value of qtlactivity for the complex variant)
 
-  rankedcompl = rankComplexCreation(complexes) ## gives the order in which the different complexes should be created
+  if length(complexes) > 0
 
-  for compl in rankedcompl
-    compG = filter(x -> !occursin(r"^C", x), complexes[compl]) ## Components of the complex that are simply gene products
-    compC = filter(x -> occursin(r"^C", x), complexes[compl]) ## Components of the complex that are also regulatory complexes
-    complexGsize = length(compG)
-    complexCsize = length(compC)
+    rankedcompl = rankComplexCreation(complexes) ## gives the order in which the different complexes should be created
 
-    complexGvar = allposscomb(gcnList, complexGsize)
-    complexCvar = [length(complexesvariants[i]) for i in compC]
-    
-    compovar = combsizes(vcat(size(complexGvar)[1], complexCvar))
+    for compl in rankedcompl
+      compG = filter(x -> !occursin(r"^C", x), complexes[compl]) ## Components of the complex that are simply gene products
+      compC = filter(x -> occursin(r"^C", x), complexes[compl]) ## Components of the complex that are also regulatory complexes
+      complexGsize = length(compG)
+      complexCsize = length(compC)
 
-    complexesvariants[compl] = []
-    for t in 1:size(compovar)[1]
-      components = vcat([activeform[compG[i]]*complexGvar[compovar[t, 1], i] for i in 1:complexGsize], [complexesvariants[compC[i]][compovar[t, (i+1)]] for i in 1:complexCsize])
-      complvar = compl*join(["_"*i for i in components])
-      push!(spec, complvar) ## adding the complex form to the list of species
-      push!(complexesvariants[compl], complvar) ## adding the complex variant to the list of possible complex variants for the complex 
-      complexesqtlactivity[complvar] = join(["""QTLeffects["$(complexGvar[compovar[t, 1], i])"]["qtlactivity"][$(parse(Int, compG[i]))]""" for i in 1:complexGsize], "*")*join(String.(["*"*complexesqtlactivity[components[i]] for i in (complexGsize + 1):length(components)]))
-      push!(initcond, "0") ## adding the initial abundance of the complex form to the list of initial conditions. For complexes, initial abundance set to 0
-      ## Creates the reaction of complex formation
-      push!(reac, reactBioSim( components, [complvar])) ## sum of complex components -> compl
-      push!(reacnames, "formation"*complvar) 
-      push!(prop, """$(complexeskinetics[compl]["formationrate"])""")
-      push!(reac, reactBioSim([complvar], components)) ## compl -> sum of complex components
-      push!(reacnames, "dissociation"*complvar) 
-      push!(prop, """$(complexeskinetics[compl]["dissociationrate"])""")
+      complexGvar = allposscomb(gcnList, complexGsize)
+      complexCvar = [length(complexesvariants[i]) for i in compC]
+      
+      compovar = combsizes(vcat(size(complexGvar)[1], complexCvar))
+
+      complexesvariants[compl] = []
+      for t in 1:size(compovar)[1]
+        components = vcat([activeform[compG[i]]*complexGvar[compovar[t, 1], i] for i in 1:complexGsize], [complexesvariants[compC[i]][compovar[t, (i+1)]] for i in 1:complexCsize])
+        complvar = compl*join(["_"*i for i in components])
+        push!(spec, complvar) ## adding the complex form to the list of species
+        push!(complexesvariants[compl], complvar) ## adding the complex variant to the list of possible complex variants for the complex 
+        complexesqtlactivity[complvar] = join(["""QTLeffects["$(complexGvar[compovar[t, 1], i])"]["qtlactivity"][$(parse(Int, compG[i]))]""" for i in 1:complexGsize], "*")*join(String.(["*"*complexesqtlactivity[components[i]] for i in (complexGsize + 1):length(components)]))
+        push!(initcond, "0") ## adding the initial abundance of the complex form to the list of initial conditions. For complexes, initial abundance set to 0
+        ## Creates the reaction of complex formation
+        push!(reac, reactBioSim( components, [complvar])) ## sum of complex components -> compl
+        push!(reacnames, "formation"*complvar) 
+        push!(prop, """$(complexeskinetics[compl]["formationrate"])""")
+        push!(reac, reactBioSim([complvar], components)) ## compl -> sum of complex components
+        push!(reacnames, "dissociation"*complvar) 
+        push!(prop, """$(complexeskinetics[compl]["dissociationrate"])""")
+      end
     end
+
   end
 
   return Dict("species" => spec, "initialconditions" => initcond, "reactions" => reac, "reactionsnames" => reacnames, "propensities" => prop, "complexesvariants" => complexesvariants, "complexesqtlactivity" => complexesqtlactivity)
