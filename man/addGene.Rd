@@ -11,22 +11,22 @@ addGene(insilicosystem, coding = NULL, TargetReaction = NULL,
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
 \item{coding}{String. The coding status of the gene (either "PC" or "NC"). If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{TargetReaction}{String. The biological function of the gene, i.e. the gene expression step targeted by the active product
 of the gene.}
 
 \item{TCrate}{Numeric. The transcription rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{TLrate}{Numeric. The translation rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{RDrate}{Numeric. The RNA decay rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{PDrate}{Numeric. The protein decay rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 }
 \value{
 The modified in silico system.

@@ -15,10 +15,10 @@ addEdge(insilicosystem, regID, tarID, regsign = NULL,
 \item{tarID}{Integer. The ID of the target gene.}
 
 \item{regsign}{The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
-will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{kinetics}{Optional: named vector of kinetics parameters of the reaction. If none provided,
-will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 }
 \value{
 The modified in silico system.

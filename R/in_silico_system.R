@@ -396,17 +396,17 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param coding String. The coding status of the gene (either "PC" or "NC"). If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param TargetReaction String. The biological function of the gene, i.e. the gene expression step targeted by the active product
 #' of the gene.
 #' @param TCrate Numeric. The transcription rate of the gene. If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param TLrate Numeric. The translation rate of the gene. If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param RDrate Numeric. The RNA decay rate of the gene. If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param PDrate Numeric. The protein decay rate of the gene. If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @return The modified in silico system.
 #' @export
 addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL){
@@ -549,12 +549,12 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param compo An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
-#' specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemsargs}}). All genes composing the compex must
+#' specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemargs}}). All genes composing the compex must
 #' have the same biological function (i.e. same "TargetReaction" parameter).
 #' @param formationrate The formation rate of the complex. If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param dissociationrate The dissociation rate of the complex. If none provided, randomly chosen according to the
-#' parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @return The modified in silico system.
 #' @export
 addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationrate = NULL){
@@ -655,9 +655,9 @@ removeComplex = function(insilicosystem, name){
 #' @param regID Integer. The ID of the regulator gene.
 #' @param tarID Integer. The ID of the target gene.
 #' @param regsign The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
-#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param kinetics Optional: named vector of kinetics parameters of the reaction. If none provided,
-#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).
+#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @return The modified in silico system.
 #' @export
 addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list()){

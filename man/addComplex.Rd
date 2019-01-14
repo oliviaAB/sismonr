@@ -11,14 +11,14 @@ addComplex(insilicosystem, compo, formationrate = NULL,
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
 \item{compo}{An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
-specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemsargs}}). All genes composing the compex must
+specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemargs}}). All genes composing the compex must
 have the same biological function (i.e. same "TargetReaction" parameter).}
 
 \item{formationrate}{The formation rate of the complex. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{dissociationrate}{The dissociation rate of the complex. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemsargs}}).}
+parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 }
 \value{
 The modified in silico system.

@@ -18,7 +18,9 @@ Imports:
     utils,
     dplyr,
     magrittr,
-    stringr
+    stringr,
+    XR,
+    jsonlite
 RoxygenNote: 6.1.0
 Suggests: 
     knitr,
