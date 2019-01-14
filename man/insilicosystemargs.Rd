@@ -8,57 +8,47 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = 0.4,
   PC.TL.p = 0.3, PC.RD.p = 0.1, PC.PD.p = 0.1, PC.PTM.p = 0.05,
   PC.MR.p = 0.05, NC.TC.p = 0.3, NC.TL.p = 0.3, NC.RD.p = 0.3,
   NC.PD.p = 0.05, NC.PTM.p = 0.05, TC.pos.p = 0.5, TL.pos.p = 0.5,
-  PTM.pos.p = 0.5, basal_transcription_rate_samplingfct = function(x) {
-      logval = rnorm(x, mean = 0.5, sd = 0.5)     val = 10^logval    
-  return(val/3600) }, basal_translation_rate_samplingfct = function(x) { 
-     logval = rnorm(x, mean = 2.5, sd = 0.8)     val = 10^logval    
-  return(val/3600) }, basal_RNAlifetime_samplingfct = function(x) {    
-  logval = rnorm(x, mean = 0, sd = 0.5)     val = 10^logval     return(val
-  * 3600) }, basal_protlifetime_samplingfct = function(x) {     logval =
-  rnorm(x, mean = 1.75, sd = 0.5)     val = 10^logval     return(val *
-  3600) }, TC.PC.outdeg.distr = "powerlaw",
-  TC.NC.outdeg.distr = "powerlaw", TC.PC.outdeg.exp = 3,
-  TC.NC.outdeg.exp = 1, TC.PC.indeg.distr = "powerlaw",
-  TC.NC.indeg.distr = "powerlaw", TC.PC.autoregproba = 0.2,
-  TC.NC.autoregproba = 0, TC.PC.twonodesloop = FALSE,
-  TC.NC.twonodesloop = FALSE, TCbindingrate_samplingfct = function(x) {
-      runif(x, 0.001, 0.01) }, TCunbindingrate_samplingfct = function(x)
-  {     runif(x, 0.001, 0.01) }, TCfoldchange_samplingfct = function(x) {
-      truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) },
-  TL.PC.outdeg.distr = "powerlaw", TL.NC.outdeg.distr = "powerlaw",
-  TL.PC.outdeg.exp = 3, TL.NC.outdeg.exp = 1,
-  TL.PC.indeg.distr = "powerlaw", TL.NC.indeg.distr = "powerlaw",
-  TL.PC.autoregproba = 0.2, TL.NC.autoregproba = 0,
-  TL.PC.twonodesloop = FALSE, TL.NC.twonodesloop = FALSE,
-  TLbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01) },
-  TLunbindingrate_samplingfct = function(x) {     runif(x, 0.001, 0.01)
-  }, TLfoldchange_samplingfct = function(x) {     sample(2:30, x, replace
-  = T) }, RD.PC.outdeg.distr = "powerlaw",
-  RD.NC.outdeg.distr = "powerlaw", RD.PC.outdeg.exp = 3,
-  RD.NC.outdeg.exp = 1, RD.PC.indeg.distr = "powerlaw",
-  RD.NC.indeg.distr = "powerlaw", RD.PC.autoregproba = 0.2,
-  RD.NC.autoregproba = 0, RD.PC.twonodesloop = FALSE,
-  RD.NC.twonodesloop = FALSE, RDregrate_samplingfct = function(x) {    
-  runif(x, 0.001, 0.01) }, PD.PC.outdeg.distr = "powerlaw",
+  PTM.pos.p = 0.5, basal_transcription_rate_samplingfct = NULL,
+  basal_translation_rate_samplingfct = NULL,
+  basal_RNAlifetime_samplingfct = NULL,
+  basal_protlifetime_samplingfct = NULL,
+  TC.PC.outdeg.distr = "powerlaw", TC.NC.outdeg.distr = "powerlaw",
+  TC.PC.outdeg.exp = 3, TC.NC.outdeg.exp = 1,
+  TC.PC.indeg.distr = "powerlaw", TC.NC.indeg.distr = "powerlaw",
+  TC.PC.autoregproba = 0.2, TC.NC.autoregproba = 0,
+  TC.PC.twonodesloop = FALSE, TC.NC.twonodesloop = FALSE,
+  TCbindingrate_samplingfct = NULL, TCunbindingrate_samplingfct = NULL,
+  TCfoldchange_samplingfct = NULL, TL.PC.outdeg.distr = "powerlaw",
+  TL.NC.outdeg.distr = "powerlaw", TL.PC.outdeg.exp = 3,
+  TL.NC.outdeg.exp = 1, TL.PC.indeg.distr = "powerlaw",
+  TL.NC.indeg.distr = "powerlaw", TL.PC.autoregproba = 0.2,
+  TL.NC.autoregproba = 0, TL.PC.twonodesloop = FALSE,
+  TL.NC.twonodesloop = FALSE, TLbindingrate_samplingfct = NULL,
+  TLunbindingrate_samplingfct = NULL, TLfoldchange_samplingfct = NULL,
+  RD.PC.outdeg.distr = "powerlaw", RD.NC.outdeg.distr = "powerlaw",
+  RD.PC.outdeg.exp = 3, RD.NC.outdeg.exp = 1,
+  RD.PC.indeg.distr = "powerlaw", RD.NC.indeg.distr = "powerlaw",
+  RD.PC.autoregproba = 0.2, RD.NC.autoregproba = 0,
+  RD.PC.twonodesloop = FALSE, RD.NC.twonodesloop = FALSE,
+  RDregrate_samplingfct = NULL, PD.PC.outdeg.distr = "powerlaw",
   PD.NC.outdeg.distr = "powerlaw", PD.PC.outdeg.exp = 3,
   PD.NC.outdeg.exp = 1, PD.PC.indeg.distr = "powerlaw",
   PD.NC.indeg.distr = "powerlaw", PD.PC.autoregproba = 0.2,
   PD.NC.autoregproba = 0, PD.PC.twonodesloop = FALSE,
-  PD.NC.twonodesloop = FALSE, PDregrate_samplingfct = function(x) {    
-  runif(x, 0.001, 0.01) }, PTM.PC.outdeg.distr = "powerlaw",
-  PTM.NC.outdeg.distr = "powerlaw", PTM.PC.outdeg.exp = 3,
-  PTM.NC.outdeg.exp = 1, PTM.PC.indeg.distr = "powerlaw",
-  PTM.NC.indeg.distr = "powerlaw", PTM.PC.autoregproba = 0.2,
-  PTM.NC.autoregproba = 0, PTM.PC.twonodesloop = FALSE,
-  PTM.NC.twonodesloop = FALSE, PTMregrate_samplingfct = function(x) {  
-    runif(x, 0.001, 0.01) }, regcomplexes = "prot",
+  PD.NC.twonodesloop = FALSE, PDregrate_samplingfct = NULL,
+  PTM.PC.outdeg.distr = "powerlaw", PTM.NC.outdeg.distr = "powerlaw",
+  PTM.PC.outdeg.exp = 3, PTM.NC.outdeg.exp = 1,
+  PTM.PC.indeg.distr = "powerlaw", PTM.NC.indeg.distr = "powerlaw",
+  PTM.PC.autoregproba = 0.2, PTM.NC.autoregproba = 0,
+  PTM.PC.twonodesloop = FALSE, PTM.NC.twonodesloop = FALSE,
+  PTMregrate_samplingfct = NULL, regcomplexes = "prot",
   regcomplexes.p = 0.3, regcomplexes.size = 2,
-  complexesformationrate_samplingfct = function(x) {     runif(x, 0.001,
-  0.01) }, complexesdissociationrate_samplingfct = function(x) {    
-  runif(x, 0.001, 0.01) }, mycolsCS = c(PC = "#e03616", NC = "#58355e",
-  Tot = "#31161F"), mycolsGF = c(TC = "#FF7F11", TL = "#FF963C", RD =
-  "#5AB7A4", PD = "#78C4B4", PTM = "#FF1B1C", MR = "#FF6D6E"),
-  mycolsPosNeg = c(`1` = "#D63230", `-1` = "#69BAF4"))
+  complexesformationrate_samplingfct = NULL,
+  complexesdissociationrate_samplingfct = NULL, mycolsCS = c(PC =
+  "#e03616", NC = "#58355e", Tot = "#31161F"), mycolsGF = c(TC =
+  "#FF7F11", TL = "#FF963C", RD = "#5AB7A4", PD = "#78C4B4", PTM =
+  "#FF1B1C", MR = "#FF6D6E"), mycolsPosNeg = c(`1` = "#D63230", `-1` =
+  "#69BAF4"))
 }
 \arguments{
 \item{G}{Integer. Number of genes in the system. Default value is 10.}

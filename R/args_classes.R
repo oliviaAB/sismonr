@@ -116,16 +116,16 @@ insilicosystemargs <- function(
   TC.pos.p = 0.5,
   TL.pos.p = 0.5,
   PTM.pos.p = 0.5,
-#  TC.PC.pos.p = 0.5,
-#  TC.NC.pos.p = 0.5,
-#  TL.PC.pos.p = 0.5,
-#  TL.NC.pos.p = 0.5,
-#  PTM.PC.pos.p = 0.5,
-#  PTM.NC.pos.p = 0.5,
-  basal_transcription_rate_samplingfct = function(x){ logval = rnorm(x, mean = 0.5, sd = 0.5); val = 10^logval; return(val/3600) },
-  basal_translation_rate_samplingfct = function(x){ logval = rnorm(x, mean = 2.5, sd = 0.8); val = 10^logval; return(val/3600) },
-  basal_RNAlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 0, sd = 0.5); val = 10^logval; return(val*3600) },
-  basal_protlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 1.75, sd = 0.5); val = 10^logval; return(val*3600) },
+  #  TC.PC.pos.p = 0.5,
+  #  TC.NC.pos.p = 0.5,
+  #  TL.PC.pos.p = 0.5,
+  #  TL.NC.pos.p = 0.5,
+  #  PTM.PC.pos.p = 0.5,
+  #  PTM.NC.pos.p = 0.5,
+  basal_transcription_rate_samplingfct = NULL,
+  basal_translation_rate_samplingfct = NULL,
+  basal_RNAlifetime_samplingfct = NULL,
+  basal_protlifetime_samplingfct = NULL,
   TC.PC.outdeg.distr = "powerlaw",
   TC.NC.outdeg.distr = "powerlaw",
   TC.PC.outdeg.exp = 3,
@@ -136,9 +136,9 @@ insilicosystemargs <- function(
   TC.NC.autoregproba = 0,
   TC.PC.twonodesloop = FALSE,
   TC.NC.twonodesloop = FALSE,
-  TCbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
-  TCunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
-  TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) },
+  TCbindingrate_samplingfct = NULL,
+  TCunbindingrate_samplingfct = NULL,
+  TCfoldchange_samplingfct = NULL,
   TL.PC.outdeg.distr = "powerlaw",
   TL.NC.outdeg.distr = "powerlaw",
   TL.PC.outdeg.exp = 3,
@@ -149,9 +149,9 @@ insilicosystemargs <- function(
   TL.NC.autoregproba = 0,
   TL.PC.twonodesloop = FALSE,
   TL.NC.twonodesloop = FALSE,
-  TLbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
-  TLunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
-  TLfoldchange_samplingfct = function(x){ sample(2:30, x, replace = T)  },
+  TLbindingrate_samplingfct = NULL,
+  TLunbindingrate_samplingfct = NULL,
+  TLfoldchange_samplingfct = NULL,
   RD.PC.outdeg.distr = "powerlaw",
   RD.NC.outdeg.distr = "powerlaw",
   RD.PC.outdeg.exp = 3,
@@ -162,7 +162,7 @@ insilicosystemargs <- function(
   RD.NC.autoregproba = 0,
   RD.PC.twonodesloop = FALSE,
   RD.NC.twonodesloop = FALSE,
-  RDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
+  RDregrate_samplingfct = NULL,
   PD.PC.outdeg.distr = "powerlaw",
   PD.NC.outdeg.distr = "powerlaw",
   PD.PC.outdeg.exp = 3,
@@ -173,7 +173,7 @@ insilicosystemargs <- function(
   PD.NC.autoregproba = 0,
   PD.PC.twonodesloop = FALSE,
   PD.NC.twonodesloop = FALSE,
-  PDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
+  PDregrate_samplingfct = NULL,
   PTM.PC.outdeg.distr = "powerlaw",
   PTM.NC.outdeg.distr = "powerlaw",
   PTM.PC.outdeg.exp = 3,
@@ -184,16 +184,33 @@ insilicosystemargs <- function(
   PTM.NC.autoregproba = 0,
   PTM.PC.twonodesloop = FALSE,
   PTM.NC.twonodesloop = FALSE,
-  PTMregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
+  PTMregrate_samplingfct = NULL,
   regcomplexes = "prot",
   regcomplexes.p = 0.3,
   regcomplexes.size = 2,
-  complexesformationrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
-  complexesdissociationrate_samplingfct = function(x){ runif(x, 0.001, 0.01) },
+  complexesformationrate_samplingfct = NULL,
+  complexesdissociationrate_samplingfct = NULL,
   mycolsCS = c("PC" = "#e03616",  "NC" = "#58355e", "Tot" = "#31161F"),
   mycolsGF = c("TC" = "#FF7F11", "TL" = "#FF963C", "RD" = "#5AB7A4", "PD" = "#78C4B4", "PTM" = "#FF1B1C", "MR" = "#FF6D6E"),
   mycolsPosNeg = c("1" = "#D63230", "-1" = "#69BAF4")
 ){
+
+  if(is.null(basal_transcription_rate_samplingfct)) basal_transcription_rate_samplingfct = function(x){ logval = rnorm(x, mean = 0.5, sd = 0.5); val = 10^logval; return(val/3600) }
+  if(is.null(basal_translation_rate_samplingfct)) basal_translation_rate_samplingfct = function(x){ logval = rnorm(x, mean = 2.5, sd = 0.8); val = 10^logval; return(val/3600) }
+  if(is.null(basal_RNAlifetime_samplingfct)) basal_RNAlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 0, sd = 0.5); val = 10^logval; return(val*3600) }
+  if(is.null(basal_protlifetime_samplingfct)) basal_protlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 1.75, sd = 0.5); val = 10^logval; return(val*3600) }
+  if(is.null(TCbindingrate_samplingfct)) TCbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(TCunbindingrate_samplingfct)) TCunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(TCfoldchange_samplingfct)) TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) }
+  if(is.null(TLbindingrate_samplingfct)) TLbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(TLunbindingrate_samplingfct)) TLunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(TLfoldchange_samplingfct)) TLfoldchange_samplingfct = function(x){ sample(2:30, x, replace = T)  }
+  if(is.null(RDregrate_samplingfct)) RDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(complexesformationrate_samplingfct)) complexesformationrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(complexesdissociationrate_samplingfct)) complexesdissociationrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+
   NC.p = 1 - PC.p
 
   temp = sum(PC.TC.p + PC.TL.p + PC.RD.p + PC.PTM.p + PC.MR.p)
@@ -214,10 +231,10 @@ insilicosystemargs <- function(
   ## There cannot be negative regulation for transcript and protein decay
   RD.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
   PD.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
-#  RD.PC.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
-#  RD.NC.pos.p = 1 ## RD.NC.pos.p: probability that the RNA decay is positively regulated by noncoding regulators (faster decay)
-#  PD.PC.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
-#  PD.NC.pos.p = 1 ## PD.NC.pos.p: probability that the protein decay is positively regulated by noncoding regulators (faster decay)
+  #  RD.PC.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
+  #  RD.NC.pos.p = 1 ## RD.NC.pos.p: probability that the RNA decay is positively regulated by noncoding regulators (faster decay)
+  #  PD.PC.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
+  #  PD.NC.pos.p = 1 ## PD.NC.pos.p: probability that the protein decay is positively regulated by noncoding regulators (faster decay)
 
   value = list(  "G" = G,
                  "PC.p" = PC.p,
@@ -238,16 +255,16 @@ insilicosystemargs <- function(
                  "RD.pos.p" = RD.pos.p,
                  "PD.pos.p" = PD.pos.p,
                  "PTM.pos.p" = PTM.pos.p,
-#                 "TC.PC.pos.p" = TC.PC.pos.p,
-#                 "TC.NC.pos.p" = TC.NC.pos.p,
-#                 "TL.PC.pos.p" = TL.PC.pos.p,
-#                 "TL.NC.pos.p" = TL.NC.pos.p,
-#                 "RD.PC.pos.p" = RD.PC.pos.p,
-#                 "RD.NC.pos.p" = RD.NC.pos.p,
-#                 "PD.PC.pos.p" = PD.PC.pos.p,
-#                 "PD.NC.pos.p" = PD.NC.pos.p,
-#                 "PTM.PC.pos.p" = PTM.PC.pos.p,
-#                 "PTM.NC.pos.p" = PTM.NC.pos.p,
+                 #                 "TC.PC.pos.p" = TC.PC.pos.p,
+                 #                 "TC.NC.pos.p" = TC.NC.pos.p,
+                 #                 "TL.PC.pos.p" = TL.PC.pos.p,
+                 #                 "TL.NC.pos.p" = TL.NC.pos.p,
+                 #                 "RD.PC.pos.p" = RD.PC.pos.p,
+                 #                 "RD.NC.pos.p" = RD.NC.pos.p,
+                 #                 "PD.PC.pos.p" = PD.PC.pos.p,
+                 #                 "PD.NC.pos.p" = PD.NC.pos.p,
+                 #                 "PTM.PC.pos.p" = PTM.PC.pos.p,
+                 #                 "PTM.NC.pos.p" = PTM.NC.pos.p,
                  "basal_transcription_rate_samplingfct" = basal_transcription_rate_samplingfct,
                  "basal_translation_rate_samplingfct" = basal_translation_rate_samplingfct,
                  "basal_RNAlifetime_samplingfct" = basal_RNAlifetime_samplingfct,
