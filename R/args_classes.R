@@ -4,6 +4,17 @@
 #'
 #' Constructor function for the \code{insilicosystemsargs} class, with default values if not provided by the user.
 #'
+#' For the protein-coding (and non-coding) biological function ratios (i.e. PC.TC.p, PC.TL.p, etc): if none of the ratios are provided,
+#' then they are set to their default values. Otherwise, if at least one value among the 6 (5 for noncoding genes) is set by the user:
+#' \itemize{
+#' \item if the sum of the provided values is 1 or more: the non-specified values are set to 0, and the specified values are normalised
+#' such that their sum is 1.
+#' \item if the sum of the provided values is less than 1: the non-specified values are set such that the sum of all ratios equals 1.
+#' }
+#' Example: if the user sets PC.TC.p to 1 and PC.TL.p to 0.6, but does not provide any values for the other ratios,
+#' then PC.TC.p is set to 1/(1+0.6)=0.625, PC.TL.p to 0.6/(1+0.6)=0.375, and PC.RD.p, PC.PD.p, PC.PTM.p and PC.MR.p are all set to 0.
+#' Accordingly, if the user only sets NC.TC.p to 0.6, then NC.TL.p, NC.RD.p, NC.PD.p and NC.PTM.p are all set to 0.1.
+#'
 #' @param G Integer. Number of genes in the system. Default value is 10.
 #' @param PC.p Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.
 #' @param PC.TC.p Numeric. Ratio of regulators of transcription among the protein-coding genes. Default value is 0.4.
@@ -102,17 +113,17 @@
 insilicosystemargs <- function(
   G = 10,
   PC.p = 0.7,
-  PC.TC.p = 0.4,
-  PC.TL.p = 0.3,
-  PC.RD.p = 0.1,
-  PC.PD.p = 0.1,
-  PC.PTM.p = 0.05,
-  PC.MR.p = 0.05,
-  NC.TC.p = 0.3,
-  NC.TL.p = 0.3,
-  NC.RD.p = 0.3,
-  NC.PD.p = 0.05,
-  NC.PTM.p = 0.05,
+  PC.TC.p = NULL,
+  PC.TL.p = NULL,
+  PC.RD.p = NULL,
+  PC.PD.p = NULL,
+  PC.PTM.p = NULL,
+  PC.MR.p = NULL,
+  NC.TC.p = NULL,
+  NC.TL.p = NULL,
+  NC.RD.p = NULL,
+  NC.PD.p = NULL,
+  NC.PTM.p = NULL,
   TC.pos.p = 0.5,
   TL.pos.p = 0.5,
   PTM.pos.p = 0.5,
@@ -213,20 +224,49 @@ insilicosystemargs <- function(
 
   NC.p = 1 - PC.p
 
-  temp = sum(PC.TC.p + PC.TL.p + PC.RD.p + PC.PTM.p + PC.MR.p)
-  PC.TC.p = PC.TC.p/temp
-  PC.TL.p = PC.TL.p/temp
-  PC.RD.p = PC.RD.p/temp
-  PC.PD.p = PC.PD.p/temp
-  PC.PTM.p = PC.PTM.p/temp
-  PC.MR.p = PC.MR.p/temp
+  ## Probability of each protein-coding gene biological function
+  temp = c(PC.TC.p, PC.TL.p, PC.RD.p, PC.PD.p, PC.PTM.p, PC.MR.p)
 
-  temp = sum(NC.TC.p + NC.TL.p + NC.RD.p + NC.PTM.p)
-  NC.TC.p = NC.TC.p/temp
-  NC.TL.p = NC.TL.p/temp
-  NC.RD.p = NC.RD.p/temp
-  NC.PD.p = NC.PD.p/temp
-  NC.PTM.p = NC.PTM.p/temp
+  if(sum(temp) == 0){ ## if no values are provided, give default values
+    PC.TC.p = 0.4
+    PC.TL.p = 0.3
+    PC.RD.p = 0.1
+    PC.PD.p = 0.1
+    PC.PTM.p = 0.05
+    PC.MR.p = 0.05
+  } else if(sum(temp) >= 1){ ## if at least one value is provided, and their sum is >=1, normalise the given values and set to 0 the others
+    for(v in c("PC.TC.p", "PC.TL.p", "PC.RD.p", "PC.PD.p", "PC.PTM.p", "PC.MR.p")){
+      assign(v, ifelse(is.null(get(v)), 0, get(v)/sum(temp)))
+    }
+  } else if(sum(temp) < 1){ ## if at least one value is provided but don't sum up to 1, assign the remaining proba such that the sum of all proba is 1
+    residual = (1-sum(temp))/(6-length(temp))
+    for(v in c("PC.TC.p", "PC.TL.p", "PC.RD.p", "PC.PD.p", "PC.PTM.p", "PC.MR.p")){
+      assign(v, ifelse(is.null(get(v)), residual, get(v)))
+    }
+  }
+
+  ## Probability of each noncoding gene biological function
+  temp = c(NC.TC.p, NC.TL.p, NC.RD.p, NC.PD.p, NC.PTM.p)
+
+  if(sum(temp) == 0){ ## if no values are provided, give default values
+    NC.TC.p = 0.3
+    NC.TL.p = 0.3
+    NC.RD.p = 0.3
+    NC.PD.p = 0.05
+    NC.PTM.p = 0.05
+  } else if(sum(temp) >= 1){ ## if at least one value is provided, and their sum is >=1, normalise the given values and set to 0 the others
+    for(v in c("NC.TC.p", "NC.TL.p", "NC.RD.p", "NC.PD.p", "NC.PTM.p")){
+      assign(v, ifelse(is.null(get(v)), 0, get(v)/sum(temp)))
+    }
+  } else if(sum(temp) < 1){ ## if at least one value is provided but don't sum up to 1, assign the remaining proba such that the sum of all proba is 1
+    residual = (1-sum(temp))/(6-length(temp))
+    for(v in c("NC.TC.p", "NC.TL.p", "NC.RD.p", "NC.PD.p", "NC.PTM.p")){
+      assign(v, ifelse(is.null(get(v)), residual, get(v)))
+    }
+  }
+
+
+
 
   ## There cannot be negative regulation for transcript and protein decay
   RD.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)

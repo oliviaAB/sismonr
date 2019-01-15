@@ -4,10 +4,10 @@
 \alias{insilicosystemargs}
 \title{Constructor function for the \code{insilicosystemsargs} class.}
 \usage{
-insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = 0.4,
-  PC.TL.p = 0.3, PC.RD.p = 0.1, PC.PD.p = 0.1, PC.PTM.p = 0.05,
-  PC.MR.p = 0.05, NC.TC.p = 0.3, NC.TL.p = 0.3, NC.RD.p = 0.3,
-  NC.PD.p = 0.05, NC.PTM.p = 0.05, TC.pos.p = 0.5, TL.pos.p = 0.5,
+insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
+  PC.TL.p = NULL, PC.RD.p = NULL, PC.PD.p = NULL, PC.PTM.p = NULL,
+  PC.MR.p = NULL, NC.TC.p = NULL, NC.TL.p = NULL, NC.RD.p = NULL,
+  NC.PD.p = NULL, NC.PTM.p = NULL, TC.pos.p = 0.5, TL.pos.p = 0.5,
   PTM.pos.p = 0.5, basal_transcription_rate_samplingfct = NULL,
   basal_translation_rate_samplingfct = NULL,
   basal_RNAlifetime_samplingfct = NULL,
@@ -236,4 +236,16 @@ An object of the class \code{insilicosystemargs}, that is a list of the differen
 }
 \description{
 Constructor function for the \code{insilicosystemsargs} class, with default values if not provided by the user.
+}
+\details{
+For the protein-coding (and non-coding) biological function ratios (i.e. PC.TC.p, PC.TL.p, etc): if none of the ratios are provided,
+then they are set to their default values. Otherwise, if at least one value among the 6 (5 for noncoding genes) is set by the user:
+\itemize{
+\item if the sum of the provided values is 1 or more: the non-specified values are set to 0, and the specified values are normalised
+such that their sum is 1.
+\item if the sum of the provided values is less than 1: the non-specified values are set such that the sum of all ratios equals 1.
+}
+Example: if the user sets PC.TC.p to 1 and PC.TL.p to 0.6, but does not provide any values for the other ratios,
+then PC.TC.p is set to 1/(1+0.6)=0.625, PC.TL.p to 0.6/(1+0.6)=0.375, and PC.RD.p, PC.PD.p, PC.PTM.p and PC.MR.p are all set to 0.
+Accordingly, if the user only sets NC.TC.p to 0.6, then NC.TL.p, NC.RD.p, NC.PD.p and NC.PTM.p are all set to 0.1.
 }
