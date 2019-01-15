@@ -10,27 +10,37 @@ addGene(insilicosystem, coding = NULL, TargetReaction = NULL,
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{coding}{String. The coding status of the gene (either "PC" or "NC"). If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+\item{coding}{String. The coding status of the gene (either "PC" for protein-coding or "NC" for noncoding). If none provided, randomly chosen according to the
+parameter \code{PC.p} provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{TargetReaction}{String. The biological function of the gene, i.e. the gene expression step targeted by the active product
-of the gene.}
+of the gene. If none provided, randomly chosen according to the parameters \code{PC.TC.p}, etc or \code{NC.TC.p}, etc (depending on the coding status of the gene)
+provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{TCrate}{Numeric. The transcription rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+parameter \code{basal_transcription_rate_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{TLrate}{Numeric. The translation rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+parameter \code{basal_translation_rate_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{RDrate}{Numeric. The RNA decay rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+parameter \code{basal_RNAlifetime_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{PDrate}{Numeric. The protein decay rate of the gene. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+parameter \code{basal_protlifetime_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}).}
 }
 \value{
 The modified in silico system.
 }
 \description{
-Adds a gene in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+Adds a gene in the in silico system with specified parameters if provided, or with parameters sampled according to the system parameters.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 5)
+mysystem$genes
+mysystem2 = addGene(mysystem, "PC", "TC", TCrate = 0.0001, TLrate = 0.001)
+mysystem2$genes
+
+mysystem3 = addGene(mysystem2)
+mysystem3$genes
 }
