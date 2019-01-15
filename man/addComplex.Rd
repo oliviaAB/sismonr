@@ -10,19 +10,22 @@ addComplex(insilicosystem, compo, formationrate = NULL,
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{compo}{An integer vector, which each element being the ID of the genes composing the complex. Must be of the same length as
-specified in the system arguments (i.e. regcomplexes.size, see \code{\link{insilicosystemargs}}). All genes composing the compex must
-have the same biological function (i.e. same "TargetReaction" parameter).}
+\item{compo}{An vector of integers, corresponding to the ID of the genes composing the complex. All genes composing the complex must
+have the same biological function (i.e. same \code{TargetReaction} parameter).}
 
 \item{formationrate}{The formation rate of the complex. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+parameters provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).}
 
 \item{dissociationrate}{The dissociation rate of the complex. If none provided, randomly chosen according to the
-parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+parameters provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).}
 }
 \value{
-The modified in silico system.
+Returns the modified in silico system.
 }
 \description{
-Adds a regulatory complex in the in silico system with specified parameters if provided, or samples the parameters according to the system parameters.
+Adds a regulatory complex in the in silico system with specified parameters (if provided), or with parameters sampled according to the system parameters.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 10, PC.TC.p = 1)
+mysystem2 = addComplex(mysystem, c(1, 2, 3))
 }
