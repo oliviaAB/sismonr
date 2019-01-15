@@ -5,7 +5,7 @@
 \title{Calls the Julia simulation}
 \usage{
 callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
-  simtime, modelname, ntrials, nepochs, simalgorithm,
+  simtime, modelname = "MySimulation", ntrials, nepochs, simalgorithm,
   ev = getJuliaEvaluator())
 }
 \arguments{
@@ -17,15 +17,15 @@ callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
 
 \item{genes}{The data-frame of genes in the system.}
 
-\item{simtime}{The amount of time to simulate the model (in seconds).}
+\item{simtime}{Numeric. The amount of time to simulate the model (in seconds).}
 
-\item{modelname}{The name of the model.}
+\item{modelname}{String. The name of the model. Default value "MySimulation".}
 
-\item{ntrials}{The number of times the simulation must be replicated.}
+\item{ntrials}{Integer. The number of times the simulation must be replicated.}
 
-\item{nepochs}{The number of times to record the state of the system during the simulation.}
+\item{nepochs}{Integer. The number of times to record the state of the system during the simulation.}
 
-\item{simalgorithm}{The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
+\item{simalgorithm}{String. The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".}
 
 \item{ev}{A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.}
@@ -34,5 +34,5 @@ Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "Tau
 The result of the simulation (a data-frame).
 }
 \description{
-Calls the Julia function for simulating a stochastic system
+Calls the Julia function for simulating a stochastic system. Should not be used by itself (this function is called by the wrapper functions \link{simulateInSilicoSystem} and \link{simulateParallelInSilicoSystem}).
 }

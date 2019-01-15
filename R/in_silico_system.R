@@ -9,20 +9,20 @@
 #'
 #' Generate the genes in the system and their attributes, according to the user parameters.
 #'
-#' @param sysargs An object of class \code{insilicosystemargs} (i.e. a list with parameters for in silico system generation).
+#' @param sysargs An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).
 #' @return A data frame of in silico genes. Attributes:
 #' \itemize{
 #' \item \code{id}: Integer, ID of the genes;
-#' \item \code{coding}: coding status of the genes (either "PC" for protein-coding or "NC" for non-coding);
+#' \item \code{coding}: coding status of the genes (either "PC" for protein-coding or "NC" for non-coding). Sampled according to the parameter \code{PC.p} in \code{sysargs};
 #' \item \code{TargetReaction}: the biological function of the genes ("TC": transcription regulator, "TL": translation regulator, "RD": RNA decay
-#' regulator, "PD": protein decay regulator, "PTM": post-translational modification regulator, "MR": metabolic enzyme);
-#' \item \code{PTMform}: Does the gene have a PTM form? "0" or "1" (here all "0", PTM form will be assigned later)
+#' regulator, "PD": protein decay regulator, "PTM": post-translational modification regulator, "MR": metabolic enzyme). Sampled according to the parameters \code{PC.TC.p}, etc for protein-coding genes or \code{NC.TC.p}, etc for noncoding genes, in \code{sysargs};
+#' \item \code{PTMform}: Does the gene have a PTM form? "0" or "1" (here all "0", PTM form will be assigned later);
 #' \item \code{Active form}: what is the active form of the gene? "R" for noncoding genes, "P" for protein-coding genes,
 #' "Pm" for protein-coding genes with a PTM form;
-#' \item \code{TCrate}: transcription rate of the genes;
-#' \item \code{TLrate}: translation rate of the genes (0 for noncoding genes);
-#' \item \code{RDrate}: RNA decay rate of the genes;
-#' \item \code{PDrate}: Protein decay rate of the genes (0 for noncoding genes).
+#' \item \code{TCrate}: transcription rate of the genes. Sampled according to the parameter \code{basal_transcription_rate_samplingfct} in \code{sysargs};
+#' \item \code{TLrate}: translation rate of the genes. Sampled according to the parameter \code{basal_translation_rate_samplingfct} in \code{sysargs} (0 for noncoding genes);
+#' \item \code{RDrate}: RNA decay rate of the genes. Sampled according to the parameter \code{basal_RNAlifetime_rate_samplingfct} in \code{sysargs};
+#' \item \code{PDrate}: Protein decay rate of the genes. Sampled according to the parameter \code{basal_protlifetime_rate_samplingfct} in \code{sysargs} (0 for noncoding genes).
 #' }
 #' @export
 createGenes = function(sysargs){
@@ -134,32 +134,29 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #'
 #' Creates an in silico multi omic network from a data-frame of genes in the system.
 #'
-#' The \code{edg} data-frame represents the edges in a regulatory network (1 row = 1 edge). It contains the following parameters:
+#' @param genes A data-frame of genes in the system (see \code{\link{createGenes}}).
+#' @param sysargs An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).
+#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @return An in silico multi omic network, that is a list of:
+#' \itemize{
+#' \item \code{genes}: the modified data-frame of genes;
+#' \item \code{edg}: A data-frame of edges in the multi-omic network (1 row = 1 edge). It contains the following parameters:
 #' \itemize{
 #' \item \code{from}: gene ID of the origin of the edge (character).
-#' \item \code{to}: gene ID of the destination of the edge (integer).
+#' \item \code{to}: gene ID of the destination of the edge (character).
 #' \item \code{TargetReaction}: Type of regulation (ID of the controlled reaction: "TC", "TL", "RD", "PD" or "PTM").
 #' \item \code{RegSign}: Sign of the reaction ("1" for positive regulation, "-1" for negative regulation).
 #' \item \code{RegBy}: Type of the regulator: "PC" for protein-coding regulation, "NC" for noncoding regulator,
 #' "C" for regulatory complex.
 #' }
-#'
-#' @param genes A data-frame of genes in the system (see \code{\link{createGenes}}).
-#' @param sysargs An object of class \code{insilicosystemargs} (i.e. a list with parameters for in silico system generation).
-#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
-#' @return An in silico multi omic network, that is a list of:
-#' \itemize{
-#' \item \code{genes}: the modified data-frame of genes;
-#' \item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
-#' \item \code{mosystem}: A list of the different regulation networks in the system and associated information.
+#' \item \code{mosystem}: A list of the different regulation networks in the system and associated information. Elements are \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
+#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
+#' regulation.
 #' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
 #' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 #' }
-#' The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
-#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
-#' regulation.
 #' @export
 createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 
@@ -324,25 +321,33 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 
 }
 
-#' Creates an empty in silico multi omic network
+#' Creates an empty in silico multi-omic network
 #'
-#' Creates an empty in silico multi omic network from a data-frame of genes in the system (no regulatory interactions) (cf
+#' Creates an empty in silico multi-omic network (i.e. no regulatory interactions) given a data-frame of genes (cf
 #' \code{\link{createMultiOmicNetwork}}).
 #'
 #' @param genes A data-frame of genes in the system (see \code{\link{createGenes}}).
-#' @return An in silico multi omic network, that is a list of:
+#' @return An in silico multi-omic network, that is a list of:
 #' \itemize{
 #' \item \code{genes}: the modified data-frame of genes;
-#' \item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
-#' \item \code{mosystem}: A list of the different regulation networks in the system and associated information.
+#' \item \code{edg}: A data-frame of edges in the multi-omic network (1 row = 1 edge, here empty dataframe). It contains the following parameters:
+#' \itemize{
+#' \item \code{from}: gene ID of the origin of the edge (character).
+#' \item \code{to}: gene ID of the destination of the edge (character).
+#' \item \code{TargetReaction}: Type of regulation (ID of the controlled reaction: "TC", "TL", "RD", "PD" or "PTM").
+#' \item \code{RegSign}: Sign of the reaction ("1" for positive regulation, "-1" for negative regulation).
+#' \item \code{RegBy}: Type of the regulator: "PC" for protein-coding regulation, "NC" for noncoding regulator,
+#' "C" for regulatory complex.
+#' }
+#' \item \code{mosystem}: A list of the different regulation networks in the system and associated information. Elements of the list are
+#' \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
+#' regulatory networks, with in addition to the usual fields in the \code{edg} data frame contain columns for kinetic parameters of the
+#' regulation. All empty.
 #' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 #' values are vectors of gene IDs constituting each regulatory complex. Empty list.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters. Empty list.
 #' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 #' }
-#' The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
-#' regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
-#' regulation. All empty.
 #' @export
 createEmptyMultiOmicNetwork = function(genes){
 
@@ -560,9 +565,9 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
 #' @param compo An vector of integers, corresponding to the ID of the genes composing the complex. All genes composing the complex must
 #' have the same biological function (i.e. same \code{TargetReaction} parameter).
 #' @param formationrate The formation rate of the complex. If none provided, randomly chosen according to the
-#' parameters provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).
+#' parameter \code{complexesformationrate_samplingfct} provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).
 #' @param dissociationrate The dissociation rate of the complex. If none provided, randomly chosen according to the
-#' parameters provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).
+#' parameter \code{complexesdissociationrate_samplingfct} provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).
 #' @return Returns the modified in silico system.
 #' @examples
 #' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1)
@@ -668,9 +673,10 @@ removeComplex = function(insilicosystem, name){
 #' @param regID Integer. The ID of the regulator gene.
 #' @param tarID Integer. The ID of the target gene.
 #' @param regsign The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
-#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).
+#' will be randomly chosen according to the parameter \code{TC.pos.p}, \code{TL.pos.p} or \code{PTM.pos.p} (depending on the type
+#' of regulation - regulation of RNA or protein decay can only be negative) provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @param kinetics Optional: named vector of kinetics parameters of the reaction. If none provided,
-#' will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}). The parameters
+#' will be randomly chosen according to the parameters \code{[name of the param]_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}). The parameters
 #' to provide depend on the type of regulation (i.e. parameter \code{TargetReaction} of the regulator):
 #' \itemize{
 #' \item TargetReaction = "TC". The parameters to specify are "TCbindingrate", "TCunbindingrate" and "TCfoldchange";

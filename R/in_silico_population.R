@@ -45,16 +45,19 @@ createVariants = function(genes, indargs){
 #'
 #' @param variantsList List of segregating variants (created by \code{\link{createVariants}}). Each element is a matrix of the existing variants
 #' for a given gene in the system.
-#' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
+#' @param indargs An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).
 #' @param sameInit Boolean. Does the individual have identical initial abundance to the rest of the population?
 #' @return An object of class \code{insilicoindividual}, that is a list composed of:
 #' \itemize{
-#' \item \code{QTLeffects}: a list of the variants carried by the individual. 1st level of the list: the different "GCN" (Gene Copy Number)
-#' that is the different copies of the genes or homologues (= ploidy of the individuals); 2nd levels the different QTL effect coefficients. The elements
-#' in this 2 level list are vectors of QTL effect coefficients for the different genes (coefficient for gene \code{i} at the \code{i}-th position
+#' \item \code{QTLeffects}: a list of the variants carried by the individual. 1st level of the list: the different "GCN" (Gene Copy Number),
+#' that is the different alleles of the genes (as defined by the ploidy of the individual. A diploid will have GCN1 and GCN2); 2nd level: the different QTL effect coefficients. The elements
+#' in this 2nd-level list are vectors of QTL effect coefficients for the different genes (coefficient for gene \code{i} at the \code{i}-th position
 #' in the vector).
-#' \item \code{haplotype}: data-frame (rows = genes, columns = Gene copy number) of the gene variants carried by the individual for each gene copy number (homologue)
-#' \item \code{InitVar}
+#' \item \code{haplotype}: data-frame (rows = genes, columns = Gene copy number) of the gene variants carried by the individual for each gene copy number (homologue).
+#' \item \code{InitVar}: a list of the multiplicative coefficients to compute the initial abundance of the different molecules
+#' (to be applied to the population mean initial abundance for the corresponding molecule). 1st level of the list: the different "GCN" (Gene Copy Number),
+#' that is the different alleles of the genes (as defined by the ploidy of the individual. A diploid will have GCN1 and GCN2); 2nd level of the list:
+#' vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
 #' }
 #' @export
 createIndividual = function(variantsList, indargs, sameInit = F){

@@ -55,27 +55,27 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
 
 \item{PC.p}{Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.}
 
-\item{PC.TC.p}{Numeric. Ratio of regulators of transcription among the protein-coding genes. Default value is 0.4.}
+\item{PC.TC.p}{Numeric. Ratio of regulators of transcription among the protein-coding genes. Default value is 0.4 (see details).}
 
-\item{PC.TL.p}{Numeric. Ratio of regulators of translation among the protein-coding genes. Default value is 0.3.}
+\item{PC.TL.p}{Numeric. Ratio of regulators of translation among the protein-coding genes. Default value is 0.3 (see details).}
 
-\item{PC.RD.p}{Numeric. Ratio of regulators of RNA decay among the protein-coding genes. Default value is 0.1.}
+\item{PC.RD.p}{Numeric. Ratio of regulators of RNA decay among the protein-coding genes. Default value is 0.1 (see details).}
 
-\item{PC.PD.p}{Numeric. Ratio of regulators of protein decay among the protein-coding genes. Default value is 0.1.}
+\item{PC.PD.p}{Numeric. Ratio of regulators of protein decay among the protein-coding genes. Default value is 0.1 (see details).}
 
-\item{PC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the protein-coding genes. Default value is 0.05.}
+\item{PC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the protein-coding genes. Default value is 0.05 (see details).}
 
-\item{PC.MR.p}{Numeric. Ratio of metabolic enzymes among the protein-coding genes. Default value is 0.05.}
+\item{PC.MR.p}{Numeric. Ratio of metabolic enzymes among the protein-coding genes. Default value is 0.05 (see details).}
 
-\item{NC.TC.p}{Numeric. Ratio of regulators of transcription among the noncoding genes. Default value is 0.3.}
+\item{NC.TC.p}{Numeric. Ratio of regulators of transcription among the noncoding genes. Default value is 0.3 (see details).}
 
-\item{NC.TL.p}{Numeric. Ratio of regulators of translation among the noncoding genes. Default value is 0.3.}
+\item{NC.TL.p}{Numeric. Ratio of regulators of translation among the noncoding genes. Default value is 0.3 (see details).}
 
-\item{NC.RD.p}{Numeric. Ratio of regulators of RNA decay among the noncoding genes. Default value is 0.3.}
+\item{NC.RD.p}{Numeric. Ratio of regulators of RNA decay among the noncoding genes. Default value is 0.3 (see details).}
 
-\item{NC.PD.p}{Numeric. Ratio of regulators of protein decay among the noncoding genes. Default value is 0.05.}
+\item{NC.PD.p}{Numeric. Ratio of regulators of protein decay among the noncoding genes. Default value is 0.05 (see details).}
 
-\item{NC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05.}
+\item{NC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05 (see details).}
 
 \item{TC.pos.p}{Numeric. Probability that the transcription is positively regulated by regulators. Default value is 0.5.}
 

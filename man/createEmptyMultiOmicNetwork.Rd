@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{createEmptyMultiOmicNetwork}
 \alias{createEmptyMultiOmicNetwork}
-\title{Creates an empty in silico multi omic network}
+\title{Creates an empty in silico multi-omic network}
 \usage{
 createEmptyMultiOmicNetwork(genes)
 }
@@ -10,21 +10,29 @@ createEmptyMultiOmicNetwork(genes)
 \item{genes}{A data-frame of genes in the system (see \code{\link{createGenes}}).}
 }
 \value{
-An in silico multi omic network, that is a list of:
+An in silico multi-omic network, that is a list of:
 \itemize{
 \item \code{genes}: the modified data-frame of genes;
-\item \code{edg}: A data-frame of edges in the multi-omic network (see details below).
-\item \code{mosystem}: A list of the different regulation networks in the system and associated information.
+\item \code{edg}: A data-frame of edges in the multi-omic network (1 row = 1 edge, here empty dataframe). It contains the following parameters:
+\itemize{
+\item \code{from}: gene ID of the origin of the edge (character).
+\item \code{to}: gene ID of the destination of the edge (character).
+\item \code{TargetReaction}: Type of regulation (ID of the controlled reaction: "TC", "TL", "RD", "PD" or "PTM").
+\item \code{RegSign}: Sign of the reaction ("1" for positive regulation, "-1" for negative regulation).
+\item \code{RegBy}: Type of the regulator: "PC" for protein-coding regulation, "NC" for noncoding regulator,
+"C" for regulatory complex.
+}
+\item \code{mosystem}: A list of the different regulation networks in the system and associated information. Elements of the list are
+\code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
+regulatory networks, with in addition to the usual fields in the \code{edg} data frame contain columns for kinetic parameters of the
+regulation. All empty.
 \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
 values are vectors of gene IDs constituting each regulatory complex. Empty list.
 \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters. Empty list.
 \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 }
-The \code{mosystem} list is composed of \code{TCRN_edg}, \code{TLRN_edg}, \code{RDRN_edg}, \code{PDRN_edg} and \code{PTMRN_edg}: data-frames of edges for the different
-regulatory networks, with in addition to the usual fields in the edg data frame contains columns for kinetic parameters of the
-regulation. All empty.
 }
 \description{
-Creates an empty in silico multi omic network from a data-frame of genes in the system (no regulatory interactions) (cf
+Creates an empty in silico multi-omic network (i.e. no regulatory interactions) given a data-frame of genes (cf
 \code{\link{createMultiOmicNetwork}}).
 }

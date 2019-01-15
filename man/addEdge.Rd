@@ -15,10 +15,11 @@ addEdge(insilicosystem, regID, tarID, regsign = NULL,
 \item{tarID}{Integer. The ID of the target gene.}
 
 \item{regsign}{The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
-will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+will be randomly chosen according to the parameter \code{TC.pos.p}, \code{TL.pos.p} or \code{PTM.pos.p} (depending on the type
+of regulation - regulation of RNA or protein decay can only be negative) provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{kinetics}{Optional: named vector of kinetics parameters of the reaction. If none provided,
-will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}). The parameters
+will be randomly chosen according to the parameters \code{[name of the param]_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}). The parameters
 to provide depend on the type of regulation (i.e. parameter \code{TargetReaction} of the regulator):
 \itemize{
 \item TargetReaction = "TC". The parameters to specify are "TCbindingrate", "TCunbindingrate" and "TCfoldchange";

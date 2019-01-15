@@ -14,10 +14,10 @@ addComplex(insilicosystem, compo, formationrate = NULL,
 have the same biological function (i.e. same \code{TargetReaction} parameter).}
 
 \item{formationrate}{The formation rate of the complex. If none provided, randomly chosen according to the
-parameters provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).}
+parameter \code{complexesformationrate_samplingfct} provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).}
 
 \item{dissociationrate}{The dissociation rate of the complex. If none provided, randomly chosen according to the
-parameters provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).}
+parameter \code{complexesdissociationrate_samplingfct} provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).}
 }
 \value{
 Returns the modified in silico system.
