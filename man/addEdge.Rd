@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{addEdge}
 \alias{addEdge}
-\title{Adds an edge in the in silico system.}
+\title{Adds an edge in the in silico system's regulatory network.}
 \usage{
 addEdge(insilicosystem, regID, tarID, regsign = NULL,
   kinetics = list())
@@ -18,11 +18,39 @@ addEdge(insilicosystem, regID, tarID, regsign = NULL,
 will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
 \item{kinetics}{Optional: named vector of kinetics parameters of the reaction. If none provided,
-will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}).}
+will be randomly chosen according to the parameters provided in sysargs (see \code{\link{insilicosystemargs}}). The parameters
+to provide depend on the type of regulation (i.e. parameter \code{TargetReaction} of the regulator):
+\itemize{
+\item TargetReaction = "TC". The parameters to specify are "TCbindingrate", "TCunbindingrate" and "TCfoldchange";
+\item TargetReaction = "TL". The parameters to specify are "TLbindingrate", "TLunbindingrate" and "TLfoldchange";
+\item TargetReaction = "RD". The parameter to specify is "RDregrate";
+\item TargetReaction = "PD". The parameter to specify is "PDregrate";
+\item TargetReaction = "PTM". The parameter to specify is "PTMregrate".
+}}
 }
 \value{
 The modified in silico system.
 }
 \description{
-Adds an edge in the in silico system between specified genes.
+Adds an edge in the in silico system's regulatory network between specified genes.
+}
+\examples{
+## creates a system with no regulation
+mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = T)
+mysystem$edg
+mysystem2 = addEdge(mysystem, 1, 2, regsign = "1",
+ kinetics = c("TCbindingrate"= 0.01, "TCunbindingrate" = 0.1, "TCfoldchange" = 10))
+## check all existing interactions in the system (no kinetic parameters)
+mysystem2$edg
+## check the interactions targeting transcription, with kinetic parameters
+mysystem2$mosystem$TCRN_edg
+
+## creates a system with no regulation
+mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PD.p = 1, empty = T)
+mysystem$edg
+mysystem2 = addEdge(mysystem, 1, 2)
+## check all existing interactions in the system (no kinetic parameters)
+mysystem2$edg
+## check the interactions targeting protein decay, with kinetic parameters
+mysystem2$mosystem$PDRN_edg
 }
