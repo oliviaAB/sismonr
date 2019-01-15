@@ -65,26 +65,25 @@ createGenes = function(sysargs){
 #'
 #' Creates an in silico regulatory network given a list of regulators and targets
 #'
-#' @param regsList A named list of length 2. Element "PC" (resp."NC") is a vector of gene ID of the protein-coding (resp. noncoding) regulators
+#' @param regsList A named list of length 2. Element "PC" (resp."NC") is a vector of gene IDs of the protein-coding (resp. noncoding) regulators
 #' for the network.
-#' @param tarsList A named list of length 2. Element "PC" (resp."NC") is a vector of gene ID of the targets of protein-coding (resp. noncoding)
+#' @param tarsList A named list of length 2. Element "PC" (resp."NC") is a vector of gene IDs of the potential targets of the protein-coding (resp. noncoding)
 #' regulators.
-#' @param reaction String. The ID of the reaction ("TC", "TL", "RD", "PD" or "PTM")
-#' @param sysargs An object of class \code{insilicosystemargs} (i.e. a list with parameters for in silico system generation).
-#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @param reaction String. The ID of the reaction targeted by the interactions ("TC", "TL", "RD", "PD" or "PTM").
+#' @param sysargs An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).
+#' @param ev A Julia evaluator (for the XRJulia package). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A list of two elements:
 #' \itemize{
-#' \item \code{edg} a data-frame of edges of the networks;
-#' \item \code{complexes} a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
-#' \item \code{complexesTargetReaction} a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
-#' }
-#' The \code{edg} data-frame has the following variables:
+#' \item \code{edg} a data-frame of edges of the network with the following variables:
 #' \itemize{
 #' \item \code{from} gene ID of the regulator, as a character;
 #' \item \code{to} gene ID of the target, as an integer;
 #' \item \code{TargetReaction} the ID of the reaction (as given by \code{reaction});
 #' \item \code{RegSign} The sign of the reaction ("1" or "-1");
 #' \item \code{RegBy} Is the regulator a protein-coding gene ("PC"), a noncoding gene ("NC") or a complex ("C")?
+#' };
+#' \item \code{complexes} a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
+#' \item \code{complexesTargetReaction} a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
 #' }
 #' @export
 createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = getJuliaEvaluator()){
@@ -368,8 +367,8 @@ createEmptyMultiOmicNetwork = function(genes){
 #' Creates an in silico system, i.e. the genes and the regulatory networks defining the system.
 #'
 #' @param empty Logical. Does the regulatory network is empty (= no regulation)? Default value is \code{FALSE}.
-#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
-#' @param ... Other arguments to be passed to the function \code{\link{insilicosystemargs}}.
+#' @param ev A Julia evaluator (for the XRJulia package). If none provided select the current evaluator or create one if no evaluator exists.
+#' @param ... Other arguments to be passed to the function \code{\link{insilicosystemargs}} (i.e. parameters for the generation of the in silico system).
 #' @return An object of class \code{insilicosystem}, that is a list composed of:
 #' \itemize{
 #' \item \code{genes}: a data-frame of genes (see \code{\link{createGenes}});
@@ -377,6 +376,20 @@ createEmptyMultiOmicNetwork = function(genes){
 #' \item \code{mosystem}: a list defining the multi-omic regulatory network (see \code{\link{createMultiOmicNetwork}});
 #' \item \code{sysargs}: An object of class \code{insilicosystemargs}; the parameters used to create the system.
 #' }
+#' @examples
+#' ## Creates an in silico system composed of 20 genes
+#' mysystem1 = createInSilicoSystem(G = 20)
+#' mysystem1$edg ## see all regulations in the system
+#' mysystem1$mosystem$TCRN_edg ## see only regulations targeting transcription
+#'
+#' ## Creates an in silico systerm composed of 10 genes, all protein-coding
+#' mysystem2 = createInSilicoSystem(G = 10, PC.p = 1)
+#' mysystem2$genes
+#'
+#' ## Creates an in silico systerm composed of 5 genes, all noncoding and all regulators of transcription
+#' mysystem3 = createInSilicoSystem(G = 5, PC.p = 0, NC.TC.p = 1)
+#' mysystem3$edg
+#' mysystem3$TCRN_edg
 #' @export
 createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 

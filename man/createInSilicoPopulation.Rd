@@ -9,20 +9,30 @@ createInSilicoPopulation(nInd, insilicosystem, sameInit = F, ...)
 \arguments{
 \item{nInd}{Integer. The number of in silico individuals to create.}
 
-\item{insilicosystem}{An \code{insilicosystem} object. The in silico system from which individuals are created.}
+\item{insilicosystem}{An \code{insilicosystem} object. The in silico system based on which which individuals are created. See \code{\link{createInSilicoSystem}}.}
 
-\item{sameInit}{Logical. Do the individuals in the population have the same initial abundance for the different molecules? Default value is \code{FALSE}.}
+\item{sameInit}{Logical. Is the initial abundance of the different molecules the same for all individuals in the population? Default value is \code{FALSE}.}
 
-\item{...}{Other arguments to be passed to the function \code{\link{insilicosystemargs}}.}
+\item{...}{Other arguments to be passed to the function \code{\link{insilicoindividualargs}} (i.e. parameters for the generation of the in silico individuals).}
 }
 \value{
 An object of class \code{insilicopopulation}, that is a list composed of:
 \itemize{
 \item \code{GenesVariants} A list of variants segregating in the population for each genes (see \code{\link{createVariants}}).
-\item \code{individualsList} A list of In Silico individuals (see \code{\link{createIndividual}}).
-\item \code{indargs} An object of class \code{insilicoindividualargs}; the parameters used to create the in silico individuals.
+\item \code{individualsList} A list of In Silico individuals (i.e. objects of class \code{insilicoindividual}, see \code{\link{createIndividual}}).
+\item \code{indargs} An object of class \code{\code{insilicoindividualargs}}; the parameters used to create the in silico individuals.
 }
 }
 \description{
 Creates a population of in silico individuals to be simulated.
+}
+\examples{
+## Creates the in silico system (with 6 genes)
+mysystem = createInSilicoSystem(G = 6)
+## Creates a first population with 3 diploid individuals,
+## With 2 variants of each gene segregating in the population
+mypop1 = createInSilicoPopulation(nInd = 3, mysystem, ploidy = 2, ngenevariants = 2)
+
+## Creates an other population with 10 tetraploid individuals
+mypop2 = createInSilicoPopulation(nInd = 10, mysystem, ploidy = 4)
 }

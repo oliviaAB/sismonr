@@ -9,9 +9,9 @@ createInSilicoSystem(empty = F, ev = getJuliaEvaluator(), ...)
 \arguments{
 \item{empty}{Logical. Does the regulatory network is empty (= no regulation)? Default value is \code{FALSE}.}
 
-\item{ev}{A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.}
+\item{ev}{A Julia evaluator (for the XRJulia package). If none provided select the current evaluator or create one if no evaluator exists.}
 
-\item{...}{Other arguments to be passed to the function \code{\link{insilicosystemargs}}.}
+\item{...}{Other arguments to be passed to the function \code{\link{insilicosystemargs}} (i.e. parameters for the generation of the in silico system).}
 }
 \value{
 An object of class \code{insilicosystem}, that is a list composed of:
@@ -24,4 +24,19 @@ An object of class \code{insilicosystem}, that is a list composed of:
 }
 \description{
 Creates an in silico system, i.e. the genes and the regulatory networks defining the system.
+}
+\examples{
+## Creates an in silico system composed of 20 genes
+mysystem1 = createInSilicoSystem(G = 20)
+mysystem1$edg ## see all regulations in the system
+mysystem1$mosystem$TCRN_edg ## see only regulations targeting transcription
+
+## Creates an in silico systerm composed of 10 genes, all protein-coding
+mysystem2 = createInSilicoSystem(G = 10, PC.p = 1)
+mysystem2$genes
+
+## Creates an in silico systerm composed of 5 genes, all noncoding and all regulators of transcription
+mysystem3 = createInSilicoSystem(G = 5, PC.p = 0, NC.TC.p = 1)
+mysystem3$edg
+mysystem3$TCRN_edg
 }
