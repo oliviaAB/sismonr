@@ -13,6 +13,6 @@ df2list(mydf)
 A named list with elements corresponding to the columns of the input data-frame.
 }
 \description{
-Transforms a data-frame into a list to be sent to Julia. The elements of the lists correspond to
+Transforms a data-frame into a list. The elements of the lists correspond to
 the columns of the data-frame.
 }

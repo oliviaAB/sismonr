@@ -77,80 +77,84 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
 
 \item{NC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05 (see details).}
 
-\item{TC.pos.p}{Numeric. Probability that the transcription is positively regulated by regulators. Default value is 0.5.}
+\item{TC.pos.p}{Numeric. Ratio of positive regulations among all regulations targeting gene transcription. Default value is 0.5.}
 
-\item{TL.pos.p}{Numeric. Probability that the translation is positively regulated by regulators. Default value is 0.5.}
+\item{TL.pos.p}{Numeric. Ratio of positive regulations among all regulations targeting gene translation. Default value is 0.5.}
 
-\item{PTM.pos.p}{Numeric. Probability that the regulators transform the original protein into its modified form
-(as opposed to transforming the modified protein back into its original form). Default value is 0.5.}
+\item{PTM.pos.p}{Numeric. Ratio of positive regulations among all regulations targeting protein post-translational modification (i.e the targeted protein
+is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.}
 
 \item{basal_transcription_rate_samplingfct}{Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
-Values from Schwanhausser et al., 2013: transcription rate distribution log-normal, from 0.1 to 100 mRNA/hour -> we want the transcription rate in seconds. Default value is}
+a log-normal distribution with mean = 0.5 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
+(from Schwanhausser et al., 2013)}
 
 \item{basal_translation_rate_samplingfct}{Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is
-Values from Schwanhausser et al., 2013: translation rate distribution log-normal, from 0.1 to 10^5 protein/mRNA/hour -> we want the transcription rate in seconds. Default value is}
+a log-normal distribution with mean = 2.5 and standard deviation = 0.8. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
+(from Schwanhausser et al., 2013)}
 
 \item{basal_RNAlifetime_samplingfct}{Function from which the transcript lifetimes are sampled (input x is the required sample size). Default value is
-Values from Schwanhausser et al., 2013: RNAs half-life distribution log-normal (chose boundary values to be from 1 min to 100 hours) -> we want the half-life in seconds. Default value is}
+a log-normal distribution with mean = 0 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and multiplied by 3600.
+(from Schwanhausser et al., 2013)}
 
 \item{basal_protlifetime_samplingfct}{Function from which the protein lifetime are sampled (input x is the required sample size). Default value is
-Values from Schwanhausser et al., 2013: proteins half-life distribution log-normal (chose boundary values to be from 1 hour to 1000 hours) -> we want the half-life in seconds. Default value is}
+a log-normal distribution with mean = 1.75 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and multiplied by 3600.
+(from Schwanhausser et al., 2013)}
 
-\item{TC.PC.outdeg.distr}{Form of the distribution of the number of targets of transcription factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TC.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{TC.NC.outdeg.distr}{Form of the distribution of the number of targets of noncoding RNAs regulating transcription; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TC.NC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TC.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the transcription regulation graph. Default value is 3.}
 
 \item{TC.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the transcription regulation graph. Default value is 1.}
 
-\item{TC.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential"). Default value is "powerlaw".}
+\item{TC.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{TC.NC.indeg.distr}{Type of preferential attachment for the targets of ncRNAs in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TC.NC.indeg.distr}{Type of preferential attachment for the targets of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TC.PC.autoregproba}{Numeric. Probability of protein regulators to perform autoregulation in the transcription regulation graph. Default value is 0.2.}
 
-\item{TC.NC.autoregproba}{Numeric. Probability of ncRNAs to perform autoregulation in the transcription regulation graph. Default value is 0.}
+\item{TC.NC.autoregproba}{Numeric. Probability of noncoding regulators to perform autoregulation in the transcription regulation graph. Default value is 0.}
 
 \item{TC.PC.twonodesloop}{Logical. Are 2-nodes loops authorised in the transcription regulation graph with protein regulators? Default value is FALSE.}
 
 \item{TC.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the transcription regulation graph with noncoding regulators? Default value is FALSE.}
 
-\item{TCbindingrate_samplingfct}{Function from which the binding rate of transcription regulators on target are sampled (input x is the required sample size). Default value is}
+\item{TCbindingrate_samplingfct}{Function from which the binding rates of transcription regulators on their targets are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{TCunbindingrate_samplingfct}{Function from which the unbinding rate of transcription regulators from target are sampled (input x is the required sample size). Default value is}
+\item{TCunbindingrate_samplingfct}{Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{TCfoldchange_samplingfct}{Function from which the transcription fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is}
+\item{TCfoldchange_samplingfct}{Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is a truncated normal distribution (lower bound: 2) with mean = 3 and standard deviation = 10.}
 
-\item{TL.PC.outdeg.distr}{Form of the distribution of the number of targets of translation factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TL.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{TL.NC.outdeg.distr}{Form of the the distribution of the number of targets of noncoding RNAs regulating translation; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TL.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TL.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the translation regulation graph. Default value is 3.}
 
 \item{TL.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the translation regulation graph. Default value is 1.}
 
-\item{TL.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the translation regulation graph can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TL.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TL.NC.indeg.distr}{Type of preferential attachment for the targets of ncRNAs in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TL.PC.autoregproba}{Numeric. Probability of protein regulators to perform autoregulation in the translation regulation graph. Default value is 0.2.}
 
-\item{TL.NC.autoregproba}{Numeric. Probability of ncRNAs to perform autoregulation in the translation regulation graph. Default value is 0.}
+\item{TL.NC.autoregproba}{Numeric. Probability of noncoding regulators to perform autoregulation in the translation regulation graph. Default value is 0.}
 
 \item{TL.PC.twonodesloop}{Logical. Are 2-nodes loops authorised in the translation regulation graph with protein regulators? Default value is FALSE.}
 
 \item{TL.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the translation regulation graph with noncoding regulators? Default value is FALSE.}
 
-\item{TLbindingrate_samplingfct}{Function from which the binding rate of translation regulators on target are sampled (input x is the required sample size). Default value is}
+\item{TLbindingrate_samplingfct}{Function from which the binding rate of translation regulators on target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{TLunbindingrate_samplingfct}{Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is}
+\item{TLunbindingrate_samplingfct}{Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{TLfoldchange_samplingfct}{Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is}
+\item{TLfoldchange_samplingfct}{Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is a truncated normal distribution (lower bound: 2) with mean = 3 and standard deviation = 10.}
 
-\item{RD.PC.outdeg.distr}{Form of the distribution of the number of targets of RNA decay factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{RD.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{RD.NC.outdeg.distr}{Form of the the distribution of the number of targets of noncoding RNAs regulating RNA decay; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{RD.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{RD.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the RNA decay regulation graph. Default value is 3.}
 
@@ -158,21 +162,21 @@ Values from Schwanhausser et al., 2013: proteins half-life distribution log-norm
 
 \item{RD.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{RD.NC.indeg.distr}{Type of preferential attachment for the targets of ncRNAs in the RNA decay graph;can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{RD.NC.indeg.distr}{Type of preferential attachment for the targets of noncoding regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{RD.PC.autoregproba}{Numeric. Probability of protein regulators to perform autoregulation in the RNA decay regulation graph. Default value is 0.2.}
 
-\item{RD.NC.autoregproba}{Numeric. Probability of ncRNAs to perform autoregulation in the RNA decay regulation graph. Default value is 0.}
+\item{RD.NC.autoregproba}{Numeric. Probability of noncoding regulators to perform autoregulation in the RNA decay regulation graph. Default value is 0.}
 
 \item{RD.PC.twonodesloop}{Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with protein regulators? Default value is FALSE.}
 
 \item{RD.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with noncoding regulators? Default value is FALSE.}
 
-\item{RDregrate_samplingfct}{Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is}
+\item{RDregrate_samplingfct}{Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{PD.PC.outdeg.distr}{Form of the distribution of the number of targets of protein decay factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{PD.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{PD.NC.outdeg.distr}{Form of the the distribution of the number of targets of noncoding RNAs regulating protein decay; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{PD.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PD.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein decay regulation graph. Default value is 3.}
 
@@ -180,21 +184,21 @@ Values from Schwanhausser et al., 2013: proteins half-life distribution log-norm
 
 \item{PD.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{PD.NC.indeg.distr}{Type of preferential attachment for the targets of ncRNAs in the protein decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{PD.NC.indeg.distr}{Type of preferential attachment for the targets of noncoding regulators in the protein decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PD.PC.autoregproba}{Numeric. Probability of protein regulators to perform autoregulation in the protein decay regulation graph. Default value is 0.2.}
 
-\item{PD.NC.autoregproba}{Numeric. Probability of ncRNAs to perform autoregulation in the protein decay regulation graph. Default value is 0.}
+\item{PD.NC.autoregproba}{Numeric. Probability of noncoding regulators to perform autoregulation in the protein decay regulation graph. Default value is 0.}
 
 \item{PD.PC.twonodesloop}{Logical. Are 2-nodes loops authorised in the protein decay graph with protein regulators in the protein decay regulation graph? Default value is FALSE.}
 
 \item{PD.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the protein decay graph with noncoding regulators in the protein decay regulation graph? Default value is FALSE.}
 
-\item{PDregrate_samplingfct}{Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size). Default value is}
+\item{PDregrate_samplingfct}{Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size).  Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{PTM.PC.outdeg.distr}{Form of the distribution of the number of targets of protein post-translational modification regulators; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{PTM.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{PTM.NC.outdeg.distr}{Form of the the distribution of the number of targets of noncoding RNAs regulating protein post-translational modification; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{PTM.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PTM.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein post-translational modification graph. Default value is 3.}
 
@@ -202,28 +206,28 @@ Values from Schwanhausser et al., 2013: proteins half-life distribution log-norm
 
 \item{PTM.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{PTM.NC.indeg.distr}{Type of preferential attachment for the targets of ncRNAs in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{PTM.NC.indeg.distr}{Type of preferential attachment for the targets of noncoding regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PTM.PC.autoregproba}{Numeric. Probability of protein regulators to perform autoregulation. Default value is 0.2.}
 
-\item{PTM.NC.autoregproba}{Numeric. Probability of ncRNAs to perform autoregulation. Default value is 0.}
+\item{PTM.NC.autoregproba}{Numeric. Probability of noncoding regulators to perform autoregulation. Default value is 0.}
 
 \item{PTM.PC.twonodesloop}{Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with protein regulators? Default value is FALSE.}
 
 \item{PTM.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with noncoding regulators? Default value is FALSE.}
 
-\item{PTMregrate_samplingfct}{Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is}
+\item{PTMregrate_samplingfct}{Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{regcomplexes}{Can the regulators controlling a common target form regulatory complexes in the protein post-translational modification graph? Can be 'none', 'prot' (only protein can form regulatory complexes) or 'both'
+\item{regcomplexes}{Can the regulators controlling a common target form regulatory complexes in the different regulatory graphs? Can be 'none', 'prot' (only protein can form regulatory complexes) or 'both'
 (both RNAs and proteins can form regulatory complexes). Default value is "prot".}
 
 \item{regcomplexes.p}{Numeric. Probability that regulators controlling a common target form regulatory complexes; ignore if regcomplexes = 'none'. Default value is 0.3.}
 
 \item{regcomplexes.size}{Integer. Number of components of a regulatory complex; ignore if regcomplexes = 'none'. Default value is 2.}
 
-\item{complexesformationrate_samplingfct}{Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is}
+\item{complexesformationrate_samplingfct}{Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
-\item{complexesdissociationrate_samplingfct}{Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is}
+\item{complexesdissociationrate_samplingfct}{Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
 
 \item{mycolsCS}{Named vector of colour names or code. Colours used in the plots to represent portein-coding and noncoding genes. Default value is c("PC" = "#e03616",  "NC" = "#58355e", "Tot" = "#31161F").}
 
@@ -232,10 +236,10 @@ Values from Schwanhausser et al., 2013: proteins half-life distribution log-norm
 \item{mycolsPosNeg}{Colours used in plots to represent positive/negative regulatory interactions. Default value is c("1" = "#D63230", "-1" = "#69BAF4").}
 }
 \value{
-An object of the class \code{insilicosystemargs}, that is a list of the different parameters.
+An object of the class \code{insilicosystemargs}, that is a named list of the different parameters.
 }
 \description{
-Constructor function for the \code{insilicosystemsargs} class, with default values if not provided by the user.
+Constructor function for the \code{insilicosystemsargs} class, with default values for the parameters if not provided by the user.
 }
 \details{
 For the protein-coding (and non-coding) biological function ratios (i.e. PC.TC.p, PC.TL.p, etc): if none of the ratios are provided,

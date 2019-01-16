@@ -2,7 +2,7 @@
 
 #' Constructor function for the \code{insilicosystemsargs} class.
 #'
-#' Constructor function for the \code{insilicosystemsargs} class, with default values if not provided by the user.
+#' Constructor function for the \code{insilicosystemsargs} class, with default values for the parameters if not provided by the user.
 #'
 #' For the protein-coding (and non-coding) biological function ratios (i.e. PC.TC.p, PC.TL.p, etc): if none of the ratios are provided,
 #' then they are set to their default values. Otherwise, if at least one value among the 6 (5 for noncoding genes) is set by the user:
@@ -28,87 +28,91 @@
 #' @param NC.RD.p Numeric. Ratio of regulators of RNA decay among the noncoding genes. Default value is 0.3 (see details).
 #' @param NC.PD.p Numeric. Ratio of regulators of protein decay among the noncoding genes. Default value is 0.05 (see details).
 #' @param NC.PTM.p Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05 (see details).
-#' @param TC.pos.p Numeric. Probability that the transcription is positively regulated by regulators. Default value is 0.5.
-#' @param TL.pos.p Numeric. Probability that the translation is positively regulated by regulators. Default value is 0.5.
-#' @param PTM.pos.p Numeric. Probability that the regulators transform the original protein into its modified form
-#' (as opposed to transforming the modified protein back into its original form). Default value is 0.5.
+#' @param TC.pos.p Numeric. Ratio of positive regulations among all regulations targeting gene transcription. Default value is 0.5.
+#' @param TL.pos.p Numeric. Ratio of positive regulations among all regulations targeting gene translation. Default value is 0.5.
+#' @param PTM.pos.p Numeric. Ratio of positive regulations among all regulations targeting protein post-translational modification (i.e the targeted protein
+#' is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.
 #' @param basal_transcription_rate_samplingfct Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
-#' Values from Schwanhausser et al., 2013: transcription rate distribution log-normal, from 0.1 to 100 mRNA/hour -> we want the transcription rate in seconds. Default value is
+#' a log-normal distribution with mean = 0.5 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
+#' (from Schwanhausser et al., 2013)
 #' @param basal_translation_rate_samplingfct Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is
-#' Values from Schwanhausser et al., 2013: translation rate distribution log-normal, from 0.1 to 10^5 protein/mRNA/hour -> we want the transcription rate in seconds. Default value is
+#' a log-normal distribution with mean = 2.5 and standard deviation = 0.8. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
+#' (from Schwanhausser et al., 2013)
 #' @param basal_RNAlifetime_samplingfct Function from which the transcript lifetimes are sampled (input x is the required sample size). Default value is
-#' Values from Schwanhausser et al., 2013: RNAs half-life distribution log-normal (chose boundary values to be from 1 min to 100 hours) -> we want the half-life in seconds. Default value is
+#' a log-normal distribution with mean = 0 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and multiplied by 3600.
+#' (from Schwanhausser et al., 2013)
 #' @param basal_protlifetime_samplingfct Function from which the protein lifetime are sampled (input x is the required sample size). Default value is
-#' Values from Schwanhausser et al., 2013: proteins half-life distribution log-normal (chose boundary values to be from 1 hour to 1000 hours) -> we want the half-life in seconds. Default value is
-#' @param TC.PC.outdeg.distr Form of the distribution of the number of targets of transcription factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param TC.NC.outdeg.distr Form of the distribution of the number of targets of noncoding RNAs regulating transcription; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' a log-normal distribution with mean = 1.75 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and multiplied by 3600.
+#' (from Schwanhausser et al., 2013)
+#' @param TC.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TC.NC.outdeg.distr Form of the distribution of the number of targets (out-degree) of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TC.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the transcription regulation graph. Default value is 3.
 #' @param TC.NC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the transcription regulation graph. Default value is 1.
-#' @param TC.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential"). Default value is "powerlaw".
-#' @param TC.NC.indeg.distr Type of preferential attachment for the targets of ncRNAs in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TC.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TC.NC.indeg.distr Type of preferential attachment for the targets of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TC.PC.autoregproba Numeric. Probability of protein regulators to perform autoregulation in the transcription regulation graph. Default value is 0.2.
-#' @param TC.NC.autoregproba Numeric. Probability of ncRNAs to perform autoregulation in the transcription regulation graph. Default value is 0.
+#' @param TC.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation in the transcription regulation graph. Default value is 0.
 #' @param TC.PC.twonodesloop Logical. Are 2-nodes loops authorised in the transcription regulation graph with protein regulators? Default value is FALSE.
 #' @param TC.NC.twonodesloop Logical. Are 2-nodes loops authorised in the transcription regulation graph with noncoding regulators? Default value is FALSE.
-#' @param TCbindingrate_samplingfct Function from which the binding rate of transcription regulators on target are sampled (input x is the required sample size). Default value is
-#' @param TCunbindingrate_samplingfct Function from which the unbinding rate of transcription regulators from target are sampled (input x is the required sample size). Default value is
-#' @param TCfoldchange_samplingfct Function from which the transcription fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is
-#' @param TL.PC.outdeg.distr Form of the distribution of the number of targets of translation factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param TL.NC.outdeg.distr Form of the the distribution of the number of targets of noncoding RNAs regulating translation; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TCbindingrate_samplingfct Function from which the binding rates of transcription regulators on their targets are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param TCunbindingrate_samplingfct Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param TCfoldchange_samplingfct Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is a truncated normal distribution (lower bound: 2) with mean = 3 and standard deviation = 10.
+#' @param TL.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TL.NC.outdeg.distr Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TL.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the translation regulation graph. Default value is 3.
 #' @param TL.NC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the translation regulation graph. Default value is 1.
-#' @param TL.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the translation regulation graph can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TL.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TL.NC.indeg.distr Type of preferential attachment for the targets of ncRNAs in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TL.PC.autoregproba Numeric. Probability of protein regulators to perform autoregulation in the translation regulation graph. Default value is 0.2.
-#' @param TL.NC.autoregproba Numeric. Probability of ncRNAs to perform autoregulation in the translation regulation graph. Default value is 0.
+#' @param TL.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation in the translation regulation graph. Default value is 0.
 #' @param TL.PC.twonodesloop Logical. Are 2-nodes loops authorised in the translation regulation graph with protein regulators? Default value is FALSE.
 #' @param TL.NC.twonodesloop Logical. Are 2-nodes loops authorised in the translation regulation graph with noncoding regulators? Default value is FALSE.
-#' @param TLbindingrate_samplingfct Function from which the binding rate of translation regulators on target are sampled (input x is the required sample size). Default value is
-#' @param TLunbindingrate_samplingfct Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is
-#' @param TLfoldchange_samplingfct Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is
-#' @param RD.PC.outdeg.distr Form of the distribution of the number of targets of RNA decay factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param RD.NC.outdeg.distr Form of the the distribution of the number of targets of noncoding RNAs regulating RNA decay; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param TLbindingrate_samplingfct Function from which the binding rate of translation regulators on target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param TLunbindingrate_samplingfct Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param TLfoldchange_samplingfct Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is a truncated normal distribution (lower bound: 2) with mean = 3 and standard deviation = 10.
+#' @param RD.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param RD.NC.outdeg.distr Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param RD.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the RNA decay regulation graph. Default value is 3.
 #' @param RD.NC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the RNA decay regulation graph. Default value is 1.
 #' @param RD.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param RD.NC.indeg.distr Type of preferential attachment for the targets of ncRNAs in the RNA decay graph;can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param RD.NC.indeg.distr Type of preferential attachment for the targets of noncoding regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param RD.PC.autoregproba Numeric. Probability of protein regulators to perform autoregulation in the RNA decay regulation graph. Default value is 0.2.
-#' @param RD.NC.autoregproba Numeric. Probability of ncRNAs to perform autoregulation in the RNA decay regulation graph. Default value is 0.
+#' @param RD.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation in the RNA decay regulation graph. Default value is 0.
 #' @param RD.PC.twonodesloop Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with protein regulators? Default value is FALSE.
 #' @param RD.NC.twonodesloop Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with noncoding regulators? Default value is FALSE.
-#' @param RDregrate_samplingfct Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is
-#' @param PD.PC.outdeg.distr Form of the distribution of the number of targets of protein decay factors; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param PD.NC.outdeg.distr Form of the the distribution of the number of targets of noncoding RNAs regulating protein decay; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param RDregrate_samplingfct Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param PD.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param PD.NC.outdeg.distr Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param PD.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein decay regulation graph. Default value is 3.
 #' @param PD.NC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein decay regulation graph. Default value is 1.
 #' @param PD.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param PD.NC.indeg.distr Type of preferential attachment for the targets of ncRNAs in the protein decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param PD.NC.indeg.distr Type of preferential attachment for the targets of noncoding regulators in the protein decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param PD.PC.autoregproba Numeric. Probability of protein regulators to perform autoregulation in the protein decay regulation graph. Default value is 0.2.
-#' @param PD.NC.autoregproba Numeric. Probability of ncRNAs to perform autoregulation in the protein decay regulation graph. Default value is 0.
+#' @param PD.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation in the protein decay regulation graph. Default value is 0.
 #' @param PD.PC.twonodesloop Logical. Are 2-nodes loops authorised in the protein decay graph with protein regulators in the protein decay regulation graph? Default value is FALSE.
 #' @param PD.NC.twonodesloop Logical. Are 2-nodes loops authorised in the protein decay graph with noncoding regulators in the protein decay regulation graph? Default value is FALSE.
-#' @param PDregrate_samplingfct Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size). Default value is
-#' @param PTM.PC.outdeg.distr Form of the distribution of the number of targets of protein post-translational modification regulators; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param PTM.NC.outdeg.distr Form of the the distribution of the number of targets of noncoding RNAs regulating protein post-translational modification; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param PDregrate_samplingfct Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size).  Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param PTM.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param PTM.NC.outdeg.distr Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param PTM.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein post-translational modification graph. Default value is 3.
 #' @param PTM.NC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein post-translational modification graph. Default value is 1.
 #' @param PTM.PC.indeg.distr Type of preferential attachment for the targets of protein regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
-#' @param PTM.NC.indeg.distr Type of preferential attachment for the targets of ncRNAs in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+#' @param PTM.NC.indeg.distr Type of preferential attachment for the targets of noncoding regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param PTM.PC.autoregproba Numeric. Probability of protein regulators to perform autoregulation. Default value is 0.2.
-#' @param PTM.NC.autoregproba Numeric. Probability of ncRNAs to perform autoregulation. Default value is 0.
+#' @param PTM.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation. Default value is 0.
 #' @param PTM.PC.twonodesloop Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with protein regulators? Default value is FALSE.
 #' @param PTM.NC.twonodesloop Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with noncoding regulators? Default value is FALSE.
-#' @param PTMregrate_samplingfct Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is
-#' @param regcomplexes Can the regulators controlling a common target form regulatory complexes in the protein post-translational modification graph? Can be 'none', 'prot' (only protein can form regulatory complexes) or 'both'
+#' @param PTMregrate_samplingfct Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param regcomplexes Can the regulators controlling a common target form regulatory complexes in the different regulatory graphs? Can be 'none', 'prot' (only protein can form regulatory complexes) or 'both'
 #' (both RNAs and proteins can form regulatory complexes). Default value is "prot".
 #' @param regcomplexes.p Numeric. Probability that regulators controlling a common target form regulatory complexes; ignore if regcomplexes = 'none'. Default value is 0.3.
 #' @param regcomplexes.size Integer. Number of components of a regulatory complex; ignore if regcomplexes = 'none'. Default value is 2.
-#' @param complexesformationrate_samplingfct Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is
-#' @param complexesdissociationrate_samplingfct Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is
+#' @param complexesformationrate_samplingfct Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param complexesdissociationrate_samplingfct Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
 #' @param mycolsCS Named vector of colour names or code. Colours used in the plots to represent portein-coding and noncoding genes. Default value is c("PC" = "#e03616",  "NC" = "#58355e", "Tot" = "#31161F").
 #' @param mycolsGF Colours used in the plots to represent the different gene expression steps (transcription, translation, etc). Default value is c("TC" = "#FF7F11", "TL" = "#FF963C", "RD" = "#5AB7A4", "PD" = "#78C4B4", "PTM" = "#FF1B1C", "MR" = "#FF6D6E").
 #' @param mycolsPosNeg Colours used in plots to represent positive/negative regulatory interactions. Default value is c("1" = "#D63230", "-1" = "#69BAF4").
-#' @return An object of the class \code{insilicosystemargs}, that is a list of the different parameters.
+#' @return An object of the class \code{insilicosystemargs}, that is a named list of the different parameters.
 #' @export
 insilicosystemargs <- function(
   G = 10,
@@ -215,7 +219,7 @@ insilicosystemargs <- function(
   if(is.null(TCfoldchange_samplingfct)) TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) }
   if(is.null(TLbindingrate_samplingfct)) TLbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(TLunbindingrate_samplingfct)) TLunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(TLfoldchange_samplingfct)) TLfoldchange_samplingfct = function(x){ sample(2:30, x, replace = T)  }
+  if(is.null(TLfoldchange_samplingfct)) TLfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10)  }
   if(is.null(RDregrate_samplingfct)) RDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
@@ -386,13 +390,13 @@ insilicosystemargs <- function(
 
 #' Constructor function for the \code{insilicoindividualargs} class.
 #'
-#' Constructor function for the \code{insilicoindividualargs} class, with default values if not provided by the user.
+#' Constructor function for the \code{insilicoindividualargs} class, with default values for the parameters if not provided by the user.
 #'
-#' @param ploidy Integer. Number of alleles for each gene. Default value is 2.
-#' @param ngenevariants Integer. Number of alleles existing for each gene. Default value is 5.
+#' @param ploidy Integer. Number of alleles for each gene (ploidy of the individuals). Default value is 2.
+#' @param ngenevariants Integer. Number of alleles existing for each gene and segregating in the in silico population. Default value is 5.
 #' @param qtleffect_samplingfct Function from which is sampled the effect of a QTL (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
-#' @param initvar_samplingfct Function from which is sampled the variation in initial abundance of a species (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
-#' @return An object of the class \code{insilicoindividualargs}, that is a list of the different parameters.
+#' @param initvar_samplingfct Function from which is sampled the variation of the initial abundance of a species (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
+#' @return An object of the class \code{insilicoindividualargs}, that is a named list of the different parameters.
 #' @export
 insilicoindividualargs <- function(
   ploidy = 2,

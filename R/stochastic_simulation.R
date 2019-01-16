@@ -1,6 +1,6 @@
 #' Tranforms a data-frame into a list.
 #'
-#' Transforms a data-frame into a list to be sent to Julia. The elements of the lists correspond to
+#' Transforms a data-frame into a list. The elements of the lists correspond to
 #' the columns of the data-frame.
 #'
 #' @param mydf A data-frame.
@@ -26,12 +26,12 @@ df2list = function(mydf){
 #' @param insilicosystem The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).
 #' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created.
-#' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
-#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
+#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
+#' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions (default: none).
+#' @param ev A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @export
-createStochSystem = function(insilicosystem, indargs, writefile, filepath, filename, ev = getJuliaEvaluator()){
+createStochSystem = function(insilicosystem, indargs, writefile, filepath = getwd(), filename = "", ev = getJuliaEvaluator()){
 
   ## Creating the networks lists to be sent to Julia (converted to dictionaries in Julia)
   temp = names(insilicosystem$mosystem)

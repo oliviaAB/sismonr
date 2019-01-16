@@ -1,16 +1,13 @@
 #' Create variants for genes in the system.
 #'
-#' Create variants that segregate in the in silico population for each gene in the system.
-#'
-#' Returns a list that gives for each gene in the system the existing variants segregating in the in silico population.
-#' A variant is defined by a set of QTL effect coefficients ("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDregrate",
-#' "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregrate") that correspond to the impact of genetic
-#' mutations on the variant.
+#' Create variants that segregate in the in silico population for each gene in the system. Returns a list that gives for each gene in the system the existing variants segregating in the in silico population.
 #'
 #' @param genes A data frame of genes in the system (created by the function \code{\link{createGenes}}).
-#' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
+#' @param indargs An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).
 #' @return A list of size G (number of genes in the system) where each element is a matrix corresponding to the QTL effect
-#' coefficients (rows) of the different variants (columns) segregating in the in silico population for the corresponding gene.
+#' coefficients (rows) of the different variants (columns) segregating in the in silico population for the corresponding gene. A variant is defined by a set of QTL effect coefficients ("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDregrate",
+#' "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregrate") that correspond to the impact of genetic
+#' mutations carried by the variant on the different kinetic parameters of the gene.
 #' @export
 createVariants = function(genes, indargs){
 
