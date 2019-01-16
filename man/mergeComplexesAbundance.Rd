@@ -2,7 +2,7 @@
 % Please edit documentation in R/stochastic_simulation.R
 \name{mergeComplexesAbundance}
 \alias{mergeComplexesAbundance}
-\title{Merge the free and in complexe versions of molecules.}
+\title{Merge the free and in-complex versions of molecules.}
 \usage{
 mergeComplexesAbundance(df)
 }
@@ -11,8 +11,17 @@ mergeComplexesAbundance(df)
 or \code{\link{simulateParallelInSilicoSystem}}).}
 }
 \value{
-A dataframe in which the abundance of free and in complexe versions of a molecule have been added.
+A dataframe in which the abundance of free and in complex versions of a molecule have been merged to give the abundance of the molecule (without distinction of whether or not it is bound in a molecular complex).
 }
 \description{
-Sum the abundance of the free and in complexe versions of each molecule.
+Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1)
+mysystem = addComplex(mysystem, c(1, 2))
+mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+sim = simulateInSilicoSystem(mysystem, mypop, 100)
+head(sim$Simulation)
+mergedComplex = mergeComplexesAbundance(sim$Simulation)
+head(mergedComplex)
 }

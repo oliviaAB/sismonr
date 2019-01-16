@@ -11,8 +11,16 @@ mergePTMAbundance(df)
 or \code{\link{simulateParallelInSilicoSystem}}).}
 }
 \value{
-A dataframe in which the abundance of original and modified versions of a protein have been added.
+A dataframe in which the abundance of original and modified versions of a protein have been merged to give the abundance of the protein (without distinction of its post-translational modification state).
 }
 \description{
-Sum the abundance of the original and modified (PTM) versions of each protein.
+Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none")
+mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+sim = simulateInSilicoSystem(mysystem, mypop, 100)
+head(sim$Simulation)
+mergedPTM = mergePTMAbundance(sim$Simulation)
+head(mergedPTM)
 }

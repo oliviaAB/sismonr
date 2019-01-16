@@ -12,9 +12,9 @@ simulateInSilicoSystem(insilicosystem, insilicopopulation, simtime,
 \arguments{
 \item{insilicosystem}{The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).}
 
-\item{insilicopopulation}{The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).}
+\item{insilicopopulation}{The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).}
 
-\item{simtime}{The amount of time to simulate the model (in seconds).}
+\item{simtime}{The final time of the simulation (in seconds).}
 
 \item{nepochs}{The number of times to record the state of the system during the simulation.}
 
@@ -25,7 +25,7 @@ Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "Tau
 
 \item{writefile}{Does the julia function write the species and reactions lists in a text file?}
 
-\item{filepath}{If writefile = \code{TRUE}, path to the folder in the which the files will be created.}
+\item{filepath}{If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).}
 
 \item{filename}{If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.}
 
@@ -34,11 +34,29 @@ Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "Tau
 \value{
 A list composed of:
 \itemize{
-\item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
-\item \code{runningtime}: A vector of running time of all simulations
+\item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
+RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds to molecules (RNAs or proteins) originated from the j-th allele of the gene.
+\item \code{runningtime}: A vector of running time of all simulations.
 \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 }
 }
 \description{
-Simulates (stochastically) the behaviour of an in silico system over time
+Simulates (stochastically) the behaviour of an in silico system over time.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+sim = simulateInSilicoSystem(mysystem, mypop, 1000)
+## For visualisation
+library(tidyverse)
+library(RColorBrewer)
+cols = brewer.pal(10, "Paired")
+names(cols) = unlist(sapply(1:5, function(x){c(paste0(x, "GCN1"), paste0(x, "GCN2"))}))
+toplot = sim$Simulation \%>\%
+gather(key = "ID", value = "Abundance", setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) \%>\%
+mutate(Type = case_when(str_detect(ID, "^R") ~ "RNAs",
+                         str_detect(ID, "^P") ~ "Proteins"),
+        Components = stringr::str_replace(ID, "^R|^P", ""))
+ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + geom_line() + facet_grid(Type~., scales = "free_y") +
+scale_colour_manual(values = cols, breaks = names(cols))
 }

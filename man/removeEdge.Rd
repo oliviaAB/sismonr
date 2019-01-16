@@ -9,13 +9,22 @@ removeEdge(insilicosystem, regID, tarID)
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{regID}{Integer. The ID of the regulator gene.}
+\item{regID}{Integer or character. The ID of the regulator gene or the name of the regulatory complex.}
 
-\item{tarID}{Integer. The ID of the target gene.}
+\item{tarID}{Integer or character. The ID of the target gene.}
 }
 \value{
 The modified in silico system.
 }
 \description{
 Removes an edge in the in silico system between specified genes.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 10)
+mysystem$edg
+## we'll remove the first edge
+regToRemove = mysystem$edg$from[1]
+tarToRemove = mysystem$edg$to[1]
+mysystem2 = removeEdge(mysystem, regToRemove, tarToRemove)
+mysystem2$edg
 }

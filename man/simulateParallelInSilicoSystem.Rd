@@ -12,9 +12,9 @@ simulateParallelInSilicoSystem(insilicosystem, insilicopopulation, simtime,
 \arguments{
 \item{insilicosystem}{The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).}
 
-\item{insilicopopulation}{The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).}
+\item{insilicopopulation}{The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).}
 
-\item{simtime}{The amount of time to simulate the model (in seconds).}
+\item{simtime}{The final time of the simulation (in seconds).}
 
 \item{nepochs}{The number of times to record the state of the system during the simulation.}
 
@@ -25,11 +25,11 @@ Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "Tau
 
 \item{writefile}{Does the julia function write the species and reactions lists in a text file?}
 
-\item{filepath}{If writefile = \code{TRUE}, path to the folder in the which the files will be created.}
+\item{filepath}{If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).}
 
 \item{filename}{If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.}
 
-\item{no_cores}{THe number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
+\item{no_cores}{The number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
 package to detect the number of available cores, and use this number-1 for the simulation.}
 
 \item{ev}{A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.}
@@ -37,11 +37,17 @@ package to detect the number of available cores, and use this number-1 for the s
 \value{
 A list composed of:
 \itemize{
-\item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
+\item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
+RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds to molecules (RNAs or proteins) originated from the j-th allele of the gene.
 \item \code{runningtime}: The running time (elapsed seconds) of the parallel simulation (only 1 value).
 \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 }
 }
 \description{
-Simulates (stochastically) the behaviour of an in silico system over time using parallelisation
+Simulates (stochastically) the behaviour of an in silico system over time using parallelisation.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
 }

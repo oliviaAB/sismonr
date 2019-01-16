@@ -11,8 +11,16 @@ mergeAlleleAbundance(df)
 or \code{\link{simulateParallelInSilicoSystem}}).}
 }
 \value{
-A dataframe in which the abundance of the different allelic versions of the same molecule have been added.
+A dataframe in which the abundance of the different allelic versions of the same molecule have been merged to give the abundance of the molecule (without distinction of the allele of origin).
 }
 \description{
-Sum the abundance of the different allelic versions of each molecule.
+Merge (i.e. sum) the abundance of the different allelic versions of each molecule.
+}
+\examples{
+mysystem = createInSilicoSystem(G = 5, empty = T)
+mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+sim = simulateInSilicoSystem(mysystem, mypop, 100)
+head(sim$Simulation)
+mergedAllelic = mergeAlleleAbundance(sim$Simulation)
+head(mergedAllelic)
 }

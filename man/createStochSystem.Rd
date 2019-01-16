@@ -5,7 +5,7 @@
 \title{Creates a stochastic system from an in silico system.}
 \usage{
 createStochSystem(insilicosystem, indargs, writefile, filepath = getwd(),
-  filename = "", ev = getJuliaEvaluator())
+  filename = "simulation", ev = getJuliaEvaluator())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}

@@ -650,6 +650,13 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
 #' @param name String. The name of the regulatory complex to remove.
 #' @return The modified in silico system.
+#' @examples
+#' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, regcomplexes.p = 0.8)
+#' mysystem$complexes
+#' mysystem$edg
+#' mysystem2 = removeComplex(mysystem, "CTC1")
+#' mysystem2$complexes
+#' mysystem2$edg
 #' @export
 removeComplex = function(insilicosystem, name){
 
@@ -811,9 +818,17 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 #' Removes an edge in the in silico system between specified genes.
 #'
 #' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
-#' @param regID Integer. The ID of the regulator gene.
-#' @param tarID Integer. The ID of the target gene.
+#' @param regID Integer or character. The ID of the regulator gene or the name of the regulatory complex.
+#' @param tarID Integer or character. The ID of the target gene.
 #' @return The modified in silico system.
+#' @examples
+#' mysystem = createInSilicoSystem(G = 10)
+#' mysystem$edg
+#' ## we'll remove the first edge
+#' regToRemove = mysystem$edg$from[1]
+#' tarToRemove = mysystem$edg$to[1]
+#' mysystem2 = removeEdge(mysystem, regToRemove, tarToRemove)
+#' mysystem2$edg
 #' @export
 removeEdge = function(insilicosystem, regID, tarID){
 

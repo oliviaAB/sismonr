@@ -31,7 +31,7 @@ df2list = function(mydf){
 #' @param ev A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @export
-createStochSystem = function(insilicosystem, indargs, writefile, filepath = getwd(), filename = "", ev = getJuliaEvaluator()){
+createStochSystem = function(insilicosystem, indargs, writefile, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
 
   ## Creating the networks lists to be sent to Julia (converted to dictionaries in Julia)
   temp = names(insilicosystem$mosystem)
@@ -103,25 +103,42 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 
 #' Simulates a in-silico system
 #'
-#' Simulates (stochastically) the behaviour of an in silico system over time
+#' Simulates (stochastically) the behaviour of an in silico system over time.
 #'
 #' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
-#' @param insilicopopulation The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).
-#' @param simtime The amount of time to simulate the model (in seconds).
+#' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @param simtime The final time of the simulation (in seconds).
 #' @param nepochs The number of times to record the state of the system during the simulation.
 #' @param ntrials The number of times the simulation must be replicated.
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created.
+#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A list composed of:
 #' \itemize{
-#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
-#' \item \code{runningtime}: A vector of running time of all simulations
+#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
+#' RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds to molecules (RNAs or proteins) originated from the j-th allele of the gene.
+#' \item \code{runningtime}: A vector of running time of all simulations.
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
+#' @examples
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 1000)
+#' ## For visualisation
+#' library(tidyverse)
+#' library(RColorBrewer)
+#' cols = brewer.pal(10, "Paired")
+#' names(cols) = unlist(sapply(1:5, function(x){c(paste0(x, "GCN1"), paste0(x, "GCN2"))}))
+#' toplot = sim$Simulation %>%
+#' gather(key = "ID", value = "Abundance", setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) %>%
+#' mutate(Type = case_when(str_detect(ID, "^R") ~ "RNAs",
+#'                          str_detect(ID, "^P") ~ "Proteins"),
+#'         Components = stringr::str_replace(ID, "^R|^P", ""))
+#' ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + geom_line() + facet_grid(Type~., scales = "free_y") +
+#' scale_colour_manual(values = cols, breaks = names(cols))
 #' @export
 simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
 
@@ -187,27 +204,32 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 
 #' Simulates a in-silico system in parallel
 #'
-#' Simulates (stochastically) the behaviour of an in silico system over time using parallelisation
+#' Simulates (stochastically) the behaviour of an in silico system over time using parallelisation.
 #'
 #' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
-#' @param insilicopopulation The in silico insilicopopulation to be simulated (see \code{\link{createInSilicoPopulation}}).
-#' @param simtime The amount of time to simulate the model (in seconds).
+#' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @param simtime The final time of the simulation (in seconds).
 #' @param nepochs The number of times to record the state of the system during the simulation.
 #' @param ntrials The number of times the simulation must be replicated.
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created.
+#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
-#' @param no_cores THe number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
+#' @param no_cores The number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
 #' package to detect the number of available cores, and use this number-1 for the simulation.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A list composed of:
 #' \itemize{
-#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for each individual in the in silico population.
+#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
+#' RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds to molecules (RNAs or proteins) originated from the j-th allele of the gene.
 #' \item \code{runningtime}: The running time (elapsed seconds) of the parallel simulation (only 1 value).
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
+#' @examples
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
 #' @export
 simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
 
@@ -285,11 +307,18 @@ sumColAbundance = function(df, colsid){
 
 #' Merge the different allelic versions of the molecules.
 #'
-#' Sum the abundance of the different allelic versions of each molecule.
+#' Merge (i.e. sum) the abundance of the different allelic versions of each molecule.
 #'
 #' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
 #' or \code{\link{simulateParallelInSilicoSystem}}).
-#' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been added.
+#' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been merged to give the abundance of the molecule (without distinction of the allele of origin).
+#' @examples
+#' mysystem = createInSilicoSystem(G = 5, empty = T)
+#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 100)
+#' head(sim$Simulation)
+#' mergedAllelic = mergeAlleleAbundance(sim$Simulation)
+#' head(mergedAllelic)
 #' @export
 mergeAlleleAbundance = function(df){
   mergeddf = df %>% select(time, trial, Ind)
@@ -305,11 +334,18 @@ mergeAlleleAbundance = function(df){
 
 #' Merge the original and PTM versions of the proteins.
 #'
-#' Sum the abundance of the original and modified (PTM) versions of each protein.
+#' Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein.
 #'
 #' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
 #' or \code{\link{simulateParallelInSilicoSystem}}).
-#' @return A dataframe in which the abundance of original and modified versions of a protein have been added.
+#' @return A dataframe in which the abundance of original and modified versions of a protein have been merged to give the abundance of the protein (without distinction of its post-translational modification state).
+#' @examples
+#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none")
+#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 100)
+#' head(sim$Simulation)
+#' mergedPTM = mergePTMAbundance(sim$Simulation)
+#' head(mergedPTM)
 #' @export
 mergePTMAbundance = function(df){
   mergeddf = df %>% select(time, trial, Ind)
@@ -323,13 +359,21 @@ mergePTMAbundance = function(df){
   return(mergeddf)
 }
 
-#' Merge the free and in complexe versions of molecules.
+#' Merge the free and in-complex versions of molecules.
 #'
-#' Sum the abundance of the free and in complexe versions of each molecule.
+#' Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule.
 #'
 #' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
 #' or \code{\link{simulateParallelInSilicoSystem}}).
-#' @return A dataframe in which the abundance of free and in complexe versions of a molecule have been added.
+#' @return A dataframe in which the abundance of free and in complex versions of a molecule have been merged to give the abundance of the molecule (without distinction of whether or not it is bound in a molecular complex).
+#' @examples
+#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1)
+#' mysystem = addComplex(mysystem, c(1, 2))
+#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 100)
+#' head(sim$Simulation)
+#' mergedComplex = mergeComplexesAbundance(sim$Simulation)
+#' head(mergedComplex)
 #' @export
 mergeComplexesAbundance = function(df){
   molsComp = colnames(df)[stringr::str_detect(colnames(df), "^C")]
