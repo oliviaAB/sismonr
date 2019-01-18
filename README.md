@@ -1,14 +1,16 @@
 # sismonr - Simulation of In Silico Multi-Omic Networks R package
 
-## IMPORTANT - Julia requirements
-This current version of sismonr requires Julia version 0.6.4 and does not work with later versions of Julia. This will be fixed as soon as possible.
+## Julia requirements
+This current version of sismonr is compatible with Julia 0.7. However, some of the Julia modules on which sismonr depends are still in the process of transitioning to the new Julia syntax. Expect warnings during the simulations.
 
-To install Julia v0.6.4, go to [https://julialang.org/downloads/oldreleases.html](https://julialang.org/downloads/oldreleases.html) and follow the instructions.
-Please make sure to include the Julia executable in your PATH. For Linux users you can use the following command:
+We do recommend (for now ) to use sismonr with Julia v0.7.0. To install Julia, go to [https://julialang.org/downloads/](https://julialang.org/downloads/) and follow the instructions.
+Please make sure to include the Julia executable in your environmental variable PATH. Linux users can use the following command in the terminal:
 ```
 sudo ln -s path_to_julia_folder/bin/julia /usr/local/bin/julia
 ```
 to create a symbolic link to julia inside the `/usr/local/bin` folder.
+
+Windows users can open the Control Panel and go to System > Advanced system settings > Environment variables. Select the PATH variable, click on Edit > New and copy-paste the path `path_to_julia_folder/bin`.
 
 ## sismonr
 
