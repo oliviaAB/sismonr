@@ -124,21 +124,27 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
 #' @examples
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
 #' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 1000)
 #' ## For visualisation
-#' library(tidyverse)
+#' library(tidyr)
+#' library(dplyr)
+#' library(ggplot2)
 #' library(RColorBrewer)
 #' cols = brewer.pal(10, "Paired")
 #' names(cols) = unlist(sapply(1:5, function(x){c(paste0(x, "GCN1"), paste0(x, "GCN2"))}))
 #' toplot = sim$Simulation %>%
-#' gather(key = "ID", value = "Abundance", setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) %>%
+#' gather(key = "ID", value = "Abundance",
+#'  setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) %>%
 #' mutate(Type = case_when(str_detect(ID, "^R") ~ "RNAs",
 #'                          str_detect(ID, "^P") ~ "Proteins"),
 #'         Components = stringr::str_replace(ID, "^R|^P", ""))
-#' ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + geom_line() + facet_grid(Type~., scales = "free_y") +
+#' ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) +
+#' geom_line() + facet_grid(Type~., scales = "free_y") +
 #' scale_colour_manual(values = cols, breaks = names(cols))
+#' }
 #' @export
 simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
 
@@ -227,9 +233,11 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
 #' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
 #' sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
+#' }
 #' @export
 simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
 
@@ -313,12 +321,14 @@ sumColAbundance = function(df, colsid){
 #' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been merged to give the abundance of the molecule (without distinction of the allele of origin).
 #' @examples
-#' mysystem = createInSilicoSystem(G = 5, empty = T)
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 5, empty = TRUE)
 #' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
 #' head(sim$Simulation)
 #' mergedAllelic = mergeAlleleAbundance(sim$Simulation)
 #' head(mergedAllelic)
+#' }
 #' @export
 mergeAlleleAbundance = function(df){
   mergeddf = df %>% select(time, trial, Ind)
@@ -340,12 +350,14 @@ mergeAlleleAbundance = function(df){
 #' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of original and modified versions of a protein have been merged to give the abundance of the protein (without distinction of its post-translational modification state).
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none")
 #' mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
 #' head(sim$Simulation)
 #' mergedPTM = mergePTMAbundance(sim$Simulation)
 #' head(mergedPTM)
+#' }
 #' @export
 mergePTMAbundance = function(df){
   mergeddf = df %>% select(time, trial, Ind)
@@ -367,6 +379,7 @@ mergePTMAbundance = function(df){
 #' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of free and in complex versions of a molecule have been merged to give the abundance of the molecule (without distinction of whether or not it is bound in a molecular complex).
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1)
 #' mysystem = addComplex(mysystem, c(1, 2))
 #' mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
@@ -374,6 +387,7 @@ mergePTMAbundance = function(df){
 #' head(sim$Simulation)
 #' mergedComplex = mergeComplexesAbundance(sim$Simulation)
 #' head(mergedComplex)
+#' }
 #' @export
 mergeComplexesAbundance = function(df){
   molsComp = colnames(df)[stringr::str_detect(colnames(df), "^C")]
@@ -388,67 +402,67 @@ mergeComplexesAbundance = function(df){
 }
 
 
-plotIndividual = function(simdf, ind, mergeAllele = F, mergePTM = F, mergeComplexes = F){
-
-  simind = simdf %>% filter(Ind == ind)
-
-  if(mergePTM)  simind = mergePTMAbundance(simind)
-  if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
-  if(mergeAllele) simind = mergeAlleleAbundance(simind)
-
-  toplot = simind %>%
-    gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
-    mutate(Type = case_when(stringr::str_detect(ID, "^R") ~ "RNAs",
-                            stringr::str_detect(ID, "^P") ~ "Proteins",
-                            stringr::str_detect(ID, "^C") ~ "Complexes"),
-           Components = stringr::str_replace(ID, "^R|^P", ""))
-
-  ## GENERATE COLOUR PALETTE
-  if(!mergeAllele){
-    ## we need to see how many different components exist in the system and how many allelic version of each exist
-    compocols = data.frame(Components = unique(toplot$Components)) %>%
-      mutate(isComplex = stringr::str_detect(Components, "^C")) %>%
-      mutate(compoID = stringr::str_replace_all(Components, "GCN.+|_.+", ""),
-             Allele = stringr::str_replace(Components, "^[[:digit:]]+(?=GCN)|^[^_]+_{1}", "")) %>%
-      dplyr::arrange(compoID, Allele)
-
-    ncols = length(unique(compocols$compoID))
-    paletteCompo = randomcoloR::distinctColorPalette(ncols) ## create a colour for each component
-    names(paletteCompo) = unique(compocols$compoID)
-    palette = unlist(lapply(names(paletteCompo), function(x){ ## create a gradient (one colour for each allelic version of the component)
-      nall = sum(compocols$compoID == x)
-      return(colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1])
-    }))
-    names(palette) = sort(compocols$Components)
-  }else{
-    palette = randomcoloR::distinctColorPalette(length(unique(toplot$Components)))
-    names(palette) = sort(unique(toplot$Components))
-  }
-
-
-  if(max(simind$trial) == 1){   ## If there is only one trial
-    simuplot = ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + geom_line() +
-      facet_grid(Type~., scales = "free_y") +
-      scale_colour_manual(values = palette, breaks = names(palette)) +
-      xlab("Time (s)") + ylab("Components absolute abundance") +
-      theme_minimal() +
-      theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10))
-  }else{
-    toplotTrials = toplot %>%
-      group_by(Ind, time, Components, Type, ID) %>%
-      summarise("mean" = mean(Abundance), "LB" = min(Abundance), "UB" = max(Abundance))
-
-    simuplot = ggplot(toplotTrials, aes(x = time)) +
-      geom_ribbon(aes(ymin = LB, ymax = UB, fill = Components), alpha = 0.5) +
-      geom_line(aes(y = mean, colour = Components)) +
-      scale_colour_manual(values = palette, breaks = names(palette)) +
-      scale_fill_manual(values = palette, breaks = names(palette)) +
-      facet_grid(Type~., scales = "free_y") +
-      xlab("Time (s)") + ylab("Components absolute abundance") +
-      theme_minimal() +
-      theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10))
-  }
-
-  print(simuplot)
-
-}
+# plotIndividual = function(simdf, ind, mergeAllele = F, mergePTM = F, mergeComplexes = F){
+#
+#   simind = simdf %>% filter(Ind == ind)
+#
+#   if(mergePTM)  simind = mergePTMAbundance(simind)
+#   if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
+#   if(mergeAllele) simind = mergeAlleleAbundance(simind)
+#
+#   toplot = simind %>%
+#     tidyr::gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
+#     mutate(Type = case_when(stringr::str_detect(ID, "^R") ~ "RNAs",
+#                             stringr::str_detect(ID, "^P") ~ "Proteins",
+#                             stringr::str_detect(ID, "^C") ~ "Complexes"),
+#            Components = stringr::str_replace(ID, "^R|^P", ""))
+#
+#   ## GENERATE COLOUR PALETTE
+#   if(!mergeAllele){
+#     ## we need to see how many different components exist in the system and how many allelic version of each exist
+#     compocols = data.frame(Components = unique(toplot$Components)) %>%
+#       mutate(isComplex = stringr::str_detect(Components, "^C")) %>%
+#       mutate(compoID = stringr::str_replace_all(Components, "GCN.+|_.+", ""),
+#              Allele = stringr::str_replace(Components, "^[[:digit:]]+(?=GCN)|^[^_]+_{1}", "")) %>%
+#       dplyr::arrange(compoID, Allele)
+#
+#     ncols = length(unique(compocols$compoID))
+#     paletteCompo = randomcoloR::distinctColorPalette(ncols) ## create a colour for each component
+#     names(paletteCompo) = unique(compocols$compoID)
+#     palette = unlist(lapply(names(paletteCompo), function(x){ ## create a gradient (one colour for each allelic version of the component)
+#       nall = sum(compocols$compoID == x)
+#       return(grDevices::colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1])
+#     }))
+#     names(palette) = sort(compocols$Components)
+#   }else{
+#     palette = randomcoloR::distinctColorPalette(length(unique(toplot$Components)))
+#     names(palette) = sort(unique(toplot$Components))
+#   }
+#
+#
+#   if(max(simind$trial) == 1){   ## If there is only one trial
+#     simuplot = ggplot2::ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + ggplot2::geom_line() +
+#       ggplot2::facet_grid(Type~., scales = "free_y") +
+#       ggplot2::scale_colour_manual(values = palette, breaks = names(palette)) +
+#       ggplot2::xlab("Time (s)") + ggplot2::ylab("Components absolute abundance") +
+#       ggplot2::theme_minimal() +
+#       ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10))
+#   }else{
+#     toplotTrials = toplot %>%
+#       dplyr::group_by(Ind, time, Components, Type, ID) %>%
+#       dplyr::summarise("mean" = mean(Abundance), "LB" = min(Abundance), "UB" = max(Abundance))
+#
+#     simuplot = ggplot2::ggplot(toplotTrials, aes(x = time)) +
+#       ggplot2::geom_ribbon(aes(ymin = LB, ymax = UB, fill = Components), alpha = 0.5) +
+#       ggplot2::geom_line(aes(y = mean, colour = Components)) +
+#       ggplot2::scale_colour_manual(values = palette, breaks = names(palette)) +
+#       ggplot2::scale_fill_manual(values = palette, breaks = names(palette)) +
+#       ggplot2::facet_grid(Type~., scales = "free_y") +
+#       ggplot2::xlab("Time (s)") + ggplot2::ylab("Components absolute abundance") +
+#       ggplot2::theme_minimal() +
+#       ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10))
+#   }
+#
+#   print(simuplot)
+#
+# }

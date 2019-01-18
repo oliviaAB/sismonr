@@ -36,8 +36,9 @@ The modified in silico system.
 Adds an edge in the in silico system's regulatory network between specified genes.
 }
 \examples{
+\donttest{
 ## creates a system with no regulation
-mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = T)
+mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = TRUE)
 mysystem$edg
 mysystem2 = addEdge(mysystem, 1, 2, regsign = "1",
  kinetics = c("TCbindingrate"= 0.01, "TCunbindingrate" = 0.1, "TCfoldchange" = 10))
@@ -47,11 +48,12 @@ mysystem2$edg
 mysystem2$mosystem$TCRN_edg
 
 ## creates a system with no regulation
-mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PD.p = 1, empty = T)
+mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PD.p = 1, empty = TRUE)
 mysystem$edg
 mysystem2 = addEdge(mysystem, 1, 2)
 ## check all existing interactions in the system (no kinetic parameters)
 mysystem2$edg
 ## check the interactions targeting protein decay, with kinetic parameters
 mysystem2$mosystem$PDRN_edg
+}
 }

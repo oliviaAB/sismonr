@@ -131,9 +131,10 @@ createIndividual = function(variantsList, variantsFreq, indargs, sameInit = F){
 #' \itemize{
 #' \item \code{GenesVariants} A list of variants segregating in the population for each genes (see \code{\link{createVariants}}).
 #' \item \code{individualsList} A list of In Silico individuals (i.e. objects of class \code{insilicoindividual}, see \code{\link{createIndividual}}).
-#' \item \code{indargs} An object of class \code{\code{insilicoindividualargs}}; the parameters used to create the in silico individuals.
+#' \item \code{indargs} An object of class \code{\link{insilicoindividualargs}}; the parameters used to create the in silico individuals.
 #' }
 #' @examples
+#' \donttest{
 #' ## Creates the in silico system (with 6 genes)
 #' mysystem = createInSilicoSystem(G = 6)
 #' ## Creates a first population with 3 diploid individuals,
@@ -179,6 +180,7 @@ createIndividual = function(variantsList, variantsFreq, indargs, sameInit = F){
 #' mypop = createInSilicoPopulation(10, mysystem,
 #'                                  genvariants = genvariants,
 #'                                  genvariants.freq = genvariants.freq)
+#' }
 #' @export
 createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, genvariants.freq = NULL, sameInit = F, ...){
 

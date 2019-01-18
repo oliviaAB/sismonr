@@ -18,10 +18,12 @@ The modified in silico system.
 Removes a regulatory complex from the in silico system. Any edge involving this complex is removed from the system.
 }
 \examples{
+\donttest{
 mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, regcomplexes.p = 0.8)
 mysystem$complexes
 mysystem$edg
 mysystem2 = removeComplex(mysystem, "CTC1")
 mysystem2$complexes
 mysystem2$edg
+}
 }

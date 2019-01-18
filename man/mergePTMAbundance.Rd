@@ -17,10 +17,12 @@ A dataframe in which the abundance of original and modified versions of a protei
 Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein.
 }
 \examples{
+\donttest{
 mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none")
 mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)
 head(sim$Simulation)
 mergedPTM = mergePTMAbundance(sim$Simulation)
 head(mergedPTM)
+}
 }

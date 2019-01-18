@@ -377,6 +377,7 @@ createEmptyMultiOmicNetwork = function(genes){
 #' \item \code{sysargs}: An object of class \code{insilicosystemargs}; the parameters used to create the system.
 #' }
 #' @examples
+#' \donttest{
 #' ## Creates an in silico system composed of 20 genes
 #' mysystem1 = createInSilicoSystem(G = 20)
 #' mysystem1$edg ## see all regulations in the system
@@ -386,10 +387,12 @@ createEmptyMultiOmicNetwork = function(genes){
 #' mysystem2 = createInSilicoSystem(G = 10, PC.p = 1)
 #' mysystem2$genes
 #'
-#' ## Creates an in silico systerm composed of 5 genes, all noncoding and all regulators of transcription
+#' ## Creates an in silico systerm composed of 5 genes,
+#' ## all noncoding and all regulators of transcription
 #' mysystem3 = createInSilicoSystem(G = 5, PC.p = 0, NC.TC.p = 1)
 #' mysystem3$edg
 #' mysystem3$TCRN_edg
+#' }
 #' @export
 createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 
@@ -428,6 +431,7 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #' parameter \code{basal_protlifetime_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @return The modified in silico system.
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 5)
 #' mysystem$genes
 #' mysystem2 = addGene(mysystem, "PC", "TC", TCrate = 0.0001, TLrate = 0.001)
@@ -435,6 +439,7 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #'
 #' mysystem3 = addGene(mysystem2)
 #' mysystem3$genes
+#' }
 #' @export
 addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL){
 
@@ -583,10 +588,12 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
 #' parameter \code{complexesdissociationrate_samplingfct} provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).
 #' @return Returns the modified in silico system.
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1)
 #' mysystem$complexes ## no complex in the system
 #' mysystem2 = addComplex(mysystem, c(1, 2, 3))
 #' mysystem2$complexes
+#' }
 #' @export
 addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationrate = NULL){
 
@@ -651,12 +658,14 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
 #' @param name String. The name of the regulatory complex to remove.
 #' @return The modified in silico system.
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, regcomplexes.p = 0.8)
 #' mysystem$complexes
 #' mysystem$edg
 #' mysystem2 = removeComplex(mysystem, "CTC1")
 #' mysystem2$complexes
 #' mysystem2$edg
+#' }
 #' @export
 removeComplex = function(insilicosystem, name){
 
@@ -707,8 +716,9 @@ removeComplex = function(insilicosystem, name){
 #' }
 #' @return The modified in silico system.
 #' @examples
+#' \donttest{
 #' ## creates a system with no regulation
-#' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = T)
+#' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = TRUE)
 #' mysystem$edg
 #' mysystem2 = addEdge(mysystem, 1, 2, regsign = "1",
 #'  kinetics = c("TCbindingrate"= 0.01, "TCunbindingrate" = 0.1, "TCfoldchange" = 10))
@@ -718,13 +728,14 @@ removeComplex = function(insilicosystem, name){
 #' mysystem2$mosystem$TCRN_edg
 #'
 #' ## creates a system with no regulation
-#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PD.p = 1, empty = T)
+#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PD.p = 1, empty = TRUE)
 #' mysystem$edg
 #' mysystem2 = addEdge(mysystem, 1, 2)
 #' ## check all existing interactions in the system (no kinetic parameters)
 #' mysystem2$edg
 #' ## check the interactions targeting protein decay, with kinetic parameters
 #' mysystem2$mosystem$PDRN_edg
+#' }
 #' @export
 addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list()){
   regID = as.character(regID)
@@ -822,6 +833,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 #' @param tarID Integer or character. The ID of the target gene.
 #' @return The modified in silico system.
 #' @examples
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 10)
 #' mysystem$edg
 #' ## we'll remove the first edge
@@ -829,6 +841,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 #' tarToRemove = mysystem$edg$to[1]
 #' mysystem2 = removeEdge(mysystem, regToRemove, tarToRemove)
 #' mysystem2$edg
+#' }
 #' @export
 removeEdge = function(insilicosystem, regID, tarID){
 
@@ -856,3 +869,48 @@ removeEdge = function(insilicosystem, regID, tarID){
 
   return(insilicosystem)
 }
+
+
+# ## depends on package VisNetwork
+# plotRegulatoryNetwork = function(insilicosystem){
+#   mysystem = createInSilicoSystem(G = 15, PC.p = 0.5)
+#   colsCS = c("PC" = "#4da6ff",  "NC" = "#ff3333", "Complexes" = "#808080")
+#   nodes = mysystem$genes %>%
+#     select(id, coding) %>%
+#     dyplr::rename(group = coding) %>%
+#     mutate(color = colsCS[group],
+#            label = paste0("Gene ", id),
+#            shadow = T)
+#
+#   for(i in names(mysystem$complexes)){
+#     nodes = rbind(nodes, data.frame(id = i, group = "Complex", color = colsCS["Complexes"], label = paste0("Complex ", i), shadow = T, row.names = i))
+#   }
+#
+#   colsGF = c("TC" = "#b30000", "TL" = "#0033cc", "RD" = "#ff6600", "PD" = "#33ccff", "PTM" = "#8000ff", "Complex formation" = "#808080")
+#   edges = mysystem$edg %>%
+#     select(-RegBy) %>%
+#     mutate(dashes = RegSign == "-1",
+#            color = colsGF[TargetReaction],
+#            arrows = "to")
+#
+#   legendnodes = data.frame(label = c("Protein-coding genes", "Noncoding genes", "Complexes"),
+#                            color = colsCS)
+#
+#   legendedges = data.frame(label = c("TC regulation", "TL regulation", "RD regulation", "PD regulation", "PTM regulation", "Complex formation", "Activation", "Repression"),
+#                            color = c(colsGF, "black", "black"), dashes = rep(c(F, T), c(6, 2)))
+#
+#   for(i in names(mysystem$complexes)){
+#     components = mysystem$complexes[[i]]
+#     edges = rbind(edges, data.frame(from = components,
+#                                     to = i,
+#                                     TargetReaction = "Complex formation",
+#                                     RegSign = "1",
+#                                     dashes = F,
+#                                     color = colsGF["Complex formation"],
+#                                     arrows = "to"))
+#   }
+#
+#   visNetwork::visNetwork(nodes, edges, main = paste(nrow(mysystem$genes), "genes,", nrow(mysystem$edg), "interactions", sep = " ")) %>%
+#     visNetwork::visOptions(highlightNearest = T, , selectedBy = "group") %>%
+#     visNetwork::visLegend(addEdges = legendedges, addNodes = legendnodes, useGroups = F)
+# }

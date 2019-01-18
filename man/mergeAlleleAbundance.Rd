@@ -17,10 +17,12 @@ A dataframe in which the abundance of the different allelic versions of the same
 Merge (i.e. sum) the abundance of the different allelic versions of each molecule.
 }
 \examples{
-mysystem = createInSilicoSystem(G = 5, empty = T)
+\donttest{
+mysystem = createInSilicoSystem(G = 5, empty = TRUE)
 mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)
 head(sim$Simulation)
 mergedAllelic = mergeAlleleAbundance(sim$Simulation)
 head(mergedAllelic)
+}
 }

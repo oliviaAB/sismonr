@@ -36,6 +36,7 @@ The modified in silico system.
 Adds a gene in the in silico system with specified parameters if provided, or with parameters sampled according to the system parameters.
 }
 \examples{
+\donttest{
 mysystem = createInSilicoSystem(G = 5)
 mysystem$genes
 mysystem2 = addGene(mysystem, "PC", "TC", TCrate = 0.0001, TLrate = 0.001)
@@ -43,4 +44,5 @@ mysystem2$genes
 
 mysystem3 = addGene(mysystem2)
 mysystem3$genes
+}
 }

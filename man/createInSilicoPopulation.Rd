@@ -29,13 +29,14 @@ An object of class \code{insilicopopulation}, that is a list composed of:
 \itemize{
 \item \code{GenesVariants} A list of variants segregating in the population for each genes (see \code{\link{createVariants}}).
 \item \code{individualsList} A list of In Silico individuals (i.e. objects of class \code{insilicoindividual}, see \code{\link{createIndividual}}).
-\item \code{indargs} An object of class \code{\code{insilicoindividualargs}}; the parameters used to create the in silico individuals.
+\item \code{indargs} An object of class \code{\link{insilicoindividualargs}}; the parameters used to create the in silico individuals.
 }
 }
 \description{
 Creates a population of in silico individuals to be simulated.
 }
 \examples{
+\donttest{
 ## Creates the in silico system (with 6 genes)
 mysystem = createInSilicoSystem(G = 6)
 ## Creates a first population with 3 diploid individuals,
@@ -81,4 +82,5 @@ genvariants.freq = list('1' = c(1),
 mypop = createInSilicoPopulation(10, mysystem,
                                  genvariants = genvariants,
                                  genvariants.freq = genvariants.freq)
+}
 }

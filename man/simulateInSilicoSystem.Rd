@@ -44,19 +44,25 @@ RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds t
 Simulates (stochastically) the behaviour of an in silico system over time.
 }
 \examples{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
 mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
 sim = simulateInSilicoSystem(mysystem, mypop, 1000)
 ## For visualisation
-library(tidyverse)
+library(tidyr)
+library(dplyr)
+library(ggplot2)
 library(RColorBrewer)
 cols = brewer.pal(10, "Paired")
 names(cols) = unlist(sapply(1:5, function(x){c(paste0(x, "GCN1"), paste0(x, "GCN2"))}))
 toplot = sim$Simulation \%>\%
-gather(key = "ID", value = "Abundance", setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) \%>\%
+gather(key = "ID", value = "Abundance",
+ setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) \%>\%
 mutate(Type = case_when(str_detect(ID, "^R") ~ "RNAs",
                          str_detect(ID, "^P") ~ "Proteins"),
         Components = stringr::str_replace(ID, "^R|^P", ""))
-ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + geom_line() + facet_grid(Type~., scales = "free_y") +
+ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) +
+geom_line() + facet_grid(Type~., scales = "free_y") +
 scale_colour_manual(values = cols, breaks = names(cols))
+}
 }

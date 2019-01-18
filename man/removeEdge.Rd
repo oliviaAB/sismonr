@@ -20,6 +20,7 @@ The modified in silico system.
 Removes an edge in the in silico system between specified genes.
 }
 \examples{
+\donttest{
 mysystem = createInSilicoSystem(G = 10)
 mysystem$edg
 ## we'll remove the first edge
@@ -27,4 +28,5 @@ regToRemove = mysystem$edg$from[1]
 tarToRemove = mysystem$edg$to[1]
 mysystem2 = removeEdge(mysystem, regToRemove, tarToRemove)
 mysystem2$edg
+}
 }

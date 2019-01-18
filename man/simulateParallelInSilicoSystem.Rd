@@ -47,7 +47,9 @@ RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds t
 Simulates (stochastically) the behaviour of an in silico system over time using parallelisation.
 }
 \examples{
+\donttest{
 mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
 mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
 sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
+}
 }
