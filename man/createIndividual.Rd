@@ -4,11 +4,15 @@
 \alias{createIndividual}
 \title{Create an In Silico individual}
 \usage{
-createIndividual(variantsList, indargs, sameInit = F)
+createIndividual(variantsList, variantsFreq, indargs, sameInit = F)
 }
 \arguments{
-\item{variantsList}{List of segregating variants (created by \code{\link{createVariants}}). Each element is a matrix of the existing variants
-for a given gene in the system.}
+\item{variantsList}{A named list giving the variants segregating in the population for each gene (e.g. created by \code{\link{createVariants}}). Each element corresponds to one gene in the system (name of the element = gene ID).
+Each element is a matrix, in which each column represents a variant of the gene segregating in the population. The rows represent the QTL effect coefficients of each variant
+(i.e. the impact of each mutation the variant carries).}
+
+\item{variantsFreq}{A named list giving for each gene the allelic frequency of each segregating variant. Each element corresponds to one gene in the system (name of the element = gene ID).
+Each element is a vector, of length equal to the number of variants of the gene segregating in the population, giving the allele frequency of each of the variants.}
 
 \item{indargs}{An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).}
 
