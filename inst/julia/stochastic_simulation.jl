@@ -85,7 +85,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
     ## of all species corresponding to all possible binding site states equals 1 (bc only 1 binding site per gene)
     for i in eachindex(stochmodel["TCproms"][g])
       prabundance = resultdf[:, map(Symbol, stochmodel["TCproms"][g][i])]
-      sumprom = [sum(convert(Array, row)) for row in eachrow(prabundance)]
+      sumprom = [sum(permutedims(Vector(row))) for row in eachrow(prabundance)]
       if any(sumprom .!=1)
         error("The sum of promoter states for "*stochmodel["TCproms"][g][i][1]*"not equal to 1.")
       end
@@ -93,7 +93,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
 
     if length(stochmodel["TLproms"][g]) > 0        
       ## Check for each RNA that the different binding sites on the RNA are in equal abundance at each time of the simulation
-      rbsabundance = [sum(convert(Array, resultdf[t, map(Symbol, x)])) for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
+      rbsabundance = [sum(permutedims(Vector(resultdf[t, map(Symbol, x)]))) for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
                   
       if !all(mapslices(allequal, rbsabundance, dims = 2))
         error("The abundance of the different binding sites on the RNA "*g*"are not equal.")

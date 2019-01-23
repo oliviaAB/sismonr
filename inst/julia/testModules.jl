@@ -24,7 +24,7 @@ try
 	print("Module BioSimulator installed.\n")
 catch err
 	print("Installing Julia module Biosimulator. This can take a few minutes.\n")
-	Pkg.clone("https://github.com/alanderos91/biosimulator.jl.git", "BioSimulator")
+	Pkg.add("https://github.com/alanderos91/biosimulator.jl.git", "BioSimulator")
  end
 
 importExprSB = Meta.parse("import StatsBase")
