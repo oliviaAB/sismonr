@@ -156,7 +156,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
   ri = 1
 
   ## Set a progress bar
-  message("Starting simulations at", format(Sys.time(), usetz = T), "\n")
+  message("Starting simulations at ", format(Sys.time(), usetz = T), "\n")
   progress = utils::txtProgressBar(min = 0, max = length(insilicopopulation$individualsList), style = 3)
 
   resTable = vector("list", length(insilicopopulation$individualsList))
@@ -284,7 +284,7 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
                                                                                                              ## node 1 will return trials 1 to 4, node 2: 5 to 7, node 3: 8 to 10
     }
 
-  message("Starting simulations at", format(Sys.time(), usetz = T), "\n")
+  message("Starting simulations at ", format(Sys.time(), usetz = T), "\n")
 
   ## Create the progress bar
   maxprogress = length(indtosimulate)

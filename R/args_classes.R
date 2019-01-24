@@ -17,20 +17,20 @@
 #'
 #' @param G Integer. Number of genes in the system. Default value is 10.
 #' @param PC.p Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.
-#' @param PC.TC.p Numeric. Ratio of regulators of transcription among the protein-coding genes. Default value is 0.4 (see details).
-#' @param PC.TL.p Numeric. Ratio of regulators of translation among the protein-coding genes. Default value is 0.3 (see details).
-#' @param PC.RD.p Numeric. Ratio of regulators of RNA decay among the protein-coding genes. Default value is 0.1 (see details).
-#' @param PC.PD.p Numeric. Ratio of regulators of protein decay among the protein-coding genes. Default value is 0.1 (see details).
-#' @param PC.PTM.p Numeric. Ratio of regulators of protein post-translational modification among the protein-coding genes. Default value is 0.05 (see details).
-#' @param PC.MR.p Numeric. Ratio of metabolic enzymes among the protein-coding genes. Default value is 0.05 (see details).
-#' @param NC.TC.p Numeric. Ratio of regulators of transcription among the noncoding genes. Default value is 0.3 (see details).
-#' @param NC.TL.p Numeric. Ratio of regulators of translation among the noncoding genes. Default value is 0.3 (see details).
-#' @param NC.RD.p Numeric. Ratio of regulators of RNA decay among the noncoding genes. Default value is 0.3 (see details).
-#' @param NC.PD.p Numeric. Ratio of regulators of protein decay among the noncoding genes. Default value is 0.05 (see details).
-#' @param NC.PTM.p Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05 (see details).
-#' @param TC.pos.p Numeric. Ratio of positive regulations among all regulations targeting gene transcription. Default value is 0.5.
-#' @param TL.pos.p Numeric. Ratio of positive regulations among all regulations targeting gene translation. Default value is 0.5.
-#' @param PTM.pos.p Numeric. Ratio of positive regulations among all regulations targeting protein post-translational modification (i.e the targeted protein
+#' @param PC.TC.p Numeric. Probability of a protein-coding gene to be a regulator of transcription. Default value is 0.4 (see details).
+#' @param PC.TL.p Numeric. Probability of a protein-coding gene to be a regulator of translation. Default value is 0.3 (see details).
+#' @param PC.RD.p Numeric. Probability of a protein-coding gene to be a regulator of RNA decay. Default value is 0.1 (see details).
+#' @param PC.PD.p Numeric. Probability of a protein-coding gene to be a regulator of protein decay. Default value is 0.1 (see details).
+#' @param PC.PTM.p Numeric. Probability of a protein-coding gene to be a regulator of protein post-translational modification. Default value is 0.05 (see details).
+#' @param PC.MR.p Numeric. Probability of a protein-coding gene to be a metabolic enzyme. Default value is 0.05 (see details).
+#' @param NC.TC.p Numeric. Probability of a noncoding gene to be a regulator of transcription. Default value is 0.3 (see details).
+#' @param NC.TL.p Numeric. Probability of a noncoding gene to be a regulator of translation. Default value is 0.3 (see details).
+#' @param NC.RD.p Numeric. Probability of a noncoding gene to be a regulator of RNA decay. Default value is 0.3 (see details).
+#' @param NC.PD.p Numeric. Probability of a noncoding gene to be a regulator of protein decay. Default value is 0.05 (see details).
+#' @param NC.PTM.p Numeric. Probability of a noncoding gene to be a regulator of protein post-translational modification. Default value is 0.05 (see details).
+#' @param TC.pos.p Numeric. Probability of a regulation targeting gene transcription to be positive. Default value is 0.5.
+#' @param TL.pos.p Numeric. Probability of a regulation targeting gene translation to be positive. Default value is 0.5.
+#' @param PTM.pos.p Numeric. Probability of a regulation targeting protein post-translational modification to be positive (i.e the targeted protein
 #' is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.
 #' @param basal_transcription_rate_samplingfct Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
 #' a log-normal distribution with mean = 0.5 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
@@ -238,7 +238,7 @@ insilicosystemargs <- function(
     PC.PD.p = 0.1
     PC.PTM.p = 0.05
     PC.MR.p = 0.05
-  } else if(sum(temp) >= 1){ ## if at least one value is provided, and their sum is >=1, normalise the given values and set to 0 the others
+  } else if(sum(temp) >= 1 | length(temp) == 6){ ## if at least one value is provided, and their sum is >=1, normalise the given values and set to 0 the others
     for(v in c("PC.TC.p", "PC.TL.p", "PC.RD.p", "PC.PD.p", "PC.PTM.p", "PC.MR.p")){
       assign(v, ifelse(is.null(get(v)), 0, get(v)/sum(temp)))
     }
@@ -258,7 +258,7 @@ insilicosystemargs <- function(
     NC.RD.p = 0.3
     NC.PD.p = 0.05
     NC.PTM.p = 0.05
-  } else if(sum(temp) >= 1){ ## if at least one value is provided, and their sum is >=1, normalise the given values and set to 0 the others
+  } else if(sum(temp) >= 1 | length(temp) == 5){ ## if at least one value is provided, and their sum is >=1, normalise the given values and set to 0 the others
     for(v in c("NC.TC.p", "NC.TL.p", "NC.RD.p", "NC.PD.p", "NC.PTM.p")){
       assign(v, ifelse(is.null(get(v)), 0, get(v)/sum(temp)))
     }

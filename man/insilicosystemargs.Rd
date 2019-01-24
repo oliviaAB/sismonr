@@ -55,33 +55,33 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
 
 \item{PC.p}{Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.}
 
-\item{PC.TC.p}{Numeric. Ratio of regulators of transcription among the protein-coding genes. Default value is 0.4 (see details).}
+\item{PC.TC.p}{Numeric. Probability of a protein-coding gene to be a regulator of transcription. Default value is 0.4 (see details).}
 
-\item{PC.TL.p}{Numeric. Ratio of regulators of translation among the protein-coding genes. Default value is 0.3 (see details).}
+\item{PC.TL.p}{Numeric. Probability of a protein-coding gene to be a regulator of translation. Default value is 0.3 (see details).}
 
-\item{PC.RD.p}{Numeric. Ratio of regulators of RNA decay among the protein-coding genes. Default value is 0.1 (see details).}
+\item{PC.RD.p}{Numeric. Probability of a protein-coding gene to be a regulator of RNA decay. Default value is 0.1 (see details).}
 
-\item{PC.PD.p}{Numeric. Ratio of regulators of protein decay among the protein-coding genes. Default value is 0.1 (see details).}
+\item{PC.PD.p}{Numeric. Probability of a protein-coding gene to be a regulator of protein decay. Default value is 0.1 (see details).}
 
-\item{PC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the protein-coding genes. Default value is 0.05 (see details).}
+\item{PC.PTM.p}{Numeric. Probability of a protein-coding gene to be a regulator of protein post-translational modification. Default value is 0.05 (see details).}
 
-\item{PC.MR.p}{Numeric. Ratio of metabolic enzymes among the protein-coding genes. Default value is 0.05 (see details).}
+\item{PC.MR.p}{Numeric. Probability of a protein-coding gene to be a metabolic enzyme. Default value is 0.05 (see details).}
 
-\item{NC.TC.p}{Numeric. Ratio of regulators of transcription among the noncoding genes. Default value is 0.3 (see details).}
+\item{NC.TC.p}{Numeric. Probability of a noncoding gene to be a regulator of transcription. Default value is 0.3 (see details).}
 
-\item{NC.TL.p}{Numeric. Ratio of regulators of translation among the noncoding genes. Default value is 0.3 (see details).}
+\item{NC.TL.p}{Numeric. Probability of a noncoding gene to be a regulator of translation. Default value is 0.3 (see details).}
 
-\item{NC.RD.p}{Numeric. Ratio of regulators of RNA decay among the noncoding genes. Default value is 0.3 (see details).}
+\item{NC.RD.p}{Numeric. Probability of a noncoding gene to be a regulator of RNA decay. Default value is 0.3 (see details).}
 
-\item{NC.PD.p}{Numeric. Ratio of regulators of protein decay among the noncoding genes. Default value is 0.05 (see details).}
+\item{NC.PD.p}{Numeric. Probability of a noncoding gene to be a regulator of protein decay. Default value is 0.05 (see details).}
 
-\item{NC.PTM.p}{Numeric. Ratio of regulators of protein post-translational modification among the noncoding genes. Default value is 0.05 (see details).}
+\item{NC.PTM.p}{Numeric. Probability of a noncoding gene to be a regulator of protein post-translational modification. Default value is 0.05 (see details).}
 
-\item{TC.pos.p}{Numeric. Ratio of positive regulations among all regulations targeting gene transcription. Default value is 0.5.}
+\item{TC.pos.p}{Numeric. Probability of a regulation targeting gene transcription to be positive. Default value is 0.5.}
 
-\item{TL.pos.p}{Numeric. Ratio of positive regulations among all regulations targeting gene translation. Default value is 0.5.}
+\item{TL.pos.p}{Numeric. Probability of a regulation targeting gene translation to be positive. Default value is 0.5.}
 
-\item{PTM.pos.p}{Numeric. Ratio of positive regulations among all regulations targeting protein post-translational modification (i.e the targeted protein
+\item{PTM.pos.p}{Numeric. Probability of a regulation targeting protein post-translational modification to be positive (i.e the targeted protein
 is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.}
 
 \item{basal_transcription_rate_samplingfct}{Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
