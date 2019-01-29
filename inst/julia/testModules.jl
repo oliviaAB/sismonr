@@ -9,7 +9,7 @@ using Pkg
 # 	Pkg.add("ClobberingReload")
 # end
 
-importExprDF = Meta.parse("import DataFrames")
+importExprDF = Meta.parse("import DataFrames");
 try
 	eval(importExprDF)
 	print("Module DataFrames installed.\n")
@@ -18,7 +18,7 @@ catch err
 	Pkg.add("DataFrames")
 end
 
-importExprBS = Meta.parse("import BioSimulator")
+importExprBS = Meta.parse("import BioSimulator");
 try
 	eval(importExprBS)
 	print("Module BioSimulator installed.\n")
@@ -27,7 +27,7 @@ catch err
 	Pkg.add(PackageSpec(url = "https://github.com/alanderos91/BioSimulator.jl.git"))
  end
 
-importExprSB = Meta.parse("import StatsBase")
+importExprSB = Meta.parse("import StatsBase");
 try
 	eval(importExprSB)
 	print("Module StatsBase installed.\n")
