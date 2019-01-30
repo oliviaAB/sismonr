@@ -50,7 +50,7 @@ createStochSystem = function(insilicosystem, indargs, writefile, filepath = getw
 
   message("Generating the stochastic system...")
   juliastochsystem = juliaCall("juliaCreateStochasticSystem",
-                          genes, TCRN_edg, TLRN_edg, RDRN_edg, PDRN_edg, PTMRN_edg,
+                          genes, get("TCRN_edg"), get("TLRN_edg"), get("RDRN_edg"), get("PDRN_edg"), get("PTMRN_edg"),
                           complexes, complexeskinetics, indargs$gcnList,
                           writefile, filepath, filename, evaluator = ev)
   message("Done.")
@@ -182,14 +182,14 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
 
 
 ## function to start a Julia evaluator on a node of the cluster, given the port id (for parallel simulation)
-startJuliaEvCluster = function(portid){
+startJuliaEvCluster = function(portid, stochmodel_string){
   myev = newJuliaEvaluator(port = portid) ## start on the node a Julia evaluator with specified port number
   mystochmodel = juliaEval("eval(Meta.parse(%s))", stochmodel_string, .get = F, evaluator = myev) ## create in the Julia process the stochmodel object
   return(list("myev" = myev, "mystochmodelvar" = mystochmodel@.Data)) ## return the Julia evaluator ID and the name on the Julia process of the stochmodel object
 }
 
 ## function to run a simulation on a cluster (for parallel simulation)
-simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, individualsList, genes, simtime, nepochs, simalgorithm){
+simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, individualsList, genes, simtime, nepochs, simalgorithm, infocores, no_cores, progress, maxprogress){
   myinfocore = infocores[[i - no_cores*(i-1)%/%no_cores]] ## get the infos of the corresponding cluster node
   myev = myinfocore$myev ## get the Julia evaluator corresponding to the current cluster node
   mystochmodel = juliaEval(paste0(myinfocore$mystochmodel), .get = F) ## get a proxy object corresponding to the stochmodel object on the Julia process using the variable name
@@ -204,7 +204,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
   if(i %%no_cores == 1){
     utils::setTxtProgressBar(progress, min(i + (no_cores-1), maxprogress))
   }
-  return(simJulia %>% mutate(trial = trial + increment[i], Ind = ind))
+  return(simJulia %>% mutate_("trial" = ~trial + increment[i], "Ind" = ~ind))
 }
 
 
@@ -255,14 +255,14 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   parallel::clusterEvalQ(mycluster, library(utils))
   parallel::clusterExport(mycluster, "newJuliaEvaluator")
   parallel::clusterExport(mycluster, "callJuliaStochasticSimulation")
-  parallel::clusterExport(mycluster, "stochmodel_string", envir = environment())
-  parallel::clusterExport(mycluster, "no_cores", envir = environment())
+  # parallel::clusterExport(mycluster, "stochmodel_string", envir = environment())
+  # parallel::clusterExport(mycluster, "no_cores", envir = environment())
 
   ## Start a Julia evaluator on each cluster
   message("Starting Julia evaluators on each cluster node ... \n")
-  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster)
+  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster, stochmodel_string = stochmodel_string)
   message("Done.\n")
-  parallel::clusterExport(mycluster, "infocores", envir = environment())
+  # parallel::clusterExport(mycluster, "infocores", envir = environment())
 
   ## Split the workload for the different cluster nodes
   ## Case 1: there are more individuals than cluster nodes: in this case each node will be used to simulate a different individual
@@ -289,12 +289,12 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   ## Create the progress bar
   maxprogress = length(indtosimulate)
   progress = utils::txtProgressBar(min = 0, max = maxprogress, style = 3)
-  parallel::clusterExport(mycluster, "progress", envir = environment())
-  parallel::clusterExport(mycluster, "maxprogress", envir = environment())
+  # parallel::clusterExport(mycluster, "progress", envir = environment())
+  # parallel::clusterExport(mycluster, "maxprogress", envir = environment())
 
   ## Run the simulation on the cluster
   startsim = tic()
-  resTable = parallel::clusterApply(mycluster, 1:length(indtosimulate), simulateInCluster, indtosimulate = indtosimulate, ntrialstosimulate = ntrialstosimulate, increment = increment, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime = simtime, nepochs = nepochs, simalgorithm = simalgorithm)
+  resTable = parallel::clusterApply(mycluster, 1:length(indtosimulate), simulateInCluster, indtosimulate = indtosimulate, ntrialstosimulate = ntrialstosimulate, increment = increment, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime = simtime, nepochs = nepochs, simalgorithm = simalgorithm, infocores = infocores, no_cores = no_cores, progress = progress, maxprogress = maxprogress)
   stopsim = toc(quiet = T)$toc
   res = bind_rows(resTable)
   message("\nRunning time of parallel simulations: ", stopsim - startsim, " seconds\n")
@@ -331,7 +331,7 @@ sumColAbundance = function(df, colsid){
 #' }
 #' @export
 mergeAlleleAbundance = function(df){
-  mergeddf = df %>% select(time, trial, Ind)
+  mergeddf = df %>% select_("time", "trial", "Ind")
   molsGCN = colnames(df)
   mols = stringr::str_replace_all(molsGCN, "GCN[[:digit:]]+", "")
 
@@ -360,7 +360,7 @@ mergeAlleleAbundance = function(df){
 #' }
 #' @export
 mergePTMAbundance = function(df){
-  mergeddf = df %>% select(time, trial, Ind)
+  mergeddf = df %>% select_("time", "trial", "Ind")
   molsPTM = colnames(df)
   mols = stringr::str_replace(molsPTM, "^Pm", "P")
 

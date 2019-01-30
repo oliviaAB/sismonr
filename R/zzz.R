@@ -21,6 +21,7 @@
     julia_bin = XRJulia::findJulia()
     if (.Platform$OS.type == "windows") cmd = paste0('"',julia_bin,'" ', testFile) else cmd = paste(julia_bin, " ", testFile)
     packageStartupMessage("Checking if the required Julia modules are installed...")
-    hasModules = base::system(cmd, intern = FALSE)
+    hasModules = base::system(cmd, intern = FALSE, ignore.stdout = T)
+    packageStartupMessage("Done.")
   }
 }
