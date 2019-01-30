@@ -1,4 +1,5 @@
 # sismonr - Simulation of In Silico Multi-Omic Networks R package
+[![Travis build status](https://travis-ci.org/oliviaAB/sismonr.svg?branch=master)](https://travis-ci.org/oliviaAB/sismonr)
 
 ## Julia requirements
 This current version of sismonr is compatible with Julia 0.7. However, some of the Julia modules on which sismonr depends are still in the process of transitioning to the new Julia syntax. Expect warnings during the simulations.
