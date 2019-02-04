@@ -142,7 +142,7 @@ plotbreaks = c("WDR", "MYB", "bHLH1", "bHLH2", "MBW1", "MBW2", "MYBrep", "MBWr",
 ## Choosing the colours
 cols = c('#9a6324', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f0f0', '#bcf60c', '#fabebe', '#008080', '#e6beff', '#ff0000')
 names(cols) = plotbreaks
-pie(rep(1, length(cols)), col = cols, labels = names(cols))
+# pie(rep(1, length(cols)), col = cols, labels = names(cols))
 
 
 colourpwplot = ggplot(toplot, aes(x = time)) +
