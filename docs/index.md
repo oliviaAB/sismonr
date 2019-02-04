@@ -81,5 +81,45 @@ Each edge in the network is characterised by the following parameters:
 - `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled? An edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc (see the [Abbreviations](###Abbreviations) section);
 - `RegSign`: sign of the regulation (`"1"` for an activation and `"-1"` for a repression). Edges corresponding to the regulation of RNA or protein decay always have `RegSign = "1"`, meaning that the regulator increases the decay rate of the target.
 
+This shows the global GRN, with the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
+```r
+> names(mysystem$mosystem)
+
+[1] "TCRN_edg"  "TLRN_edg"  "RDRN_edg"  "PDRN_edg"  "PTMRN_edg"
+
+> mysystem$mosystem$TCRN_edg
+
+  from to TargetReaction RegSign RegBy TCbindingrate TCunbindingrate TCfoldchange
+1    9  2             TC       1    NC   0.006863351     0.009372557     5.173425
+2    9  3             TC      -1    NC   0.008071258     0.004499718     0.000000
+3   10  4             TC      -1    PC   0.004963256     0.001410222     0.000000
+4    9  5             TC       1    NC   0.001369649     0.003318900     7.341233
+5    3  6             TC      -1    PC   0.003139301     0.003830472     0.000000
+6    9  7             TC      -1    NC   0.001967162     0.002181207     0.000000
+7    9  8             TC       1    NC   0.008571345     0.001387365    21.336259
+8    6  9             TC      -1    PC   0.005159756     0.009424001     0.000000
+```
+Here you can only see the edges of the GRN corresponding to the regulation of transcription. In each of the sub-GRNs stored in the `mosystem` element contains the kinetic parameters associated with each edge. For example as we can see here each edge is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (notice that for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, `TCfoldchange = 0`).
+
+```r
+> lapply(mysystem$mosystem, function(x){colnames(x)[-(1:5)]})
+
+$`TCRN_edg`
+[1] "TCbindingrate"   "TCunbindingrate" "TCfoldchange"   
+
+$TLRN_edg
+[1] "TLbindingrate"   "TLunbindingrate" "TLfoldchange"   
+
+$RDRN_edg
+[1] "RDregrate"
+
+$PDRN_edg
+[1] "PDregrate"
+
+$PTMRN_edg
+[1] "PTMregrate"
+```
+
+## Creating an *in silico* population
 ## Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
