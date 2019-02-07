@@ -8,6 +8,10 @@
 
 ### Abbreviations
 
+### Quickstart
+
+*Write a quick tuto?*
+
 ## Creating an *in silico* system
 
 The first step is to generate an *in silico* system. An *in silico* system is composed of a set of genes, and a gene regulatory network or GRN describing the different regulatory interactions occuring between the genes. The network is created by a call to the function `createInSilicoSystem`. The user can control different aspects of the system with the arguments passed to the function. For example,
@@ -99,7 +103,7 @@ This shows the global GRN, with the different types of regulations. The element 
 7    9  8             TC       1    NC   0.008571345     0.001387365    21.336259
 8    6  9             TC      -1    PC   0.005159756     0.009424001     0.000000
 ```
-Here you can only see the edges of the GRN corresponding to the regulation of transcription. In each of the sub-GRNs stored in the `mosystem` element contains the kinetic parameters associated with each edge. For example as we can see here each edge is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (notice that for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, `TCfoldchange = 0`).
+Here you can only see the edges of the GRN corresponding to the regulation of transcription. Each of the sub-GRNs stored in the `mosystem` element contains additional information about the kinetic parameters associated with each edge. For example as we can see here each edge is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (notice that for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, `TCfoldchange = 0`). The kinetic parameters associated with each edge depend on the type of regulation:
 
 ```r
 > lapply(mysystem$mosystem, function(x){colnames(x)[-(1:5)]})
@@ -120,6 +124,108 @@ $PTMRN_edg
 [1] "PTMregrate"
 ```
 
+### The regulatory complexes
+
+In the GRN, some regulations can be performed by regulatory complexes. The composition of these complexes is stored in the `complexes` element of the `insilicosystem` object.
+
+```r
+> mysystem$complexes
+
+$`CTL1`
+[1] "4" "7"
+```
+This means that the products of genes 4 and 7 assemble in the system to form a regulatory complex labelled "CTL1". The kinetic parameters associated with these complexes (i.e. binding and unbinding rates of the components) are available with:
+
+```r
+> mysystem$complexeskinetics
+
+$`CTL1`
+$`CTL1`$`formationrate`
+[1] 0.009995349
+
+$`CTL1`$dissociationrate
+[1] 0.001773972
+```
+The element `complexesTargetReaction` of the `insilicosystem` object simply gives the type of regulation that the complexes accomplish.
+
+
+### The `sysargs` element
+
+The different parameters used to generate the in silico system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
+
+### Empty in silico system
+
+The argument `"empty"` of the `generateInSilicoSystem` function allows you to generate a system without any regulatory interactions:
+
+```r
+> emptysystem = createInSilicoSystem(G = 7, empty = T)
+> emptysystem$edg
+
+[1] from           to             TargetReaction RegSign        RegBy         
+<0 rows> (or 0-length row.names)
+```
+
 ## Creating an *in silico* population
+
+We will next create a population of *in silico* individuals. Each individual possess different copies of the genes specified in the *in silico* system generated in the previous step. You can decide the ploidy of the individuals, that is the number of copies of each gene that they will carry, the number of different variants of each gene that segregate in this in silico population, etc. For example:
+```r
+mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 2)
+```
+
+creates a population of 3 *in silico* individuals, assuming that there exist 2 different (genetically speaking) versions of each gene.
+
+### The gene variants
+A gene variant is represented as a vector containing the quantitative effects of its mutations on different kinetic properties of the gene, termed **QTL effect coefficients**. The variants segregating in this population are stored in the element `GenesVariants` of the `insilicopopulation` object returned by the function.
+```r
+> mypop$GenesVariants[1:2]
+
+$`1`
+              1         2
+qtlTCrate     1 1.0808783
+qtlRDrate     1 1.0000000
+qtlTCregbind  1 1.0000000
+qtlRDregrate  1 1.0000000
+qtlactivity   1 0.7847347
+qtlTLrate     0 0.0000000
+qtlPDrate     0 0.0000000
+qtlTLregbind  0 0.0000000
+qtlPDregrate  0 0.0000000
+qtlPTMregrate 0 0.0000000
+
+$`2`
+              1         2
+qtlTCrate     1 1.0000000
+qtlRDrate     1 1.0715774
+qtlTCregbind  1 1.0324456
+qtlRDregrate  1 0.9692238
+qtlactivity   1 1.1148695
+qtlTLrate     1 0.9312254
+qtlPDrate     1 1.0143813
+qtlTLregbind  1 0.9132447
+qtlPDregrate  1 1.0000000
+qtlPTMregrate 1 1.0000000
+```
+This shows the variants (columns of the dataframe) of genes 1 and 2 that have been generated by the function. The first variant of each gene corresponds to the "original" version of the gene, i.e. all QTL effect coefficients are set to 1. A QTL effect coefficient is a multiplicative coefficient that will be applied to the corresponding kinetic parameter of the gene during the construction of the stochastic model to simulate the expression profiles for the different individuals. As some of the QTL effect coefficients apply to translation- or protein-related steps of the gene expression, they are set to 0 for noncoding genes (see gene 1).
+
+Here, the 2nd variant of gene 1 carries two mutations (two QTL effect coefficients different from 1). The first mutation increases the transcription rate of the variant by approx. 1.08 (compared to the transcription rate given in the in silico system). The second mutation decreases the activity of the gene's active product. Gene 1 being a noncoding gene (`coding = "NC"`) encoding a regulatory RNA targeting the translation of its targets (`TargetReaction = "TL"`), it means that the RNAs of this variants have a decreased affinity (i.e. binding rate) for their targets, by around 22%.
+
+QTL effect coefficient name | Effect
+--------------------------- | ------
+`qtlTCrate` | Affects the basal transcription rate of the gene
+`qtlRDrate` | Affects the basal RNA decay rate of the gene
+`qtlTCregbind` | Affects the binding rate of the regulators of transcription on the gene's promoter (affects all transcription regulators targeting this gene)
+`qtlRDregbind` | Affects the rate at which regulators of RNA decay encountering the RNAs of the gene target their degradation (affects all RNA decay regulators targeting this gene)
+`qtlactivity` | Affects the activity of the active product of the gene. If the gene is encoding for a regulator of transcription or translation, this affects the binding rate of its active products (i.e. RNAs or proteins) to the binding site on their targets (affects the binding site on all targets of the gene). If the gene encodes a regulator of RNA or protein decay or of protein post-translational modification, this affects the rate at which its active products (i.e. RNAs or proteins) trigger the degradation/transformation of their targets (effect for all targets of the gene).
+`qtlTLrate` | Affects the basal translation rate of the gene 
+`qtlPDrate` | Affects the basal protein decay rate of the gene
+`qtlTLregbind` | Affects the binding rate of the regulators of translation on the gene's RNA binding sites (affects all translation regulators targeting this gene)
+`qtlPDregbind` | Affects the rate at which regulators of protein decay encountering the proteins of the gene target their degradation (affects all protein decay regulators targeting this gene)
+`qtlPTMregbind` | Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene target their modification (affects all protein post-translational modification regulators targeting this gene)
+
+### The *in silico* individuals
+
+The different generated *in silico* individuals are stored in the element `individualsList` of the `insilicopopulation` object.
+
+
 ## Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
