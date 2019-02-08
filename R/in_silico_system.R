@@ -241,8 +241,8 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameters for translation regulation include the binding and unbinding rate of regulators to gene promoter,
   ##    and the fold change induced on translation rate by a regulator bound to the promoter
-  sampledunbindingrates = sysargs[["TLunbindingrate_samplingfct"]](nrow(TCRN_edg))
-  steadystateregs = sapply(TCRN_edg$from, steadyStateAbundance, genes, complexes)
+  sampledunbindingrates = sysargs[["TLunbindingrate_samplingfct"]](nrow(TLRN_edg))
+  steadystateregs = sapply(TLRN_edg$from, steadyStateAbundance, genes, complexes)
   meansbindingrates = sampledunbindingrates/steadystateregs
   sampledbindingrates = sysargs[["TLbindingrate_samplingfct"]](meansbindingrates)
 
@@ -720,11 +720,11 @@ removeComplex = function(insilicosystem, name){
   insilicosystem$complexesTargetReaction[[name]] = NULL
 
   ## Remove any edge involving the complex in the general edges list
-  insilicosystem$edg = dplyr::filter_(insilicosystem$edg, "from" != name)
+  insilicosystem$edg = dplyr::filter(insilicosystem$edg, !!as.name("from") != name)
 
   ## Remove any edge involving the gene in the specific multi-omic edges list
   for(rn in names(insilicosystem$mosystem)){
-    insilicosystem$mosystem[[rn]] = dplyr::filter_(insilicosystem$mosystem[[rn]], "from" != name)
+    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], !!as.name("from") != name)
   }
 
   return(insilicosystem)
@@ -791,7 +791,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
     }
   }else{ ## if the regulator is a gene product
     targetreaction = insilicosystem$genes[insilicosystem$genes$id == as.integer(regID), "TargetReaction"]
-    regby = dplyr::filter_(insilicosystem$genes, "id" == as.integer(regID))[1,"coding"]
+    regby = dplyr::filter(insilicosystem$genes, !!as.name("id") == as.integer(regID))[1,"coding"]
   }
 
   if(grepl("^C", tarID)){ ## if the tarID given is a complex
@@ -802,7 +802,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
   }
 
   ## Checking if an edge already exists between the 2 genes ----
-  if(nrow(dplyr::filter_(insilicosystem$edg, "from" == regID & "to" == tarID)) != 0){
+  if(nrow(dplyr::filter(insilicosystem$edg, !!as.name("from") == regID & !!as.name("to") == tarID)) != 0){
     stop(paste0("An edge already exists from gene ", regID, " to gene ", tarID, "."))
   }
 
@@ -824,31 +824,51 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
                                               1 - insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]]), replace = T)
   }
 
-  ## which kinetic parameters must be created for the edge
-  params = list("TC" = c("TCbindingrate" , "TCunbindingrate", "TCfoldchange"),
-                "TL" = c("TLbindingrate" , "TLunbindingrate", "TLfoldchange"),
-                "RD" = c("RDregrate"),
-                "PD" = c("PDregrate"),
-                "PTM" = c("PTMregrate"))
 
   ## Adding the interaction in the edg data-frame ----
   insilicosystem$edg = dplyr::add_row(insilicosystem$edg, from = regID, to = tarID,
                                       TargetReaction = targetreaction, RegSign = regsign, RegBy = regby)
 
-  ## Retrieving/sampling the kinetic parameters
-  kin2sample = setdiff(params[[targetreaction]], names(kinetics)) ## kinetic parameters not provided by the user
-  kingiven = intersect(params[[targetreaction]], names(kinetics)) ## kinetic parameters provided by the user
+  ## Sampling the kinetic parameters for the edge
 
-  ## sampling the values for the parameters not provided
-  kinsampled = sapply(kin2sample, function(i){
-    insilicosystem$sysargs[[paste0(i,"_samplingfct")]](1)
-  })
+  if(targetreaction %in% c("TC", "TL")){ ## For transcription or translation regulation
+    sampledunbindingrate = ifelse(paste0(targetreaction, "unbindingrate") %in% names(kinetics),
+                                      kinetics[[paste0(targetreaction, "unbindingrate")]],
+                                      insilicosystem$sysargs[[paste0(targetreaction,"unbindingrate_samplingfct")]](1))
+    if(paste0(targetreaction, "bindingrate") %in% names(kinetics)){
+      sampledbindingrate = kinetics[[paste0(targetreaction, "bindingrate")]]
+    }else{ ## sample binding rate according to regulator steady state abundance
+      steadystatereg = steadyStateAbundance(tarID, insilicosystem$genes, insilicosystem$complexes)
+      sampledbindingrate = insilicosystem$sysargs[[paste0(targetreaction,"bindingrate_samplingfct")]](sampledunbindingrate/steadystatereg)
+    }
 
-  kin = unlist(c(kinsampled, kinetics[kingiven]))
-  names(kin) = c(kin2sample, kingiven)
+    if(regsign == "-1"){ ## set foldchange to 0 for repressions
+      sampledfoldchange = 0
+    }else{
+      sampledfoldchange = ifelse(paste0(targetreaction, "foldchange") %in% names(kinetics),
+                                 kinetics[[paste0(targetreaction, "foldchange")]],
+                                 insilicosystem$sysargs[[paste0(targetreaction,"foldchange_samplingfct")]](1))
+    }
+    kin = c(sampledbindingrate, sampledunbindingrate, sampledfoldchange)
+    names(kin) = sapply(c("bindingrate", "unbindingrate", "foldchange"), function(x){paste0(targetreaction, x)})
+  }else{ ## For other types of regulation
 
-  if(targetreaction %in% c("TC", "TL") & regsign == "-1"){
-    kin[paste0(targetreaction, "foldchange")] = 0
+    ## which kinetic parameters must be created for the edge
+    params = list("RD" = c("RDregrate"),
+                  "PD" = c("PDregrate"),
+                  "PTM" = c("PTMregrate"))
+
+    ## Retrieving/sampling the kinetic parameters
+    kin2sample = setdiff(params[[targetreaction]], names(kinetics)) ## kinetic parameters not provided by the user
+    kingiven = intersect(params[[targetreaction]], names(kinetics)) ## kinetic parameters provided by the user
+
+    ## sampling the values for the parameters not provided
+    kinsampled = sapply(kin2sample, function(i){
+      insilicosystem$sysargs[[paste0(i,"_samplingfct")]](1)
+    })
+
+    kin = unlist(c(kinsampled, kinetics[kingiven]))
+    names(kin) = c(kin2sample, kingiven)
   }
 
   ## add the edg and kinetic parameters to the adequate mutli-omic edge list
@@ -891,7 +911,7 @@ removeEdge = function(insilicosystem, regID, tarID){
   }
 
   ## The row to remove ----
-  theedg = dplyr::filter_(insilicosystem$edg, "from" == regID & "to" == tarID)
+  theedg = dplyr::filter(insilicosystem$edg, !!as.name("from") == regID & !!as.name("to") == tarID)
 
   if(nrow(theedg) == 0){ ## if the edge doesn't exists, no need to remove it!
     message("No edge exists from gene ", regID, " to gene ", tarID,".", sep = "")
@@ -900,8 +920,8 @@ removeEdge = function(insilicosystem, regID, tarID){
     stop("More than one edge in the system meets the criterion! There must be a mistake somewhere.")
   }else{ ## If no problem, remove the edge from the data frames edg and XXRN_edg
     targetreaction = theedg[1, "TargetReaction"]
-    insilicosystem$edg = dplyr::filter_(insilicosystem$edg, "from" != regID | "to" != tarID)
-    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter_(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], "from" != regID | "to" != tarID)
+    insilicosystem$edg = dplyr::filter(insilicosystem$edg, !!as.name("from") != regID | !!as.name("to") != tarID)
+    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], !!as.name("from") != regID | !!as.name("to") != tarID)
   }
 
   return(insilicosystem)
