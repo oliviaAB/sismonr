@@ -33,17 +33,13 @@
 #' @param PTM.pos.p Numeric. Probability of a regulation targeting protein post-translational modification to be positive (i.e the targeted protein
 #' is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.
 #' @param basal_transcription_rate_samplingfct Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
-#' a log-normal distribution with mean = 0.5 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
-#' (from Schwanhausser et al., 2013)
+#' \code{function(x){ logval = rnorm(x, mean = 0.3, sd = 0.5); val = 10^logval; return(val/3600) }}.
 #' @param basal_translation_rate_samplingfct Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is
-#' a log-normal distribution with mean = 2.5 and standard deviation = 0.8. The values sampled from the log-normal distribution are transformed (y' = 10^y) and divided by 3600.
-#' (from Schwanhausser et al., 2013)
+#' \code{function(x){ logval = rnorm(x, mean = 2.146, sd = 0.7); val = 10^logval; return(val/3600) }}.
 #' @param basal_RNAlifetime_samplingfct Function from which the transcript lifetimes are sampled (input x is the required sample size). Default value is
-#' a log-normal distribution with mean = 0 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and multiplied by 3600.
-#' (from Schwanhausser et al., 2013)
+#' \code{function(x){ logval = rnorm(x, mean = 0.95, sd = 0.2); val = 10^logval; return(val*3600) }}.
 #' @param basal_protlifetime_samplingfct Function from which the protein lifetime are sampled (input x is the required sample size). Default value is
-#' a log-normal distribution with mean = 1.75 and standard deviation = 0.5. The values sampled from the log-normal distribution are transformed (y' = 10^y) and multiplied by 3600.
-#' (from Schwanhausser et al., 2013)
+#' \code{function(x){ logval = rnorm(x, mean = 1.3, sd = 0.4); val = 10^logval; return(val*3600) }}.
 #' @param TC.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TC.NC.outdeg.distr Form of the distribution of the number of targets (out-degree) of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TC.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the transcription regulation graph. Default value is 3.
@@ -54,9 +50,9 @@
 #' @param TC.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation in the transcription regulation graph. Default value is 0.
 #' @param TC.PC.twonodesloop Logical. Are 2-nodes loops authorised in the transcription regulation graph with protein regulators? Default value is FALSE.
 #' @param TC.NC.twonodesloop Logical. Are 2-nodes loops authorised in the transcription regulation graph with noncoding regulators? Default value is FALSE.
-#' @param TCbindingrate_samplingfct Function from which the binding rates of transcription regulators on their targets are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
-#' @param TCunbindingrate_samplingfct Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
-#' @param TCfoldchange_samplingfct Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is a truncated normal distribution (lower bound: 2) with mean = 3 and standard deviation = 10.
+#' @param TCbindingrate_samplingfct Function from which the binding rates of transcription regulators on their targets are sampled (input mean is a vector of length equal to the required sample size). Default value is \code{function(means){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(meansbindingrates), sd = 0.1)}}.
+#' @param TCunbindingrate_samplingfct Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is \code{ function(x){logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval))} }.
+#' @param TCfoldchange_samplingfct Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is \code{function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10) }}.
 #' @param TL.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TL.NC.outdeg.distr Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param TL.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the translation regulation graph. Default value is 3.
@@ -67,9 +63,9 @@
 #' @param TL.NC.autoregproba Numeric. Probability of noncoding regulators to perform autoregulation in the translation regulation graph. Default value is 0.
 #' @param TL.PC.twonodesloop Logical. Are 2-nodes loops authorised in the translation regulation graph with protein regulators? Default value is FALSE.
 #' @param TL.NC.twonodesloop Logical. Are 2-nodes loops authorised in the translation regulation graph with noncoding regulators? Default value is FALSE.
-#' @param TLbindingrate_samplingfct Function from which the binding rate of translation regulators on target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
-#' @param TLunbindingrate_samplingfct Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
-#' @param TLfoldchange_samplingfct Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is a truncated normal distribution (lower bound: 2) with mean = 3 and standard deviation = 10.
+#' @param TLbindingrate_samplingfct Function from which the binding rate of translation regulators on target are sampled (input mean is a vector of length equal to the required sample size). Default value is \code{function(x){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(meansbindingrates), sd = 0.1); return(10^logval)  }}.
+#' @param TLunbindingrate_samplingfct Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval)) }}.
+#' @param TLfoldchange_samplingfct Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is \code{function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10)  }}.
 #' @param RD.PC.outdeg.distr Form of the distribution of the number of targets (out-degree) of protein regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param RD.NC.outdeg.distr Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
 #' @param RD.PC.outdeg.exp Numeric. Exponent of the distribution for the out-degree of the protein regulators in the RNA decay regulation graph. Default value is 3.
@@ -214,12 +210,12 @@ insilicosystemargs <- function(
   if(is.null(basal_translation_rate_samplingfct)) basal_translation_rate_samplingfct = function(x){ logval = rnorm(x, mean = 2.146, sd = 0.7); val = 10^logval; return(val/3600) }
   if(is.null(basal_RNAlifetime_samplingfct)) basal_RNAlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 0.95, sd = 0.2); val = 10^logval; return(val*3600) }
   if(is.null(basal_protlifetime_samplingfct)) basal_protlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 1.3, sd = 0.4); val = 10^logval; return(val*3600) }
-  if(is.null(TCbindingrate_samplingfct)) TCbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(TCunbindingrate_samplingfct)) TCunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(TCfoldchange_samplingfct)) TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10) }
-  if(is.null(TLbindingrate_samplingfct)) TLbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(TLunbindingrate_samplingfct)) TLunbindingrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(TLfoldchange_samplingfct)) TLfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1, mean = 3, sd = 10)  }
+  if(is.null(TCbindingrate_samplingfct)) TCbindingrate_samplingfct = function(means){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(means), sd = 0.1); return(10^logval) }
+  if(is.null(TCunbindingrate_samplingfct)) TCunbindingrate_samplingfct = function(x){ logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval)) }
+  if(is.null(TCfoldchange_samplingfct)) TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10) }
+  if(is.null(TLbindingrate_samplingfct)) TLbindingrate_samplingfct = function(means){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(means), sd = 0.1); return(10^logval)  }
+  if(is.null(TLunbindingrate_samplingfct)) TLunbindingrate_samplingfct = function(x){ logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval)) }
+  if(is.null(TLfoldchange_samplingfct)) TLfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10)  }
   if(is.null(RDregrate_samplingfct)) RDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }

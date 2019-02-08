@@ -1,3 +1,28 @@
+#' Computes the steady state abundance
+#'
+#' Computes the steady state abundance of the active product of a gene/regulatory complex
+#'
+#' If \code{id} represents a gene ID, returns the steady state abundance of its RNA (transcription rate/RNA decay rate)
+#' if it is a noncoding gene or the steady state abundance of its protein (RNA steady state * translation rate/protein decay rate)
+#' if it is a protein-coding gene. If \code{id} represents a regulatory complex, returns the minimum of the steady state abundance
+#' of its components (recursively if the regulatory complex is composed by other regulatory complexes)
+#'
+#' @param id the ID of the molecule
+#' @param genes the data frame of genes in the in silico system
+#' @param complexes the list of regulatory complexes and their composition
+#' @return The steady state abundance of the active product of the gene/regulatory complex
+steadyStateAbundance = function(id, genes, complexes){
+  if(stringr::str_detect(id, "^\\d+$")){ ## if id is a gene ID
+    g = as.numeric(id)
+    RNAss = genes$TCrate[g]/genes$RDrate[g]
+    ifelse(genes$coding[g] == "PC", RNAss * genes$TLrate[g]/genes$PDrate[g], RNAss)
+  }else{ ## if id represents a regulatory complex
+    return(min(sapply(complexes[[id]], steadyStateAbundance, genes, complexes)))
+  }
+
+}
+
+
 ## Generate the genes in the system and their attributes, according to the user parameters
 ## Inputs:
 ##  - nod: data frame created by the function createGenes
@@ -184,8 +209,14 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameters for transcription regulation include the binding and unbinding rate of regulators to gene promoter,
   ##    and the fold change induced on transcription rate by a regulator bound to the promoter
-  TCRN_edg = data.frame(TCRN_edg, "TCbindingrate" = sysargs[["TCbindingrate_samplingfct"]](nrow(TCRN_edg)),
-                                  "TCunbindingrate" = sysargs[["TCunbindingrate_samplingfct"]](nrow(TCRN_edg)),
+
+  sampledunbindingrates = sysargs[["TCunbindingrate_samplingfct"]](nrow(TCRN_edg))
+  steadystateregs = sapply(TCRN_edg$from, steadyStateAbundance, genes, complexes)
+  meansbindingrates = sampledunbindingrates/steadystateregs
+  sampledbindingrates = sysargs[["TCbindingrate_samplingfct"]](meansbindingrates)
+
+  TCRN_edg = data.frame(TCRN_edg, "TCbindingrate" = sampledbindingrates,
+                                  "TCunbindingrate" = sampledunbindingrates,
                                   "TCfoldchange" = rep(0, nrow(TCRN_edg)), stringsAsFactors = F)
   TCRN_edg$TCfoldchange[TCRN_edg$RegSign == "1"] = sysargs[["TCfoldchange_samplingfct"]](sum(TCRN_edg$RegSign == "1"))  ## Repressors induce a fold change of 0
 
@@ -210,8 +241,14 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   ## Sample the kinetic parameters of each regulatory interaction
   ##    Kinetic parameters for translation regulation include the binding and unbinding rate of regulators to gene promoter,
   ##    and the fold change induced on translation rate by a regulator bound to the promoter
-  TLRN_edg = data.frame(TLRN_edg, "TLbindingrate" = sysargs[["TLbindingrate_samplingfct"]](nrow(TLRN_edg)),
-                        "TLunbindingrate" = sysargs[["TLunbindingrate_samplingfct"]](nrow(TLRN_edg)),
+  sampledunbindingrates = sysargs[["TLunbindingrate_samplingfct"]](nrow(TCRN_edg))
+  steadystateregs = sapply(TCRN_edg$from, steadyStateAbundance, genes, complexes)
+  meansbindingrates = sampledunbindingrates/steadystateregs
+  sampledbindingrates = sysargs[["TLbindingrate_samplingfct"]](meansbindingrates)
+
+
+  TLRN_edg = data.frame(TLRN_edg, "TLbindingrate" = sampledbindingrates,
+                        "TLunbindingrate" = sampledunbindingrates,
                         "TLfoldchange" = rep(0, nrow(TLRN_edg)), stringsAsFactors = F)
   TLRN_edg$TLfoldchange[TLRN_edg$RegSign == "1"] = sysargs[["TLfoldchange_samplingfct"]](sum(TLRN_edg$RegSign == "1"))  ## Repressors induce a fold change of 0
 
