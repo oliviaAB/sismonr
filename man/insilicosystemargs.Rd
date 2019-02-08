@@ -221,9 +221,9 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{regcomplexes.size}{Integer. Number of components of a regulatory complex; ignore if regcomplexes = 'none'. Default value is 2.}
 
-\item{complexesformationrate_samplingfct}{Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
+\item{complexesformationrate_samplingfct}{Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = -4, sd = 0.7); return(10^(-logval)) }}.}
 
-\item{complexesdissociationrate_samplingfct}{Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
+\item{complexesdissociationrate_samplingfct}{Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = 3, sd = 0.7); return(10^(-logval)) }}.}
 
 \item{mycolsCS}{Named vector of colour names or code. Colours used in the plots to represent portein-coding and noncoding genes. Default value is c("PC" = "#e03616",  "NC" = "#58355e", "Tot" = "#31161F").}
 

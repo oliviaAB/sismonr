@@ -103,8 +103,8 @@
 #' (both RNAs and proteins can form regulatory complexes). Default value is "prot".
 #' @param regcomplexes.p Numeric. Probability that regulators controlling a common target form regulatory complexes; ignore if regcomplexes = 'none'. Default value is 0.3.
 #' @param regcomplexes.size Integer. Number of components of a regulatory complex; ignore if regcomplexes = 'none'. Default value is 2.
-#' @param complexesformationrate_samplingfct Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
-#' @param complexesdissociationrate_samplingfct Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].
+#' @param complexesformationrate_samplingfct Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = -4, sd = 0.7); return(10^(-logval)) }}.
+#' @param complexesdissociationrate_samplingfct Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = 3, sd = 0.7); return(10^(-logval)) }}.
 #' @param mycolsCS Named vector of colour names or code. Colours used in the plots to represent portein-coding and noncoding genes. Default value is c("PC" = "#e03616",  "NC" = "#58355e", "Tot" = "#31161F").
 #' @param mycolsGF Colours used in the plots to represent the different gene expression steps (transcription, translation, etc). Default value is c("TC" = "#FF7F11", "TL" = "#FF963C", "RD" = "#5AB7A4", "PD" = "#78C4B4", "PTM" = "#FF1B1C", "MR" = "#FF6D6E").
 #' @param mycolsPosNeg Colours used in plots to represent positive/negative regulatory interactions. Default value is c("1" = "#D63230", "-1" = "#69BAF4").
@@ -219,8 +219,8 @@ insilicosystemargs <- function(
   if(is.null(RDregrate_samplingfct)) RDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
   if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(complexesformationrate_samplingfct)) complexesformationrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
-  if(is.null(complexesdissociationrate_samplingfct)) complexesdissociationrate_samplingfct = function(x){ runif(x, 0.001, 0.01) }
+  if(is.null(complexesformationrate_samplingfct)) complexesformationrate_samplingfct = function(x){ logval = rnorm(x, mean = -4, sd = 0.7); return(10^(-logval)) }
+  if(is.null(complexesdissociationrate_samplingfct)) complexesdissociationrate_samplingfct = function(x){ logval = rnorm(x, mean = 3, sd = 0.7); return(10^(-logval)) }
 
   NC.p = 1 - PC.p
 
