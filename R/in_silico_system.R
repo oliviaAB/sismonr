@@ -212,8 +212,12 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 
   sampledunbindingrates = sysargs[["TCunbindingrate_samplingfct"]](nrow(TCRN_edg))
   steadystateregs = sapply(TCRN_edg$from, steadyStateAbundance, genes, complexes)
-  meansbindingrates = sampledunbindingrates/steadystateregs
-  sampledbindingrates = sysargs[["TCbindingrate_samplingfct"]](meansbindingrates)
+  if(nrow(TCRN_edg) > 0){
+    meansbindingrates = sampledunbindingrates/steadystateregs
+    sampledbindingrates = sysargs[["TCbindingrate_samplingfct"]](meansbindingrates)
+  }else{
+    sampledbindingrates = numeric(0)
+  }
 
   TCRN_edg = data.frame(TCRN_edg, "TCbindingrate" = sampledbindingrates,
                                   "TCunbindingrate" = sampledunbindingrates,
@@ -243,10 +247,12 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   ##    and the fold change induced on translation rate by a regulator bound to the promoter
   sampledunbindingrates = sysargs[["TLunbindingrate_samplingfct"]](nrow(TLRN_edg))
   steadystateregs = sapply(TLRN_edg$from, steadyStateAbundance, genes, complexes)
-  meansbindingrates = sampledunbindingrates/steadystateregs
-  sampledbindingrates = sysargs[["TLbindingrate_samplingfct"]](meansbindingrates)
-
-
+  if(nrow(TLRN_edg) > 0){
+    meansbindingrates = sampledunbindingrates/steadystateregs
+    sampledbindingrates = sysargs[["TLbindingrate_samplingfct"]](meansbindingrates)
+  }else{
+    sampledbindingrates = numeric(0)
+  }
   TLRN_edg = data.frame(TLRN_edg, "TLbindingrate" = sampledbindingrates,
                         "TLunbindingrate" = sampledunbindingrates,
                         "TLfoldchange" = rep(0, nrow(TLRN_edg)), stringsAsFactors = F)

@@ -11,27 +11,35 @@ end
 
 ## Sample from an discrete exponential distribution
 function sampleexpon(n, lambda, max)
-  prob = (1/float(lambda))*exp.(-(1:max)/float(lambda))
-  cumprob = cumsum(prob / sum(prob))
-  rnb = rand(Int(n))
-  res = Int64[]
-  for nb in rnb
-    push!(res, findfirst(x -> x >= nb, cumprob))
-  end 
-  return res
+  if max > 0
+    prob = (1/float(lambda))*exp.(-(1:max)/float(lambda))
+    cumprob = cumsum(prob / sum(prob))
+    rnb = rand(Int(n))
+    res = Int64[]
+    for nb in rnb
+      push!(res, findfirst(x -> x >= nb, cumprob))
+    end 
+    return res
+  else
+    return [0 for i in 1:n]
+  end
 end
 
 
 ## Sample from an discrete power-law distribution
 function samplepowerlaw(n, gamma, max)
-  prob = (1:max).^(-float(gamma))
-  cumprob = cumsum(prob / sum(prob))
-  rnb = rand(Int(n))
-  res = Int64[]
-  for nb in rnb
-    push!(res, findfirst(x -> x >= nb, cumprob))
-  end 
-  return res
+  if max > 0
+    prob = (1:max).^(-float(gamma))
+    cumprob = cumsum(prob / sum(prob))
+    rnb = rand(Int(n))
+    res = Int64[]
+    for nb in rnb
+      push!(res, findfirst(x -> x >= nb, cumprob))
+    end 
+    return res
+  else
+    return [0 for i in 1:n]
+  end
 end
 
 
