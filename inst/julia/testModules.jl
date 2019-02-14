@@ -9,6 +9,15 @@ using Pkg
 # 	Pkg.add("ClobberingReload")
 # end
 
+importExprDF = Meta.parse("import JSON");
+try
+	eval(importExprDF)
+	print("Module JSON installed.\n")
+catch err
+	print("Installing Julia module JSON. This can take a few minutes.\n")
+	Pkg.add("JSON")
+end
+
 importExprDF = Meta.parse("import DataFrames");
 try
 	eval(importExprDF)
