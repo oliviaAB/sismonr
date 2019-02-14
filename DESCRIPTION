@@ -23,6 +23,7 @@ Imports:
     jsonlite,
     methods,
     tidyr
+Remotes: johnmchambers/XRJulia
 RoxygenNote: 6.1.0
 Suggests: 
     knitr,
