@@ -175,8 +175,8 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
     resTable[[ind]] = simJulia %>% mutate("Ind" = ind)
   }
   res = bind_rows(resTable)
-
-  message("\nMean running time per simulation: ", mean(runningtime),"seconds. \n")
+  message("\nSimulations finished at ", format(Sys.time(), usetz = T), "\n")
+  message("Mean running time per simulation: ", mean(runningtime),"seconds. \n")
   return(list("Simulation" = res, "runningtime" = runningtime, "stochmodel" = stochmodel))
 }
 
@@ -297,7 +297,8 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   resTable = parallel::clusterApply(mycluster, 1:length(indtosimulate), simulateInCluster, indtosimulate = indtosimulate, ntrialstosimulate = ntrialstosimulate, increment = increment, individualsList = insilicopopulation$individualsList, genes = insilicosystem$genes, simtime = simtime, nepochs = nepochs, simalgorithm = simalgorithm, infocores = infocores, no_cores = no_cores, progress = progress, maxprogress = maxprogress)
   stopsim = toc(quiet = T)$toc
   res = bind_rows(resTable)
-  message("\nRunning time of parallel simulations: ", stopsim - startsim, " seconds\n")
+  message("\nSimulations finished at ", format(Sys.time(), usetz = T), "\n")
+  message("Running time of parallel simulations: ", stopsim - startsim, " seconds\n")
 
   parallel::stopCluster(mycluster)
 

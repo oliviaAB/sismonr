@@ -10,7 +10,7 @@ License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    XRJulia,
+    XRJulia (>= 0.9.0),
     parallel,
     truncnorm,
     tictoc,

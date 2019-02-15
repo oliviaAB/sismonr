@@ -8,8 +8,6 @@
 
 library(sismonr)
 library(tidyverse)
-# library(RColorBrewer)
-library(wesanderson)
 
 ## Gene ID - name correspondence
 genes.name2id = data.frame("ID" = as.character(1:7),
