@@ -396,7 +396,8 @@ mergeComplexesAbundance = function(df){
 
   for(i in molsComp){
     splt = stringr::str_split(i, "_")[[1]]
-    mergeddf[, splt[-1]] = mergeddf[, splt[-1]] + df[, i]
+    splt = splt[!stringr::str_detect(splt, "^C")]
+    mergeddf[, splt] = mergeddf[, splt] + df[, i]
   }
 
   return(mergeddf)
