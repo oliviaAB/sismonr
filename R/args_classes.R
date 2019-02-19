@@ -206,10 +206,10 @@ insilicosystemargs <- function(
   mycolsPosNeg = c("1" = "#D63230", "-1" = "#69BAF4")
 ){
 
-  if(is.null(basal_transcription_rate_samplingfct)) basal_transcription_rate_samplingfct = function(x){ logval = rnorm(x, mean = 0.3, sd = 0.5); val = 10^logval; return(val/3600) }
+  if(is.null(basal_transcription_rate_samplingfct)) basal_transcription_rate_samplingfct = function(x){ logval = rnorm(x, mean = -0.92, sd = 0.35); val = 10^logval; return(val/60) }
   if(is.null(basal_translation_rate_samplingfct)) basal_translation_rate_samplingfct = function(x){ logval = rnorm(x, mean = 2.146, sd = 0.7); val = 10^logval; return(val/3600) }
-  if(is.null(basal_RNAlifetime_samplingfct)) basal_RNAlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 0.95, sd = 0.2); val = 10^logval; return(val*3600) }
-  if(is.null(basal_protlifetime_samplingfct)) basal_protlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 1.3, sd = 0.4); val = 10^logval; return(val*3600) }
+  if(is.null(basal_RNAlifetime_samplingfct)) basal_RNAlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 1.36, sd = 0.2); val = 10^logval; return(val*60) }
+  if(is.null(basal_protlifetime_samplingfct)) basal_protlifetime_samplingfct = function(x){ logval = rnorm(x, mean = 5.43, sd = 1); val = 2^logval; return(val*60) }
   if(is.null(TCbindingrate_samplingfct)) TCbindingrate_samplingfct = function(means){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(means), sd = 0.1); return(10^logval) }
   if(is.null(TCunbindingrate_samplingfct)) TCunbindingrate_samplingfct = function(x){ logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval)) }
   if(is.null(TCfoldchange_samplingfct)) TCfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10) }
