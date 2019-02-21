@@ -1,4 +1,4 @@
-{% include toc.html html=content %}
+{% include lib/toc.html html=content %}
 
 # R package sismonr
 
