@@ -1,6 +1,22 @@
 # R package sismonr
 
 *A R package for generating and simulating in silico biological systems.*
+## Table of Content
+
+- [Introduction](#introduction)
+   - [Abbreviations](#abbreviations)
+   - [Quickstart](#quickstart)
+- [Creating an *in silico* system](#creating-an-in-silico-system)
+   - [The list of genes](#the-list-of-genes)
+   - [The GRN](#the-grn)
+   - [The regulatory complexes](#the-regulatory-complexes)
+   - [The `sysargs` element](#the-sysargs-element)
+   - [Empty in silico system](#empty-in-silico-system)
+- [Creating an *in silico* population](#creating-an-in-silico-population)
+   - [The gene variants](#the-gene-variants)
+   - [The *in silico* individuals](#the-in-silico-individuals)
+- [Appendix](#appendix)
+
 
 ## Introduction
 
@@ -20,7 +36,7 @@ mysystem = createInSilicoSystem(G = 10, PC.p = 0.7)
 ```
 generates an *in silico* system with 10 genes,and during the generation process each of the genes has a probability of 0.7 to be designated protein-coding gene (as opposed to noncoding gene). The system returned by the function is a list of class `createInSilicoSystem`. The different attributes of the system are presented below.
 
-### The list of genes 
+### The list of genes
 
 The different genes constituting the system are stored in a data-frame, and can be accessed with:
 ```r
@@ -82,7 +98,7 @@ Each edge in the network is characterised by the following parameters:
 - `from`: ID of the regulator gene. Note that for the edge 15, the regulator is not a gene but a regulatory complex (identifiable by its ID starting with `'C'`);
 - `RegBy`: type of regulator (`"PC"` for a protein-coding regulator, `"NC"` for a noncoding regulator and `"C"` for a regulatory complex);
 - `to`: ID of the target gene;
-- `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled? An edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc (see the [Abbreviations](###Abbreviations) section);
+- `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled? An edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc (see the [Abbreviations](#abbreviations) section);
 - `RegSign`: sign of the regulation (`"1"` for an activation and `"-1"` for a repression). Edges corresponding to the regulation of RNA or protein decay always have `RegSign = "1"`, meaning that the regulator increases the decay rate of the target.
 
 This shows the global GRN, with the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
@@ -153,7 +169,7 @@ The element `complexesTargetReaction` of the `insilicosystem` object simply give
 
 The different parameters used to generate the in silico system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
 
-### Empty in silico system
+### Empty *in silico* system
 
 The argument `"empty"` of the `generateInSilicoSystem` function allows you to generate a system without any regulatory interactions:
 
@@ -169,10 +185,10 @@ The argument `"empty"` of the `generateInSilicoSystem` function allows you to ge
 
 We will next create a population of *in silico* individuals. Each individual possess different copies of the genes specified in the *in silico* system generated in the previous step. You can decide the ploidy of the individuals, that is the number of copies of each gene that they will carry, the number of different variants of each gene that segregate in this in silico population, etc. For example:
 ```r
-mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 2)
+mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 4)
 ```
 
-creates a population of 3 *in silico* individuals, assuming that there exist 2 different (genetically speaking) versions of each gene.
+creates a population of 3 *in silico* individuals, assuming that there exist 4 different (genetically speaking) versions of each gene.
 
 ### The gene variants
 A gene variant is represented as a vector containing the quantitative effects of its mutations on different kinetic properties of the gene, termed **QTL effect coefficients**. The variants segregating in this population are stored in the element `GenesVariants` of the `insilicopopulation` object returned by the function.
@@ -180,51 +196,129 @@ A gene variant is represented as a vector containing the quantitative effects of
 > mypop$GenesVariants[1:2]
 
 $`1`
-              1         2
-qtlTCrate     1 1.0808783
-qtlRDrate     1 1.0000000
-qtlTCregbind  1 1.0000000
-qtlRDregrate  1 1.0000000
-qtlactivity   1 0.7847347
-qtlTLrate     0 0.0000000
-qtlPDrate     0 0.0000000
-qtlTLregbind  0 0.0000000
-qtlPDregrate  0 0.0000000
-qtlPTMregrate 0 0.0000000
+              1        2         3         4
+qtlTCrate     1 1.000000 0.8874961 1.0012797
+qtlRDrate     1 1.000000 0.9701102 0.9554292
+qtlTCregbind  1 1.000000 0.9334462 1.0101256
+qtlRDregrate  1 1.000000 0.9950473 1.1977350
+qtlactivity   1 1.080341 1.2668271 0.9128124
+qtlTLrate     0 0.000000 0.0000000 0.0000000
+qtlPDrate     0 0.000000 0.0000000 0.0000000
+qtlTLregbind  0 0.000000 0.0000000 0.0000000
+qtlPDregrate  0 0.000000 0.0000000 0.0000000
+qtlPTMregrate 0 0.000000 0.0000000 0.0000000
 
 $`2`
-              1         2
-qtlTCrate     1 1.0000000
-qtlRDrate     1 1.0715774
-qtlTCregbind  1 1.0324456
-qtlRDregrate  1 0.9692238
-qtlactivity   1 1.1148695
-qtlTLrate     1 0.9312254
-qtlPDrate     1 1.0143813
-qtlTLregbind  1 0.9132447
-qtlPDregrate  1 1.0000000
-qtlPTMregrate 1 1.0000000
+              1         2         3        4
+qtlTCrate     1 1.0000000 1.0000000 1.000000
+qtlRDrate     1 1.0000000 1.2642279 1.000000
+qtlTCregbind  1 0.9535243 0.8852958 1.000000
+qtlRDregrate  1 1.0000000 0.8183264 1.010594
+qtlactivity   1 0.9140379 1.0000000 1.000000
+qtlTLrate     1 1.0000000 1.0000000 1.000000
+qtlPDrate     1 1.0000000 1.0000000 1.000000
+qtlTLregbind  1 1.0000000 1.0000000 1.000000
+qtlPDregrate  1 1.0000000 1.0000000 1.000000
+qtlPTMregrate 1 1.0000000 1.0000000 1.000000
 ```
 This shows the variants (columns of the dataframe) of genes 1 and 2 that have been generated by the function. The first variant of each gene corresponds to the "original" version of the gene, i.e. all QTL effect coefficients are set to 1. A QTL effect coefficient is a multiplicative coefficient that will be applied to the corresponding kinetic parameter of the gene during the construction of the stochastic model to simulate the expression profiles for the different individuals. As some of the QTL effect coefficients apply to translation- or protein-related steps of the gene expression, they are set to 0 for noncoding genes (see gene 1).
 
-Here, the 2nd variant of gene 1 carries two mutations (two QTL effect coefficients different from 1). The first mutation increases the transcription rate of the variant by approx. 1.08 (compared to the transcription rate given in the in silico system). The second mutation decreases the activity of the gene's active product. Gene 1 being a noncoding gene (`coding = "NC"`) encoding a regulatory RNA targeting the translation of its targets (`TargetReaction = "TL"`), it means that the RNAs of this variants have a decreased affinity (i.e. binding rate) for their targets, by around 22%.
+Here, the 2nd variant of gene 1 carries one mutation (one QTL effect coefficient different from 1). The mutation increases the activity of the gene's active product. Gene 1 being a noncoding gene (`coding = "NC"`) encoding a regulatory RNA targeting the translation of its targets (`TargetReaction = "TL"`), it means that the RNAs of this variants have a decreased affinity (i.e. binding rate) for their targets, by around 8%.
 
 QTL effect coefficient name | Effect
 --------------------------- | ------
 `qtlTCrate` | Affects the basal transcription rate of the gene
 `qtlRDrate` | Affects the basal RNA decay rate of the gene
 `qtlTCregbind` | Affects the binding rate of the regulators of transcription on the gene's promoter (affects all transcription regulators targeting this gene)
-`qtlRDregbind` | Affects the rate at which regulators of RNA decay encountering the RNAs of the gene target their degradation (affects all RNA decay regulators targeting this gene)
-`qtlactivity` | Affects the activity of the active product of the gene. If the gene is encoding for a regulator of transcription or translation, this affects the binding rate of its active products (i.e. RNAs or proteins) to the binding site on their targets (affects the binding site on all targets of the gene). If the gene encodes a regulator of RNA or protein decay or of protein post-translational modification, this affects the rate at which its active products (i.e. RNAs or proteins) trigger the degradation/transformation of their targets (effect for all targets of the gene).
+`qtlRDregbind` | Affects the rate at which regulators of RNA decay encountering the RNAs of the gene trigger their degradation (affects all RNA decay regulators targeting this gene)
+`qtlactivity` | Affects the activity of the active product of the gene. If the gene is encoding for a regulator of transcription or translation, this affects the binding rate of its active products (i.e. RNAs or proteins) to their binding sites on their targets (affects the binding to all targets of the gene). If the gene encodes a regulator of RNA or protein decay or of protein post-translational modification, this affects the rate at which its active products (i.e. RNAs or proteins) trigger the degradation/transformation of their targets (effect for all targets of the gene).
 `qtlTLrate` | Affects the basal translation rate of the gene 
 `qtlPDrate` | Affects the basal protein decay rate of the gene
 `qtlTLregbind` | Affects the binding rate of the regulators of translation on the gene's RNA binding sites (affects all translation regulators targeting this gene)
-`qtlPDregbind` | Affects the rate at which regulators of protein decay encountering the proteins of the gene target their degradation (affects all protein decay regulators targeting this gene)
-`qtlPTMregbind` | Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene target their modification (affects all protein post-translational modification regulators targeting this gene)
+`qtlPDregbind` | Affects the rate at which regulators of protein decay encountering the proteins of the gene trigger their degradation (affects all protein decay regulators targeting this gene)
+`qtlPTMregbind` | Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene trigger their modification (affects all protein post-translational modification regulators targeting this gene)
 
 ### The *in silico* individuals
 
-The different generated *in silico* individuals are stored in the element `individualsList` of the `insilicopopulation` object.
+The different generated *in silico* individuals are stored in the element `individualsList` of the `insilicopopulation` object. Each individual is represented by a list with the following elements: 
+
+- `haplotype`: gives for each gene (rows) the variants that the individual carries (columns). The different alleles of the genes are denoted "GCNi", (with `i` ranging from 1 to P - the ploidy of the organism).
+```r
+> mypop$individualsList$Ind1$haplotype
+
+   GCN1 GCN2
+1     1    4
+2     1    3
+3     3    4
+4     2    2
+5     4    1
+6     4    3
+7     2    4
+8     4    1
+9     1    3
+10    1    4
+```
+Here the first individuals (`Ind1`) carries the variants 1 and 4 of gene 1, and two copies of variant 2 of gene 4.
+
+- `QTLeffects`: gives for each allele (i.e. "GCN1", "GCN2", etc) the value of each QTL effect coefficient for the genes (value for gene `i` at the `i`-st position in the vector of QTL effect coefficients).
+```r
+> mypop$individualsList$Ind1$QTLeffects$GCN1
+
+$`GCN1`
+$`GCN1`$`qtlTCrate`
+ [1] 1.0000000 1.0000000 0.9571972 0.9017158 0.8814155 1.0000000 1.0951769 1.0000000 1.0000000 1.0000000
+
+$`GCN1`$qtlRDrate
+ [1] 1.0000000 1.0000000 1.1494022 1.0000000 1.0000000 1.0123999 1.0000000 0.9455702 1.0000000 1.0000000
+
+$`GCN1`$qtlTCregbind
+ [1] 1.0000000 1.0000000 0.7909081 0.8483935 1.0000000 0.9909619 1.0000000 0.8050945 1.0000000 1.0000000
+
+$`GCN1`$qtlRDregrate
+ [1] 1.0000000 1.0000000 1.0000000 0.8034261 1.0000000 1.1755527 1.0000000 0.9967105 1.0000000 1.0000000
+
+$`GCN1`$qtlactivity
+ [1] 1.0000000 1.0000000 1.0000000 1.0000000 0.8736387 1.0000000 1.0000000 0.9926014 1.0000000 1.0000000
+
+$`GCN1`$qtlTLrate
+ [1] 0.000000 1.000000 1.050869 1.000000 1.000000 1.000000 1.000000 1.000000 0.000000 1.000000
+
+$`GCN1`$qtlPDrate
+ [1] 0.0000000 1.0000000 0.8573324 1.0000000 1.0000000 1.0000000 1.0000000 0.9918177 0.0000000 1.0000000
+
+$`GCN1`$qtlTLregbind
+ [1] 0.0000000 1.0000000 1.0814660 1.0000000 0.9588442 1.0000000 0.9635237 1.0760147 0.0000000 1.0000000
+
+$`GCN1`$qtlPDregrate
+ [1] 0.0000000 1.0000000 1.0404279 0.9307016 1.0000000 0.9828826 1.0000000 1.0000000 0.0000000 1.0000000
+
+$`GCN1`$qtlPTMregrate
+ [1] 0.0000000 1.0000000 1.0713693 0.8816208 0.9678285 1.0000000 1.0707949 1.0289422 0.0000000 1.0000000
+```
+
+As individual `Ind1`'s first allele ("GCN1") of gene 1 is gene 1's variant 1 (see `mypop$GenesVariants[[1]][,1]`), the first element of each QTL effect coefficient vector for `GCN1` is `1.0` (or `0.0` for QTL effect coefficients that only affect protein-coding genes). Similarly, the 4th element of the different QTL effect coefficients vectors for `GCN1` correspond to the values in `mypop$GenesVariants[[4]][,2]` (as the first gene 4 allele of `Ind1` is gene 4's variant 2).
+
+- `InitVar`: the list of **initial abundance variation coefficients** for the RNAs and proteins of the genes. During the simulation of the individuals gene profiles, a stochastic system is generated and an initial abundance is automatically computed for each product (RNA and protein) of the different genes. When constructing the *in silico* population, the parameter `sameInit` controls whether or not these initial abundances are the same for all individuals in the population. If not (default behaviour of the `createInSilicoPopulation` function), then each gene product is assigned an initial abundance variation coefficient that will be multiplied with the automatically computed initial abundance of the molecule, to give its initial abundance for the corresponding individual.
+
+```r
+> mypop$individualsList$Ind1$InitVar
+$`GCN1`
+$`GCN1`$`R`
+ [1] 0.8809851 1.0474897 0.8500242 0.9365774 0.9403471 1.0005447 0.8752230 1.0001330 0.8909920 1.1357460
+
+$`GCN1`$P
+ [1] 1.1350323 1.2276211 1.1378157 0.9011492 1.0271452 0.8608892 1.0298241 1.0099649 0.9657831 0.9047659
+
+
+$GCN2
+$GCN2$`R`
+ [1] 0.9665166 0.9213717 0.9512336 0.9348600 0.9855229 0.9706291 1.0009749 1.0637908 1.0002845 1.0288500
+
+$GCN2$P
+ [1] 1.1190859 1.1086633 1.2548449 1.0356028 1.0033309 1.0531737 0.9510813 1.1071123 1.0277100 1.0018235
+```
+
+For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $\equiv$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub>.
 
 
 ## Appendix
