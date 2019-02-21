@@ -318,8 +318,11 @@ $GCN2$P
  [1] 1.1190859 1.1086633 1.2548449 1.0356028 1.0033309 1.0531737 0.9510813 1.1071123 1.0277100 1.0018235
 ```
 
-For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $\equiv$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub>.
+For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $$\equiv \sim$$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub>.
 
 
 ## Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
+
+
+{% include lib/mathjax.html %}
