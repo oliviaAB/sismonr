@@ -1,21 +1,19 @@
-# R package sismonr
-
 *A R package for generating and simulating in silico biological systems.*
 
 * TOC
 {:toc}
 
-## Introduction
+# Introduction
 
 *Explain the concepts of in silico system and individual*
 
-### Abbreviations
+## Abbreviations
 
-### Quickstart
+## Quickstart
 
 *Write a quick tuto?*
 
-## Creating an *in silico* system
+# Creating an *in silico* system
 
 The first step is to generate an *in silico* system. An *in silico* system is composed of a set of genes, and a gene regulatory network or GRN describing the different regulatory interactions occuring between the genes. The network is created by a call to the function `createInSilicoSystem`. The user can control different aspects of the system with the arguments passed to the function. For example,
 ```r
@@ -23,7 +21,7 @@ mysystem = createInSilicoSystem(G = 10, PC.p = 0.7)
 ```
 generates an *in silico* system with 10 genes,and during the generation process each of the genes has a probability of 0.7 to be designated protein-coding gene (as opposed to noncoding gene). The system returned by the function is a list of class `createInSilicoSystem`. The different attributes of the system are presented below.
 
-### The list of genes
+## The list of genes
 
 The different genes constituting the system are stored in a data-frame, and can be accessed with:
 ```r
@@ -56,7 +54,7 @@ Each gene is labeled with an ID (column `id`) and possess the following paramete
 - `ActiveForm`: what is the active form of the gene? If the gene is noncoding, `ActiveForm = R[gene ID]`, and for a protein-coding gene `ActiveForm = "P[gene ID]"`. If the protein of a protein-coding gene is targeted for post-translational modification (`PTMform = "1"`) then we assume that only the modified form of the protein is active, and thus `ActiveForm = Pm[gene ID]`.
 - `TCrate`, `TLrate`, `RDrate` and `PDrate`: give the transcription, translation, RNA decay and protein decay rates of the genes, respectively. `TLrate` and `PDrate` are set to 0 for noncoding genes.
 
-### The GRN
+## The GRN
 
 The regulatory network describing the regulatory interaction between the genes are stored in a data-frame, and accessible with:
 ```r
@@ -127,7 +125,7 @@ $PTMRN_edg
 [1] "PTMregrate"
 ```
 
-### The regulatory complexes
+## The regulatory complexes
 
 In the GRN, some regulations can be performed by regulatory complexes. The composition of these complexes is stored in the `complexes` element of the `insilicosystem` object.
 
@@ -152,11 +150,11 @@ $`CTL1`$dissociationrate
 The element `complexesTargetReaction` of the `insilicosystem` object simply gives the type of regulation that the complexes accomplish.
 
 
-### The `sysargs` element
+## The `sysargs` element
 
 The different parameters used to generate the in silico system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
 
-### Empty *in silico* system
+## Empty *in silico* system
 
 The argument `"empty"` of the `generateInSilicoSystem` function allows you to generate a system without any regulatory interactions:
 
@@ -168,7 +166,7 @@ The argument `"empty"` of the `generateInSilicoSystem` function allows you to ge
 <0 rows> (or 0-length row.names)
 ```
 
-## Creating an *in silico* population
+# Creating an *in silico* population
 
 We will next create a population of *in silico* individuals. Each individual possess different copies of the genes specified in the *in silico* system generated in the previous step. You can decide the ploidy of the individuals, that is the number of copies of each gene that they will carry, the number of different variants of each gene that segregate in this in silico population, etc. For example:
 ```r
@@ -177,7 +175,7 @@ mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 4)
 
 creates a population of 3 *in silico* individuals, assuming that there exist 4 different (genetically speaking) versions of each gene.
 
-### The gene variants
+## The gene variants
 A gene variant is represented as a vector containing the quantitative effects of its mutations on different kinetic properties of the gene, termed **QTL effect coefficients**. The variants segregating in this population are stored in the element `GenesVariants` of the `insilicopopulation` object returned by the function.
 ```r
 > mypop$GenesVariants[1:2]
@@ -225,7 +223,7 @@ QTL effect coefficient name | Effect
 `qtlPDregbind` | Affects the rate at which regulators of protein decay encountering the proteins of the gene trigger their degradation (affects all protein decay regulators targeting this gene)
 `qtlPTMregbind` | Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene trigger their modification (affects all protein post-translational modification regulators targeting this gene)
 
-### The *in silico* individuals
+## The *in silico* individuals
 
 The different generated *in silico* individuals are stored in the element `individualsList` of the `insilicopopulation` object. Each individual is represented by a list with the following elements: 
 
@@ -305,10 +303,10 @@ $GCN2$P
  [1] 1.1190859 1.1086633 1.2548449 1.0356028 1.0033309 1.0531737 0.9510813 1.1071123 1.0277100 1.0018235
 ```
 
-For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $$\equiv \sim$$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub>.
+For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $$\sim$$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub>.
 
 
-## Appendix
+# Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
 
 
