@@ -1,25 +1,9 @@
-* TOC
-{:toc}
-
 # R package sismonr
 
 *A R package for generating and simulating in silico biological systems.*
-## Table of Content
 
-- [Introduction](#introduction)
-   - [Abbreviations](#abbreviations)
-   - [Quickstart](#quickstart)
-- [Creating an *in silico* system](#creating-an-in-silico-system)
-   - [The list of genes](#the-list-of-genes)
-   - [The GRN](#the-grn)
-   - [The regulatory complexes](#the-regulatory-complexes)
-   - [The `sysargs` element](#the-sysargs-element)
-   - [Empty in silico system](#empty-in-silico-system)
-- [Creating an *in silico* population](#creating-an-in-silico-population)
-   - [The gene variants](#the-gene-variants)
-   - [The *in silico* individuals](#the-in-silico-individuals)
-- [Appendix](#appendix)
-
+* TOC
+{:toc}
 
 ## Introduction
 
