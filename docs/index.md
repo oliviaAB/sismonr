@@ -544,3 +544,4 @@ dissociationCTL1_P4GCN2_Pm7GCN2	CTL1_P4GCN2_Pm7GCN2 --> P4GCN2 + Pm7GCN2	0.00177
 
 
 {% include lib/mathjax.html %}
+{% include lib/nav.html %}
