@@ -1,15 +1,3 @@
----
-title: sismonr package
-layout: page
-nav:
-  'Table of Contents': './'
-  'Abbreviations': '#abbreviations'
-  'The system': '#creating-an-in-silico-system'
-  'The individuals': '#creating-an-in-silico-population'
-  'Simulation': '#simulating-the-system'
-
----
-
 *A R package for generating and simulating in silico biological systems.*
 
 * TOC
