@@ -1,6 +1,6 @@
 ---
 title: sismonr package
-layout: page
+layout: default
 nav:
   'Table of Contents': './'
   'Abbreviations': '#abbreviations'
