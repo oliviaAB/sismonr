@@ -19,7 +19,7 @@ The first step is to generate an *in silico* system. An *in silico* system is co
 ```r
 mysystem = createInSilicoSystem(G = 10, PC.p = 0.7)
 ```
-generates an *in silico* system with 10 genes,and during the generation process each of the genes has a probability of 0.7 to be designated protein-coding gene (as opposed to noncoding gene). The system returned by the function is a list of class `createInSilicoSystem`. The different attributes of the system are presented below.
+generates an *in silico* system with 10 genes,and during the generation process each of the genes has a probability of 0.7 to be designated protein-coding gene (as opposed to noncoding gene). The system returned by the function is an object of class `insilicosystem`, i.e. a list whose different attributes are presented below.
 
 ## The list of genes
 
@@ -170,10 +170,10 @@ The argument `"empty"` of the `generateInSilicoSystem` function allows you to ge
 
 We will next create a population of *in silico* individuals. Each individual possess different copies of the genes specified in the *in silico* system generated in the previous step. You can decide the ploidy of the individuals, that is the number of copies of each gene that they will carry, the number of different variants of each gene that segregate in this in silico population, etc. For example:
 ```r
-mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 4)
+mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 4, ploidy = 2)
 ```
 
-creates a population of 3 *in silico* individuals, assuming that there exist 4 different (genetically speaking) versions of each gene.
+creates a population of 3 *in silico* diploid individuals (ploidy = 2), assuming that there exist 4 different (genetically speaking) versions of each gene.  The population returned by the function is an object of class `insilicopopulation`, i.e. a list whose different attributes are presented below.
 
 ## The gene variants
 A gene variant is represented as a vector containing the quantitative effects of its mutations on different kinetic properties of the gene, termed **QTL effect coefficients**. The variants segregating in this population are stored in the element `GenesVariants` of the `insilicopopulation` object returned by the function.
@@ -227,7 +227,7 @@ QTL effect coefficient name | Effect
 
 The different generated *in silico* individuals are stored in the element `individualsList` of the `insilicopopulation` object. Each individual is represented by a list with the following elements: 
 
-- `haplotype`: gives for each gene (rows) the variants that the individual carries (columns). The different alleles of the genes are denoted "GCNi", (with `i` ranging from 1 to P - the ploidy of the organism).
+- `haplotype`: gives for each gene (rows) the variants that the individual carries (columns). The different alleles of the genes are denoted "GCNi", (with `i` ranging from 1 to P - the ploidy of the organism). In this example we defined the ploidy of the individuals to be 2, so each individual carries 2 copies of each gene.
 ```r
 > mypop$individualsList$Ind1$haplotype
 
@@ -246,6 +246,7 @@ The different generated *in silico* individuals are stored in the element `indiv
 Here the first individuals (`Ind1`) carries the variants 1 and 4 of gene 1, and two copies of variant 2 of gene 4.
 
 - `QTLeffects`: gives for each allele (i.e. "GCN1", "GCN2", etc) the value of each QTL effect coefficient for the genes (value for gene `i` at the `i`-st position in the vector of QTL effect coefficients).
+
 ```r
 > mypop$individualsList$Ind1$QTLeffects$GCN1
 
@@ -303,8 +304,118 @@ $GCN2$P
  [1] 1.1190859 1.1086633 1.2548449 1.0356028 1.0033309 1.0531737 0.9510813 1.1071123 1.0277100 1.0018235
 ```
 
-For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $$\sim$$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub>.
+For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the gene 1's first allele RNAs is $$\sim$$ 0.88 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub> for individual `Ind1`.
 
+## The `indargs` element
+
+The different parameters used to generate the in silico individuals are stored in the `indargs` element of the `insilicopopulation` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoPopulation`.
+
+# Simulating the system
+
+Once the system and the population have been defined, we can simulate the expression of the genes in the system for each *in silico* individual. We use the function:
+```r
+sim = simulateInSilicoSystem(mysystem, mypop, simtime = 500, ntrials = 1)
+```
+
+`simtime` allows you to control the simulation end time in seconds (here we simulate the expression of the genes for 500s). `ntrials` correspond to the number of repetitions of the simulation that will be computed for each individual. To speed-up the running time, Linux and MacOS users can use a parallelised version of the simulation function:
+
+```r
+sim = simulateParallelInSilicoSystem(mysystem, mypop, simtime = 500, ntrials = 1)
+```
+
+The output of the simulation is a list of 3 elements. The element `runningtime` gives the elapsed time between the beginning and the end of the simulations (all repetitions) for each individual.
+
+```r
+> sim$runningtime
+
+[1] 7.60 7.57 7.66
+```
+
+The `stochmodel` element is a XRJulia proxy object giving Julia object that stores the stochastic model of the system (do not try to read it, it is not really useful in its current form).
+
+## The stochastic model
+
+ If you want to see the list of species and reactions (i.e. the stochastic model) of the system, you can use the option `writefile = T`
+of the `simulate(Parallel)inSilicoSystem` functions. This generates two text files: one listing the different species in the system, each line giving a species name and its initial abundance, and one listing the biochemical reactions and associated rates. The initial abundances and reaction rates are written in a general form (i.e. giving the QTL effect coefficients/initial abundance variation coefficients to be used to compute numerical values for each individual).
+
+### The species
+
+As the individuals are diploid, there exist two versions of each gene (and gene product): those originating from the first allele (GCN1) and those originating from the second allele (GCN2), e.g.:
+
+```
+R1GCN1
+R1GCN2	
+```
+
+
+The DNA sequence of genes is not explicitely modelled, except if the gene is regulated at the transcription level. In this case, the gene's DNA form is modelled as the sum of the binding sites of its different regulators. These binding sites can exist in a free or bound state. Morevoer, the binding site of a specific regulator can be occupied by the regulator's product arising from either of the regulator alleles. For example, gene 2 transcription is regulated by gene 9, so the DNA form of gene 2 first allele is:
+```
+Pr2GCN1reg9F	1 ## free binding site for regulator 9 on gene 2 first allele 
+Pr2GCN1reg9GCN1B	0 ## binding site occupied by one of regulator 9's products originating from the first allele of gene 9
+Pr2GCN1reg9GCN2B	0 ## binding site occupied by one of regulator 9's products originating from the second allele of gene 9
+```
+The same scheme is repeated for the second allele of gene 2:
+
+```
+Pr2GCN2reg9F	1
+Pr2GCN2reg9GCN1B	0
+Pr2GCN2reg9GCN2B	0
+```
+
+At the beginning of the simulation, all binding sites are in a free state (initial abundance 1 for the free form of the binding sites, 0 for the occupied forms).
+
+The same modelling applies to the RNA form of genes. If the gene is not targeted by regulators of translation (e.g. gene 1), we simply have:
+```
+R1GCN1	51.19330725498743*InitVar["GCN1"]["R"][1]
+R1GCN2	51.19330725498743*InitVar["GCN2"]["R"][1]
+```
+The initial abundance of gene 1's RNAs is $$\sim 51 \times$$ the initial abundance variation coefficient for the corresponding allele of the considered individual. If on the contrary the gene is targeted by regulator of translation, the RNA form of the gene is modelled as the sum of the RNA binding sites for the different translation regulators. One example is gene 10 whose translation is regulated by gene 1:
+```
+RBS10GCN1reg1F	9.385223382716024*InitVar["GCN1"]["R"][10]
+RBS10GCN1reg1GCN1B	0
+RBS10GCN1reg1GCN2B	0
+RBS10GCN2reg1F	9.385223382716024*InitVar["GCN2"]["R"][10]
+RBS10GCN2reg1GCN1B	0
+RBS10GCN2reg1GCN2B	0
+```
+Again, at the beginning of the simulation, all RNA binding sites are in a free state, and the initial abundance of the RNAs must account for the initial abundance variation coefficient for the corresponding allele of the considered individual.
+
+The proteins are modelled as follow:
+```
+P2GCN1	(89578.69434518841)*InitVar["GCN1"]["P"][2]
+P2GCN2	(89578.69434518841)*InitVar["GCN2"]["P"][2]
+```
+If a gene is targeted in the GRN by post-translational modification, there also exists a modified form of the protein, e.g. for gene 7:
+```
+P7GCN1	(1358.0048533970976)*InitVar["GCN1"]["P"][7]
+P7GCN2	(1358.0048533970976)*InitVar["GCN2"]["P"][7]
+Pm7GCN1	0
+Pm7GCN2	0
+```
+
+At the beginning of the simulation all proteins are in their original (non-modified) form.
+
+Recall that in our system, the products of genes 4 and 7 for a regulatory complex named `CTL1`. As there exist two versions of the proteins of these genes (arising either from the first or the second allele of the genes), there exist 4 versions of the complex, including all possible combinations of the different protein allelic versions. Initially no regulatory complex is formed in the system.
+```
+CTL1_P4GCN1_Pm7GCN1	0
+CTL1_P4GCN1_Pm7GCN2	0
+CTL1_P4GCN2_Pm7GCN1	0
+CTL1_P4GCN2_Pm7GCN2	0
+```
+
+## The reactions
+
+Each reaction is characterised by a name, a biochemical formula in the form "$$\sum$$ reactants --> $$\sum$$ products", and a rate. For example the formation and dissociations of the regulatory complex CTL1 are (from the section above we know that there are 4 versions of the complex, hence 8 formation/dissociation reactions):
+```
+formationCTL1_P4GCN1_Pm7GCN1	P4GCN1 + Pm7GCN1 --> CTL1_P4GCN1_Pm7GCN1	0.00999534945189953
+dissociationCTL1_P4GCN1_Pm7GCN1	CTL1_P4GCN1_Pm7GCN1 --> P4GCN1 + Pm7GCN1	0.00177397170383483
+formationCTL1_P4GCN1_Pm7GCN2	P4GCN1 + Pm7GCN2 --> CTL1_P4GCN1_Pm7GCN2	0.00999534945189953
+dissociationCTL1_P4GCN1_Pm7GCN2	CTL1_P4GCN1_Pm7GCN2 --> P4GCN1 + Pm7GCN2	0.00177397170383483
+formationCTL1_P4GCN2_Pm7GCN1	P4GCN2 + Pm7GCN1 --> CTL1_P4GCN2_Pm7GCN1	0.00999534945189953
+dissociationCTL1_P4GCN2_Pm7GCN1	CTL1_P4GCN2_Pm7GCN1 --> P4GCN2 + Pm7GCN1	0.00177397170383483
+formationCTL1_P4GCN2_Pm7GCN2	P4GCN2 + Pm7GCN2 --> CTL1_P4GCN2_Pm7GCN2	0.00999534945189953
+dissociationCTL1_P4GCN2_Pm7GCN2	CTL1_P4GCN2_Pm7GCN2 --> P4GCN2 + Pm7GCN2	0.00177397170383483
+```
 
 # Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
