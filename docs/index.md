@@ -1,11 +1,14 @@
 ---
+title: sismonr package
+layout: page
 nav:
   'Table of Contents': './'
   'Abbreviations': '#abbreviations'
   'The system': '#creating-an-in-silico-system'
   'The individuals': '#creating-an-in-silico-population'
   'Simulation': '#simulating-the-system'
- ---
+
+---
 
 *A R package for generating and simulating in silico biological systems.*
 
@@ -341,6 +344,116 @@ The output of the simulation is a list of 3 elements. The element `runningtime` 
 ```
 
 The `stochmodel` element is a XRJulia proxy object giving Julia object that stores the stochastic model of the system (do not try to read it, it is not really useful in its current form).
+
+The result of the simulation, that is the abundance of the different species in the system over time for each *in silico* individual, is returned in the `Simulation` element. This is a data-frame, giving for each individual (column `Ind`), for each repetition of the simulation (column `trial`) the abundance of the different species over time (column `time`).
+
+```r
+> head(sim$Simulation)
+
+  time trial R5GCN2 P5GCN2 R7GCN2 P7GCN2 Pm7GCN2 R3GCN1 P3GCN1 R1GCN2 R9GCN1 R6GCN2 P6GCN2 R10GCN2 P10GCN2 R1GCN1 R4GCN2
+1    0     1      1   7667      1   1281       0      2  15435     48      1      1  18764       8   19822     61      1
+2    1     1      1   7666      1      0       0      2  15434     45      1      1  18764       8   19822     56      1
+3    2     1      1   7666      1      0       0      2  15435     44      1      1  18764       8   19822     54      1
+4    3     1      1   7666      1      0       0      2  15436     41      1      1  18764       8   19821     53      1
+5    4     1      1   7667      1      0       0      2  15438     40      0      1  18765       8   19820     52      1
+6    5     1      1   7667      1      0       0      2  15441     39      0      1  18765       8   19820     51      1
+  P4GCN2 R8GCN1 P8GCN1 R6GCN1 P6GCN1 R10GCN1 P10GCN1 R2GCN2 P2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 P3GCN2
+1  46409     10 217144      1  19608      10   17629      1  97156     10 147716      1   6896      0  44701      2  17941
+2  45003     10 217144      1  19607      11   17627      1  97155     10 147713      1   6894      0  43369      2  17942
+3  45001     10 217144      1  19607      11   17627      1  97155     10 147712      1   6894      0  43373      2  17942
+4  45004     10 217141      1  19608      11   17626      1  97156     10 147710      1   6894      0  43373      2  17944
+5  45005     10 217141      1  19608      11   17625      1  97156     10 147709      1   6895      0  43373      2  17947
+6  45004     10 217139      1  19608      11   17624      1  97156     10 147709      1   6895      0  43374      2  17949
+  R2GCN1 P2GCN1 R9GCN2 R7GCN1 P7GCN1 Pm7GCN1 CTL1_P4GCN1_Pm7GCN2 CTL1_P4GCN2_Pm7GCN1 CTL1_P4GCN1_Pm7GCN1 CTL1_P4GCN2_Pm7GCN2
+1      1 100838      1      1   1456       0                   0                   0                   0                   0
+2      1 100837      1      1      0       0                 606                 728                 718                 665
+3      1 100837      1      1      0       0                 603                 729                 717                 668
+4      1 100837      1      1      0       0                 601                 727                 719                 670
+5      1 100839      1      1      0       0                 601                 727                 719                 670
+6      1 100839      0      1      0       0                 600                 727                 719                 671
+   Ind
+1 Ind1
+2 Ind1
+3 Ind1
+4 Ind1
+5 Ind1
+6 Ind1
+```
+
+By default, the simulation distinguishes the different gene products (RNAs, proteins and regulatory complexes) according to their allele of origin (e.g. the RNAs arising from the first and second allele of gene 1 will be separately counted in the columns `R1GCN1` and `R1GCN2`, respectively). To obtain results that ignore the allele of origin, you can use:
+
+```r
+> simNoAllele = mergeAlleleAbundance(sim$Simulation)
+> head(simNoAllele)
+
+  time trial  Ind R5    P5 R7   P7 Pm7 R3    P3  R1 R9 R6    P6 R10   P10 R4    P4 R8     P8 R2     P2 CTL1_P4_Pm7
+1    0     1 Ind1  2 14563  2 2737   0  4 33376 109  2  2 38372  18 37451  1 91110 20 364860  2 197994           0
+2    1     1 Ind1  2 14560  2    0   0  4 33376 101  2  2 38371  19 37449  1 88372 20 364857  2 197992        2717
+3    2     1 Ind1  2 14560  2    0   0  4 33377  98  2  2 38371  19 37449  1 88374 20 364856  2 197992        2717
+4    3     1 Ind1  2 14560  2    0   0  4 33380  94  2  2 38372  19 37447  1 88377 20 364851  2 197993        2717
+5    4     1 Ind1  2 14562  2    0   0  4 33385  92  1  2 38373  19 37445  1 88378 20 364850  2 197995        2717
+6    5     1 Ind1  2 14562  2    0   0  4 33390  90  0  2 38373  19 37444  1 88378 20 364848  2 197995        2717
+```
+
+A gene product bound into a regulatory complex is not accounted for when computing the abundance for this species (e.g. if all existing proteins of gene 7 are in a regulatory complex then the abundance for `P7` will be 0). It is possible to ignore the regulatory complexes and compute the abundance of a species by counting each molecule whether it is in a free form or bound into a complex: 
+
+```r
+> simNoComplex = mergeComplexesAbundance(sim$Simulation)
+> head(simNoComplex)
+
+  time trial R5GCN2 P5GCN2 R7GCN2 P7GCN2 Pm7GCN2 R3GCN1 P3GCN1 R1GCN2 R9GCN1 R6GCN2 P6GCN2 R10GCN2 P10GCN2 R1GCN1 R4GCN2
+1    0     1      1   7667      1   1281       0      2  15435     48      1      1  18764       8   19822     61      1
+2    1     1      1   7666      1      0    1271      2  15434     45      1      1  18764       8   19822     56      1
+3    2     1      1   7666      1      0    1271      2  15435     44      1      1  18764       8   19822     54      1
+4    3     1      1   7666      1      0    1271      2  15436     41      1      1  18764       8   19821     53      1
+5    4     1      1   7667      1      0    1271      2  15438     40      0      1  18765       8   19820     52      1
+6    5     1      1   7667      1      0    1271      2  15441     39      0      1  18765       8   19820     51      1
+  P4GCN2 R8GCN1 P8GCN1 R6GCN1 P6GCN1 R10GCN1 P10GCN1 R2GCN2 P2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 P3GCN2
+1  46409     10 217144      1  19608      10   17629      1  97156     10 147716      1   6896      0  44701      2  17941
+2  46396     10 217144      1  19607      11   17627      1  97155     10 147713      1   6894      0  44693      2  17942
+3  46398     10 217144      1  19607      11   17627      1  97155     10 147712      1   6894      0  44693      2  17942
+4  46401     10 217141      1  19608      11   17626      1  97156     10 147710      1   6894      0  44693      2  17944
+5  46402     10 217141      1  19608      11   17625      1  97156     10 147709      1   6895      0  44693      2  17947
+6  46402     10 217139      1  19608      11   17624      1  97156     10 147709      1   6895      0  44693      2  17949
+  R2GCN1 P2GCN1 R9GCN2 R7GCN1 P7GCN1 Pm7GCN1  Ind
+1      1 100838      1      1   1456       0 Ind1
+2      1 100837      1      1      0    1446 Ind1
+3      1 100837      1      1      0    1446 Ind1
+4      1 100837      1      1      0    1446 Ind1
+5      1 100839      1      1      0    1446 Ind1
+6      1 100839      0      1      0    1446 Ind1
+
+```
+
+Lastly, non-modified and modified forms of proteins are counted separately. We merge their abundance with:
+```r
+> simNoPTM = mergePTMAbundance(simNoAllele)
+> head(simNoPTM)
+
+  time trial  Ind R5    P5 R7   P7 R3    P3  R1 R9 R6    P6 R10   P10 R4    P4 R8     P8 R2     P2 CTL1_P4_Pm7
+1    0     1 Ind1  2 14563  2 2737  4 33376 109  2  2 38372  18 37451  1 91110 20 364860  2 197994           0
+2    1     1 Ind1  2 14560  2    0  4 33376 101  2  2 38371  19 37449  1 88372 20 364857  2 197992        2717
+3    2     1 Ind1  2 14560  2    0  4 33377  98  2  2 38371  19 37449  1 88374 20 364856  2 197992        2717
+4    3     1 Ind1  2 14560  2    0  4 33380  94  2  2 38372  19 37447  1 88377 20 364851  2 197993        2717
+5    4     1 Ind1  2 14562  2    0  4 33385  92  1  2 38373  19 37445  1 88378 20 364850  2 197995        2717
+6    5     1 Ind1  2 14562  2    0  4 33390  90  0  2 38373  19 37444  1 88378 20 364848  2 197995        2717
+```
+
+All merging functions presented above can be used one after the other or independently, e.g.:
+
+```r
+> simNothing = mergeComplexesAbundance(simNoAllele)
+> head(simNothing)
+
+  time trial  Ind R5    P5 R7   P7  Pm7 R3    P3  R1 R9 R6    P6 R10   P10 R4    P4 R8     P8 R2     P2
+1    0     1 Ind1  2 14563  2 2737    0  4 33376 109  2  2 38372  18 37451  1 91110 20 364860  2 197994
+2    1     1 Ind1  2 14560  2    0 2717  4 33376 101  2  2 38371  19 37449  1 91089 20 364857  2 197992
+3    2     1 Ind1  2 14560  2    0 2717  4 33377  98  2  2 38371  19 37449  1 91091 20 364856  2 197992
+4    3     1 Ind1  2 14560  2    0 2717  4 33380  94  2  2 38372  19 37447  1 91094 20 364851  2 197993
+5    4     1 Ind1  2 14562  2    0 2717  4 33385  92  1  2 38373  19 37445  1 91095 20 364850  2 197995
+6    5     1 Ind1  2 14562  2    0 2717  4 33390  90  0  2 38373  19 37444  1 91095 20 364848  2 197995
+```
+
 
 ## The stochastic model
 
