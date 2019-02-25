@@ -1,3 +1,12 @@
+---
+nav:
+  'Table of Contents': './'
+  'Abbreviations': '#abbreviations'
+  'The system': '#creating-an-in-silico-system'
+  'The individuals': '#creating-an-in-silico-population'
+  'Simulation': '#simulating-the-system'
+ ---
+
 *A R package for generating and simulating in silico biological systems.*
 
 * TOC
@@ -403,7 +412,7 @@ CTL1_P4GCN2_Pm7GCN1	0
 CTL1_P4GCN2_Pm7GCN2	0
 ```
 
-## The reactions
+### The reactions
 
 Each reaction is characterised by a name, a biochemical formula in the form "$$\sum$$ reactants --> $$\sum$$ products", and a rate. For example the formation and dissociations of the regulatory complex CTL1 are (from the section above we know that there are 4 versions of the complex, hence 8 formation/dissociation reactions):
 ```
