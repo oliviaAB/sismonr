@@ -152,7 +152,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
   message("\n")
 
   ## Store the running time of each simulation
-  runningtime = vector("numeric", length(insilicopopulation$individualsList)*ntrials)
+  runningtime = vector("numeric", length(insilicopopulation$individualsList))
   ri = 1
 
   ## Set a progress bar
