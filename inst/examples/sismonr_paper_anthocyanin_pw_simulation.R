@@ -149,26 +149,41 @@ cols = c('#9a6324', '#3cb44b', '#ffe119', '#4363d8', '#f58231', '#911eb4', '#46f
 names(cols) = plotbreaks
 # pie(rep(1, length(cols)), col = cols, labels = names(cols))
 
-uplimprot = 300
-uplimcompl = 250
-toplotBounds = toplot %>% filter(time<1000) %>%
-  mutate(UB = ifelse(Type == "Proteins" & UB>uplimprot, uplimprot, UB),
-         mean = ifelse(Type == "Proteins" & mean>uplimprot, NA, mean),
-         LB = ifelse(Type == "Proteins" & LB>uplimprot, NA, LB)) %>%
-  mutate(UB = ifelse(Type == "Complexes" & UB>uplimcompl, uplimcompl, UB),
-         mean = ifelse(Type == "Complexes" & mean>uplimcompl, NA, mean),
-         LB = ifelse(Type == "Complexes" & LB>uplimcompl, NA, LB))
-
-colourpwplot = ggplot(toplotBounds, aes(x = time)) +
-  geom_ribbon(aes(ymin = LB, ymax = UB, fill = Components), alpha = 0.5) +
-  geom_line(aes(y = mean, colour = Components)) +
+colourpwplot = ggplot(toplot, aes(x = time)) +
+  geom_ribbon(aes(ymin = LB, ymax = UB, fill = Components), alpha = 0.5, show.legend = F) +
+  geom_line(aes(y = mean, colour = Components), show.legend = F) +
   scale_colour_manual(values = cols, breaks = plotbreaks) +
   scale_fill_manual(values = cols, breaks = plotbreaks) +
+  scale_y_log10() +
   facet_grid(Type~Ind, scales = "free_y", labeller = as_labeller(c(`Ind1` = "Wild type", `Ind2` = "MYBrep overexpressed", `Ind3` = "MYBrep silenced", `RNAs` = "RNAs", `Proteins` = "Proteins", `Complexes` = "Complexes"))) +
   xlab("Time (s)") + ylab("Components absolute abundance") +
   theme_minimal() +
   theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10), legend.direction = "horizontal", legend.position = "bottom")
-print(colourpwplot)
+
+## create legend
+
+nbg = length(genes.name2id$name)
+nbc = length(complexes.name2id$name)
+legend_points = rbind(data.frame("Components" = rep(genes.name2id$name, each = 2), "x" = rep(1:nbg, each = 2), "y" = rep(1:2, nbg)),
+                      data.frame("Components" = complexes.name2id$name, "x" = (1:nbc)+nbg, "y" = rep(3, nbc)))
+legend_text = rbind(data.frame("Names" = c(genes.name2id$name, complexes.name2id$name), "x" = 1:(nbg+nbc), "y" = 4.1, "angle" = 30, "size" = 3, "hjust" = 0.5),
+                    data.frame("Names" = c("RNAs", "Proteins", "Complexes"), "x" = 0.2, "y" = 1:3, "angle" = 0, "size" = 4, "hjust" = 1))
+legend_lines = rbind(data.frame("x" = seq(0.5, 12.5, by = 1), "xend" = seq(0.5, 12.5, by = 1), "y" = 0.5, "yend" = 3.9),
+                     data.frame("x" = 0.4, "xend" = 12.6, "y" = seq(0.5, 3.5, by = 1), "yend" = seq(0.5, 3.5, by = 1)))
+
+legendplot = ggplot() +
+  geom_point(data = legend_points, size = 5, shape = 15, aes(x = x, y = y, group = Components, colour = Components), show.legend = F) +
+  geom_text(data = legend_text, aes(label = Names, x = x, y = y, angle = angle, size = size, hjust = hjust), show.legend = F) +
+  geom_segment(data = legend_lines, colour = "gray90", aes(x = x, xend = xend, y = y, yend = yend)) +
+  scale_colour_manual(values = cols, breaks = plotbreaks) +
+  scale_size(range = c(2.5, 3.5), guide = F) +
+  xlim(-1.6, 13) + ylim(0.45, 4.5) +
+  theme_void()
+
+finalplot = ggdraw() +
+  draw_plot(colourpwplot, x = 0.15, y = 0.2 , width = 0.7, height = 0.8) +
+  draw_plot(legendplot, x = 0.175, y = 0, width = 0.65, height = 0.2)
+print(finalplot)
 
 ## --------------------------------------------------------------------------------- ##
 #### Computing the experimental and simulated RNA concentration ratios for the genes ##

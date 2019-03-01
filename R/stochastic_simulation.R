@@ -403,68 +403,137 @@ mergeComplexesAbundance = function(df){
   return(mergeddf)
 }
 
+chooseColourPalette = function(toplot, mergeAllele){
 
-# plotIndividual = function(simdf, ind, mergeAllele = F, mergePTM = F, mergeComplexes = F){
-#
-#   simind = simdf %>% filter(Ind == ind)
-#
-#   if(mergePTM)  simind = mergePTMAbundance(simind)
-#   if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
-#   if(mergeAllele) simind = mergeAlleleAbundance(simind)
-#
-#   toplot = simind %>%
-#     tidyr::gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
-#     mutate(Type = case_when(stringr::str_detect(ID, "^R") ~ "RNAs",
-#                             stringr::str_detect(ID, "^P") ~ "Proteins",
-#                             stringr::str_detect(ID, "^C") ~ "Complexes"),
-#            Components = stringr::str_replace(ID, "^R|^P", ""))
-#
-#   ## GENERATE COLOUR PALETTE
-#   if(!mergeAllele){
-#     ## we need to see how many different components exist in the system and how many allelic version of each exist
-#     compocols = data.frame(Components = unique(toplot$Components)) %>%
-#       mutate(isComplex = stringr::str_detect(Components, "^C")) %>%
-#       mutate(compoID = stringr::str_replace_all(Components, "GCN.+|_.+", ""),
-#              Allele = stringr::str_replace(Components, "^[[:digit:]]+(?=GCN)|^[^_]+_{1}", "")) %>%
-#       dplyr::arrange(compoID, Allele)
-#
-#     ncols = length(unique(compocols$compoID))
-#     paletteCompo = randomcoloR::distinctColorPalette(ncols) ## create a colour for each component
-#     names(paletteCompo) = unique(compocols$compoID)
-#     palette = unlist(lapply(names(paletteCompo), function(x){ ## create a gradient (one colour for each allelic version of the component)
-#       nall = sum(compocols$compoID == x)
-#       return(grDevices::colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1])
-#     }))
-#     names(palette) = sort(compocols$Components)
-#   }else{
-#     palette = randomcoloR::distinctColorPalette(length(unique(toplot$Components)))
-#     names(palette) = sort(unique(toplot$Components))
-#   }
-#
-#
-#   if(max(simind$trial) == 1){   ## If there is only one trial
-#     simuplot = ggplot2::ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) + ggplot2::geom_line() +
-#       ggplot2::facet_grid(Type~., scales = "free_y") +
-#       ggplot2::scale_colour_manual(values = palette, breaks = names(palette)) +
-#       ggplot2::xlab("Time (s)") + ggplot2::ylab("Components absolute abundance") +
-#       ggplot2::theme_minimal() +
-#       ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10))
-#   }else{
-#     toplotTrials = toplot %>%
-#       dplyr::group_by(Ind, time, Components, Type, ID) %>%
-#       dplyr::summarise("mean" = mean(Abundance), "LB" = min(Abundance), "UB" = max(Abundance))
-#
-#     simuplot = ggplot2::ggplot(toplotTrials, aes(x = time)) +
-#       ggplot2::geom_ribbon(aes(ymin = LB, ymax = UB, fill = Components), alpha = 0.5) +
-#       ggplot2::geom_line(aes(y = mean, colour = Components)) +
-#       ggplot2::scale_colour_manual(values = palette, breaks = names(palette)) +
-#       ggplot2::scale_fill_manual(values = palette, breaks = names(palette)) +
-#       ggplot2::facet_grid(Type~., scales = "free_y") +
-#       ggplot2::xlab("Time (s)") + ggplot2::ylab("Components absolute abundance") +
-#       ggplot2::theme_minimal() +
-#       ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10))
-#   }
-#
-#   print(simuplot)
-#
-# }
+    if(!mergeAllele){
+    ## we need to see how many different components exist in the system and how many allelic version of each exist
+    compocols = data.frame(Components = unique(toplot$Components)) %>%
+      mutate("isComplex" = stringr::str_detect(.data$Components, "^C")) %>%
+      mutate("compoID" = stringr::str_replace_all(.data$Components, "GCN.+|_.+", ""),
+             "Allele" = stringr::str_replace(.data$Components, "^[[:digit:]]+(?=GCN)|^[^_]+_{1}", "")) %>%
+      dplyr::arrange(.data$compoID, .data$Allele)
+
+    ncols = length(unique(compocols$compoID))
+    paletteCompo = randomcoloR::distinctColorPalette(ncols) ## create a colour for each component
+    names(paletteCompo) = sort(unique(compocols$compoID))
+    palette = unlist(lapply(names(paletteCompo), function(x){ ## create a gradient (one colour for each allelic version of the component)
+      nall = sum(compocols$compoID == x)
+      return(grDevices::colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1])
+    }))
+    names(palette) = sort(compocols$Components)
+  }else{
+    palette = randomcoloR::distinctColorPalette(length(unique(toplot$Components)))
+    names(palette) = sort(unique(toplot$Components))
+  }
+  return(palette)
+}
+
+plotBase = function(toplot, palette, multitrials, yLogScale, ...){
+  if(multitrials){
+    simuplot = ggplot2::ggplot(toplot, aes_string(x = "time")) +
+      ggplot2::geom_ribbon(aes_string(ymin = "LB", ymax = "UB", fill = "Components"), alpha = 0.5) +
+      ggplot2::geom_line(aes_string(y = "mean", colour = "Components")) +
+      ggplot2::scale_colour_manual(values = palette, breaks = names(palette), guide = guide_legend(ncol=10, byrow=T)) +
+      ggplot2::scale_fill_manual(values = palette, breaks = names(palette), guide = guide_legend(ncol=10, byrow=T))
+  }else{
+    simuplot = ggplot2::ggplot(toplot, aes_string(x = "time", y = "Abundance", colour = "Components")) + ggplot2::geom_line() +
+      ggplot2::scale_colour_manual(values = palette, breaks = names(palette), guide = guide_legend(ncol=10, byrow=T))
+  }
+
+  plotTitle = "Components absolute abundance"
+  if(yLogScale) simuplot = simuplot + ggplot2::scale_y_log10(); plotTitle = "log10(Components absolute abundance+1)"
+
+  simuplot = simuplot +
+    ggplot2::facet_grid(Type~Ind, scales = "free_y") +
+    ggplot2::xlab("Time (s)") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10),
+                   legend.spacing = grid::unit(5, "mm"), legend.key.size = grid::unit(10, "mm"),
+                   legend.direction = "horizontal", ...) +
+    ggplot2::ylab(plotTitle)
+  return(simuplot)
+}
+
+#' Plots the result of a simulation
+#'
+#' Automatically plots the result of a simulation for the selected in silico individuals.
+#'
+#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
+#' @param inds A vector of in silico individual names for which to plot the expression profiles
+#' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
+#' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
+#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
+#' @param yLogScale Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
+#' @param nIndPerRow Positive integer, the number of individuals to plot per row. Default 3.
+#' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
+#' @return A plot from \code{\link[ggpubr]{ggarrange}}.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+#' plotSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
+#'  axis.title = element_text(color = "red"))
+#' }
+#' @export
+plotSimulation = function(simdf, inds, mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, ...){
+
+  ## Select the requested inviduals (in principle we could only do this later but this avoids transforming the whole dataset
+  ## if we want to plot only a couple of individuals)
+  simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds)
+
+  ## Are there mutliple trials?
+  multitrials = max(simind$trial) > 1
+
+  if(mergePTM)  simind = mergePTMAbundance(simind)
+  if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
+  if(mergeAllele) simind = mergeAlleleAbundance(simind)
+
+  ## First transformation into a long tibble
+  toplot = simind %>%
+    tidyr::gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
+    mutate("Type" = case_when(stringr::str_detect(.data$ID, "^R") ~ "RNAs",
+                            stringr::str_detect(.data$ID, "^P") ~ "Proteins",
+                            stringr::str_detect(.data$ID, "^C") ~ "Complexes"),
+           "Components" = stringr::str_replace(.data$ID, "^R|^P", ""),
+           "Components" = stringr::str_replace(.data$Components, "^m", "PTM"))
+
+  ## If plot in log-scale, need to have non-zero abundances
+  if(yLogScale) toplot = toplot %>% mutate_("Abundance" = ~Abundance + 1)
+
+  ## If multiple trials, summarise them with mean, min and max
+  if(multitrials){
+    toplot = toplot %>%
+      dplyr::group_by_("Ind", "time", "Components", "Type", "ID") %>%
+      dplyr::summarise("mean" = mean(!!sym("Abundance")), "LB" = min(!!sym("Abundance")), "UB" = max(!!sym("Abundance")))
+  }
+
+  palette = chooseColourPalette(toplot, mergeAllele)
+
+  # ## How many rows of plot given the nb of inds to plot and nb of inds per row
+  # nbrows = c(rep(nIndsPerRow, length(inds) %/% nIndsPerRow), length(inds) %% nIndsPerRow)
+  #
+  # ## Create each row of plot
+  # firstindex = 1
+  # plots = vector("list", length = length(nbrows))
+  # for(i in 1:length(nbrows)){
+  #   indsrow = inds[firstindex:(firstindex + nbrows[i] - 1)]
+  #   plots[[i]] = plotBase(filter(toplot, !!as.name("Ind") %in% indsrow), palette, multitrials, yLogScale)
+  #   firstindex = firstindex + nbrows[i]
+  # }
+
+  ## Create a plot for each individual
+  plots = vector("list", length = length(inds))
+  for(i in 1:length(inds)){
+    plots[[i]] = plotBase(filter(toplot, !!as.name("Ind") == inds[i]), palette, multitrials, yLogScale, ...)
+  }
+
+  ## How many rows of plot given the nb of inds to plot and nb of inds per row
+  nbrows = length(inds) %/% nIndPerRow + (length(inds) %% nIndPerRow != 0)
+
+  simuplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = min(nIndPerRow, length(inds)), common.legend = T, heights = rep(1, length(plots)), legend = "bottom")
+
+  ##simuplot
+  return(simuplot)
+}
+

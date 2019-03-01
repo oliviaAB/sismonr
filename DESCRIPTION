@@ -22,8 +22,14 @@ Imports:
     XR,
     jsonlite,
     methods,
-    tidyr
-Remotes: johnmchambers/XRJulia
+    tidyr,
+    ggpubr,
+    randomcoloR,
+    ggplot2,
+    rlang
+Remotes: 
+    johnmchambers/XRJulia,
+    kassambara/ggpubr
 RoxygenNote: 6.1.0
 Suggests: 
     knitr,
