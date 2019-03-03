@@ -24,9 +24,9 @@ Imports:
     methods,
     tidyr,
     ggpubr,
-    randomcoloR,
     ggplot2,
-    rlang
+    rlang,
+    grDevices
 Remotes: 
     johnmchambers/XRJulia,
     kassambara/ggpubr

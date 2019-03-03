@@ -414,15 +414,17 @@ chooseColourPalette = function(toplot, mergeAllele){
       dplyr::arrange(.data$compoID, .data$Allele)
 
     ncols = length(unique(compocols$compoID))
-    paletteCompo = randomcoloR::distinctColorPalette(ncols) ## create a colour for each component
+    #paletteCompo = randomcoloR::distinctColorPalette(ncols) ## create a colour for each component
+    paletteCompo = grDevices::rainbow(ncols)
     names(paletteCompo) = sort(unique(compocols$compoID))
     palette = unlist(lapply(names(paletteCompo), function(x){ ## create a gradient (one colour for each allelic version of the component)
       nall = sum(compocols$compoID == x)
-      return(grDevices::colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1])
+      return(rev(grDevices::colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1]))
     }))
     names(palette) = sort(compocols$Components)
   }else{
-    palette = randomcoloR::distinctColorPalette(length(unique(toplot$Components)))
+    #palette = randomcoloR::distinctColorPalette(length(unique(toplot$Components)))
+    palette = grDevices::rainbow(length(unique(toplot$Components)))
     names(palette) = sort(unique(toplot$Components))
   }
   return(palette)
@@ -458,8 +460,12 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #'
 #' Automatically plots the result of a simulation for the selected in silico individuals.
 #'
+#' If more than one trial is to be plotted, the mean abundance of each molecule over the different trials is plotted with a solid line,
+#' and the min and max abundances represented as coloured areas around the mean.
+#'
 #' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
 #' @param inds A vector of in silico individual names for which to plot the expression profiles
+#' @param trials A vector of trials ID (=number) to use for the plot (see details).
 #' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
 #' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
 #' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
@@ -476,14 +482,15 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
-plotSimulation = function(simdf, inds, mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, ...){
+plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, ...){
 
   ## Select the requested inviduals (in principle we could only do this later but this avoids transforming the whole dataset
   ## if we want to plot only a couple of individuals)
-  simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds)
+  simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds) %>%
+                     dplyr::filter(!!as.name("trial") %in% trials)
 
   ## Are there mutliple trials?
-  multitrials = max(simind$trial) > 1
+  multitrials = length(unique(simind$trial)) > 1
 
   if(mergePTM)  simind = mergePTMAbundance(simind)
   if(mergeComplexes)  simind = mergeComplexesAbundance(simind)

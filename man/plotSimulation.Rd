@@ -4,13 +4,16 @@
 \alias{plotSimulation}
 \title{Plots the result of a simulation}
 \usage{
-plotSimulation(simdf, inds, mergeAllele = T, mergePTM = T,
+plotSimulation(simdf, inds = unique(simdf$Ind),
+  trials = unique(simdf$trial), mergeAllele = T, mergePTM = T,
   mergeComplexes = F, yLogScale = T, nIndPerRow = 3, ...)
 }
 \arguments{
 \item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})}
 
 \item{inds}{A vector of in silico individual names for which to plot the expression profiles}
+
+\item{trials}{A vector of trials ID (=number) to use for the plot (see details).}
 
 \item{mergeAllele}{Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}}
 
@@ -29,6 +32,10 @@ A plot from \code{\link[ggpubr]{ggarrange}}.
 }
 \description{
 Automatically plots the result of a simulation for the selected in silico individuals.
+}
+\details{
+If more than one trial is to be plotted, the mean abundance of each molecule over the different trials is plotted with a solid line,
+and the min and max abundances represented as coloured areas around the mean.
 }
 \examples{
 \donttest{
