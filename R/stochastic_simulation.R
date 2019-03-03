@@ -466,6 +466,8 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
 #' @param inds A vector of in silico individual names for which to plot the expression profiles
 #' @param trials A vector of trials ID (=number) to use for the plot (see details).
+#' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
+#' @param timeMax Numeric. The maximum simulation time to plot. Default value set to the maximum time in the simulation.
 #' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
 #' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
 #' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
@@ -482,12 +484,13 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
-plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, ...){
+plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, ...){
 
   ## Select the requested inviduals (in principle we could only do this later but this avoids transforming the whole dataset
   ## if we want to plot only a couple of individuals)
   simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds) %>%
-                     dplyr::filter(!!as.name("trial") %in% trials)
+                     dplyr::filter(!!as.name("trial") %in% trials) %>%
+                     dplyr::filter(!!as.name("time") >= timeMin & !!as.name("time") <= timeMax)
 
   ## Are there mutliple trials?
   multitrials = length(unique(simind$trial)) > 1
@@ -544,3 +547,96 @@ plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf
   return(simuplot)
 }
 
+plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
+
+  simuplot = ggplot2::ggplot(toplot, aes_string(x = "time", y = "Components", fill = "mean")) + ggplot2::geom_tile()
+
+  if(yLogScale){
+    simuplot = simuplot + ggplot2::scale_fill_viridis_c(trans = "log10", option = VirPalOption, name = "log10(Components absolute abundance+1)")
+  }else{
+    simuplot = simuplot + ggplot2::scale_fill_viridis_c(option = VirPalOption, name = "Components absolute abundance")
+  }
+
+  simuplot = simuplot +
+    ggplot2::facet_grid(Type~Ind, scales = "free_y") +
+    ggplot2::xlab("Time (s)") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10),
+                   legend.spacing = grid::unit(5, "mm"), legend.key.size = grid::unit(10, "mm"),
+                   legend.direction = "horizontal", ...)
+
+  return(simuplot)
+
+}
+
+#' Plots the result of a simulation as a heatmap
+#'
+#' Automatically plots the result of a simulation for the selected in silico individuals as a heatmap.
+#'
+#' If more than one trial is to be plotted, the mean abundance of each molecule over the different trials is plotted with a solid line,
+#' and the min and max abundances represented as coloured areas around the mean.
+#'
+#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
+#' @param inds A vector of in silico individual names for which to plot the expression profiles
+#' @param trials A vector of trials ID (=number) to use for the plot (see details).
+#' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
+#' @param timeMax Numeric. The maximum simulation time to plot. Default value set to the maximum time in the simulation.
+#' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
+#' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
+#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
+#' @param yLogScale Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
+#' @param nIndPerRow Positive integer, the number of individuals to plot per row. Default 3.
+#' @param VirPalOption String, palette name option to be passed to \code{\link[ggplot2]{scale_fill_viridis_c}}; can be one of "magma", "inferno", "plasma", "viridis" or "cividis". Default value is "plasma".
+#' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
+#' @return A plot from \code{\link[ggpubr]{ggarrange}}.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+#' plotHeatMap(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
+#'  axis.title = element_text(color = "red"))
+#' }
+#' @export
+plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, VirPalOption = "plasma", ...){
+  simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds) %>%
+                     dplyr::filter(!!as.name("trial") %in% trials) %>%
+                     dplyr::filter(!!as.name("time") >= timeMin & !!as.name("time") <= timeMax)
+
+  if(mergePTM)  simind = mergePTMAbundance(simind)
+  if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
+  if(mergeAllele) simind = mergeAlleleAbundance(simind)
+
+  ## First transformation into a long tibble
+  toplot = simind %>%
+    tidyr::gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
+    mutate("Type" = case_when(stringr::str_detect(.data$ID, "^R") ~ "RNAs",
+                              stringr::str_detect(.data$ID, "^P") ~ "Proteins",
+                              stringr::str_detect(.data$ID, "^C") ~ "Complexes"),
+           "Components" = stringr::str_replace(.data$ID, "^R|^P", ""),
+           "Components" = stringr::str_replace(.data$Components, "^m", "PTM"))
+
+  ## If plot in log-scale, need to have non-zero abundances
+  if(yLogScale) toplot = toplot %>% mutate_("Abundance" = ~Abundance + 1)
+
+  ## Only plot the mean (even if only one trial to be plotted)
+  toplot = toplot %>% dplyr::group_by_("Ind", "time", "Components", "Type", "ID") %>%
+           dplyr::summarise("mean" = mean(!!sym("Abundance")))
+
+
+  ## Create a plot for each individual
+  plots = vector("list", length = length(inds))
+  for(i in 1:length(inds)){
+    plots[[i]] = plotBaseHM(filter(toplot, !!as.name("Ind") == inds[i]), yLogScale, VirPalOption, ...)
+  }
+
+  ## How many rows of plot given the nb of inds to plot and nb of inds per row
+  nbrows = length(inds) %/% nIndPerRow + (length(inds) %% nIndPerRow != 0)
+
+  simuplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = min(nIndPerRow, length(inds)), common.legend = T, heights = rep(1, length(plots)), legend = "bottom")
+
+  ##simuplot
+  return(simuplot)
+
+
+}
