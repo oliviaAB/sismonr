@@ -467,7 +467,8 @@ plotHeatMap(sim$Simulation)
 ```
 ![plotHeatMap](images/plotHeatMap.png)
 
-The settings of this function are the same as those of the `plotSimulation` function presented above. 
+The settings of this function are the same as those of the `plotSimulation` function presented above. Plotting this specific simulation as a heatmap is not really useful, but such plot can get really interesting for more complex case, as for example the anthocyanin biosynthesis regulation pathway (included as an example):
+![plotcolpw](images/heatmap_colpw_tmax100.png)
 
 ## The stochastic model
 
