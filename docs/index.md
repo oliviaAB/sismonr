@@ -449,6 +449,7 @@ It is possible to visualise the results of the simulation with:
 ```r
 plotSimulation(sim$Simulation)
 ```
+![plotSimulation](images/plotSimulation.png)
 
 This returns a plot of the abundance of the different species (separated by RNAs -bottom-, proteins -middle- and regulatory complexes -top-) over time. As the simulation has been repeated 5 times (`ntrials` = 5), the mean abundance over the different repetitions or trials of the molecules is plotted as a solid lines, and the minimum and maximum values are represented by the coloured areas. By default the abundances are plotted on a log10 scale, but you can change that with the option `yLogScale = F`i in the `plotSimulation`.
 
@@ -458,11 +459,14 @@ If you want to focus on one *in silico* individual, and zoom on a smaller time-p
 ```r
 plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
 ```
+![plotSimulation2](images/plotSimulation2.png)
 
 Alernatively, you can plot the abundance of the different components as a heatmap:
 ```r
 plotHeatMap(sim$Simulation)
 ```
+![plotHeatMap](images/plotHeatMap.png)
+
 The settings of this function are the same as those of the `plotSimulation` function presented above. 
 
 ## The stochastic model
