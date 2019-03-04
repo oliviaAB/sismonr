@@ -488,80 +488,102 @@ of the `simulate(Parallel)inSilicoSystem` functions. This generates two text fil
 
 As the individuals are diploid, there exist two versions of each gene (and gene product): those originating from the first allele (GCN1) and those originating from the second allele (GCN2), e.g.:
 
-```
-R1GCN1
-R1GCN2	
-```
+> R1GCN1
+> 
+> R1GCN2	
+
 
 
 The DNA sequence of genes is not explicitely modelled, except if the gene is regulated at the transcription level. In this case, the gene's DNA form is modelled as the sum of the binding sites of its different regulators. These binding sites can exist in a free or bound state. Morevoer, the binding site of a specific regulator can be occupied by the regulator's product arising from either of the regulator alleles. For example, gene 2 transcription is regulated by gene 9, so the DNA form of gene 2 first allele is:
-```
-Pr2GCN1reg9F	1 ## free binding site for regulator 9 on gene 2 first allele 
-Pr2GCN1reg9GCN1B	0 ## binding site occupied by one of regulator 9's products originating from the first allele of gene 9
-Pr2GCN1reg9GCN2B	0 ## binding site occupied by one of regulator 9's products originating from the second allele of gene 9
-```
+
+> Pr2GCN1reg9F	1 ## free binding site for regulator 9 on gene 2 first allele 
+> 
+> Pr2GCN1reg9GCN1B	0 ## binding site occupied by one of regulator 9's products originating from the first allele of gene 9
+> 
+> Pr2GCN1reg9GCN2B	0 ## binding site occupied by one of regulator 9's products originating from the second allele of gene 9
+
 The same scheme is repeated for the second allele of gene 2:
 
-```
-Pr2GCN2reg9F	1
-Pr2GCN2reg9GCN1B	0
-Pr2GCN2reg9GCN2B	0
-```
+> Pr2GCN2reg9F	1
+> 
+> Pr2GCN2reg9GCN1B	0
+> 
+> Pr2GCN2reg9GCN2B	0
 
 At the beginning of the simulation, all binding sites are in a free state (initial abundance 1 for the free form of the binding sites, 0 for the occupied forms).
 
 The same modelling applies to the RNA form of genes. If the gene is not targeted by regulators of translation (e.g. gene 1), we simply have:
-```
-R1GCN1	51.19330725498743*InitVar["GCN1"]["R"][1]
-R1GCN2	51.19330725498743*InitVar["GCN2"]["R"][1]
-```
+
+> R1GCN1	51.19330725498743\*InitVar\["GCN1"\]\["R"\]\[1\]
+> 
+> R1GCN2	51.19330725498743\*InitVar\["GCN2"\]\["R"\]\[1\]
+
 The initial abundance of gene 1's RNAs is $$\sim 51 \times$$ the initial abundance variation coefficient for the corresponding allele of the considered individual. If on the contrary the gene is targeted by regulator of translation, the RNA form of the gene is modelled as the sum of the RNA binding sites for the different translation regulators. One example is gene 10 whose translation is regulated by gene 1:
-```
-RBS10GCN1reg1F	9.385223382716024*InitVar["GCN1"]["R"][10]
-RBS10GCN1reg1GCN1B	0
-RBS10GCN1reg1GCN2B	0
-RBS10GCN2reg1F	9.385223382716024*InitVar["GCN2"]["R"][10]
-RBS10GCN2reg1GCN1B	0
-RBS10GCN2reg1GCN2B	0
-```
+
+> RBS10GCN1reg1F	9.385223382716024\*InitVar\["GCN1"\]\["R"\]\[10\]
+> 
+> RBS10GCN1reg1GCN1B	0
+> 
+> RBS10GCN1reg1GCN2B	0
+>
+> RBS10GCN2reg1F	9.385223382716024\*InitVar\["GCN2"\]\["R"\]\[10\]
+> 
+> RBS10GCN2reg1GCN1B	0
+> 
+> RBS10GCN2reg1GCN2B	0
+
 Again, at the beginning of the simulation, all RNA binding sites are in a free state, and the initial abundance of the RNAs must account for the initial abundance variation coefficient for the corresponding allele of the considered individual.
 
 The proteins are modelled as follow:
-```
-P2GCN1	(89578.69434518841)*InitVar["GCN1"]["P"][2]
-P2GCN2	(89578.69434518841)*InitVar["GCN2"]["P"][2]
-```
+
+> P2GCN1	(89578.69434518841)\*InitVar\["GCN1"\]\["P"\]\[2\]
+> 
+> P2GCN2	(89578.69434518841)\*InitVar\["GCN2"\]\["P"\]\[2\]
+
 If a gene is targeted in the GRN by post-translational modification, there also exists a modified form of the protein, e.g. for gene 7:
-```
-P7GCN1	(1358.0048533970976)*InitVar["GCN1"]["P"][7]
-P7GCN2	(1358.0048533970976)*InitVar["GCN2"]["P"][7]
-Pm7GCN1	0
-Pm7GCN2	0
-```
+
+> P7GCN1	(1358.0048533970976)\*InitVar\["GCN1"\]\["P"\]\[7\]
+> 
+> P7GCN2	(1358.0048533970976)\*InitVar\["GCN2"\]\["P"\]\[7\]
+> 
+> Pm7GCN1	0
+> 
+> Pm7GCN2	0
+
 
 At the beginning of the simulation all proteins are in their original (non-modified) form.
 
 Recall that in our system, the products of genes 4 and 7 for a regulatory complex named `CTL1`. As there exist two versions of the proteins of these genes (arising either from the first or the second allele of the genes), there exist 4 versions of the complex, including all possible combinations of the different protein allelic versions. Initially no regulatory complex is formed in the system.
-```
-CTL1_P4GCN1_Pm7GCN1	0
-CTL1_P4GCN1_Pm7GCN2	0
-CTL1_P4GCN2_Pm7GCN1	0
-CTL1_P4GCN2_Pm7GCN2	0
-```
+
+> CTL1_P4GCN1_Pm7GCN1	0
+> 
+> CTL1_P4GCN1_Pm7GCN2	0
+> 
+> CTL1_P4GCN2_Pm7GCN1	0
+> 
+> CTL1_P4GCN2_Pm7GCN2	0
+
 
 ### The reactions
 
 Each reaction is characterised by a name, a biochemical formula in the form "$$\sum$$ reactants --> $$\sum$$ products", and a rate. For example the formation and dissociations of the regulatory complex CTL1 are (from the section above we know that there are 4 versions of the complex, hence 8 formation/dissociation reactions):
-```
-formationCTL1_P4GCN1_Pm7GCN1	P4GCN1 + Pm7GCN1 --> CTL1_P4GCN1_Pm7GCN1	0.00999534945189953
-dissociationCTL1_P4GCN1_Pm7GCN1	CTL1_P4GCN1_Pm7GCN1 --> P4GCN1 + Pm7GCN1	0.00177397170383483
-formationCTL1_P4GCN1_Pm7GCN2	P4GCN1 + Pm7GCN2 --> CTL1_P4GCN1_Pm7GCN2	0.00999534945189953
-dissociationCTL1_P4GCN1_Pm7GCN2	CTL1_P4GCN1_Pm7GCN2 --> P4GCN1 + Pm7GCN2	0.00177397170383483
-formationCTL1_P4GCN2_Pm7GCN1	P4GCN2 + Pm7GCN1 --> CTL1_P4GCN2_Pm7GCN1	0.00999534945189953
-dissociationCTL1_P4GCN2_Pm7GCN1	CTL1_P4GCN2_Pm7GCN1 --> P4GCN2 + Pm7GCN1	0.00177397170383483
-formationCTL1_P4GCN2_Pm7GCN2	P4GCN2 + Pm7GCN2 --> CTL1_P4GCN2_Pm7GCN2	0.00999534945189953
-dissociationCTL1_P4GCN2_Pm7GCN2	CTL1_P4GCN2_Pm7GCN2 --> P4GCN2 + Pm7GCN2	0.00177397170383483
-```
+
+> formationCTL1_P4GCN1_Pm7GCN1	P4GCN1 + Pm7GCN1 --> CTL1_P4GCN1_Pm7GCN1	0.00999534945189953
+> 
+> dissociationCTL1_P4GCN1_Pm7GCN1	CTL1_P4GCN1_Pm7GCN1 --> P4GCN1 + Pm7GCN1	0.00177397170383483
+> 
+> formationCTL1_P4GCN1_Pm7GCN2	P4GCN1 + Pm7GCN2 --> CTL1_P4GCN1_Pm7GCN2	0.00999534945189953
+> 
+> dissociationCTL1_P4GCN1_Pm7GCN2	CTL1_P4GCN1_Pm7GCN2 --> P4GCN1 + Pm7GCN2	0.00177397170383483
+> 
+> formationCTL1_P4GCN2_Pm7GCN1	P4GCN2 + Pm7GCN1 --> CTL1_P4GCN2_Pm7GCN1	0.00999534945189953
+> 
+> dissociationCTL1_P4GCN2_Pm7GCN1	CTL1_P4GCN2_Pm7GCN1 --> P4GCN2 + Pm7GCN1	0.00177397170383483
+> 
+> formationCTL1_P4GCN2_Pm7GCN2	P4GCN2 + Pm7GCN2 --> CTL1_P4GCN2_Pm7GCN2	0.00999534945189953
+> 
+> dissociationCTL1_P4GCN2_Pm7GCN2	CTL1_P4GCN2_Pm7GCN2 --> P4GCN2 + Pm7GCN2	0.00177397170383483
+
 
 # Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
