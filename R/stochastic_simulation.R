@@ -363,7 +363,7 @@ mergeAlleleAbundance = function(df){
 mergePTMAbundance = function(df){
   mergeddf = df %>% select_("time", "trial", "Ind")
   molsPTM = colnames(df)
-  mols = stringr::str_replace(molsPTM, "^Pm", "P")
+  mols = stringr::str_replace(molsPTM, "Pm", "P")
 
   for(m in setdiff(unique(mols), c("time", "trial", "Ind"))){
     mergeddf[[m]] = sumColAbundance(df,which(mols == m))
@@ -397,7 +397,9 @@ mergeComplexesAbundance = function(df){
   for(i in molsComp){
     splt = stringr::str_split(i, "_")[[1]]
     splt = splt[!stringr::str_detect(splt, "^C")]
-    mergeddf[, splt] = mergeddf[, splt] + df[, i]
+    for(j in unique(splt)){
+      mergeddf[, j] = mergeddf[, j] + df[, i]*sum(splt == j)
+    }
   }
 
   return(mergeddf)
