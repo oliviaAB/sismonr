@@ -1,4 +1,4 @@
-*A R package for generating and simulating in silico biological systems.*
+*An R package for generating and simulating in silico biological systems.*
 
 * TOC
 {:toc}
@@ -6,6 +6,8 @@
 # Introduction
 
 *Explain the concepts of in silico system and individual*
+
+The code used throughout this documentation as well as the created variables saved as `.RData` objects are available [here](https://github.com/oliviaAB/sismonr/tree/master/docs/example).
 
 ## Abbreviations
 
@@ -15,11 +17,11 @@
 
 # Creating an *in silico* system
 
-The first step is to generate an *in silico* system. An *in silico* system is composed of a set of genes, and a gene regulatory network or GRN describing the different regulatory interactions occuring between the genes. The network is created by a call to the function `createInSilicoSystem`. The user can control different aspects of the system with the arguments passed to the function. For example,
+The first step is to generate an *in silico* system. An *in silico* system is composed of a set of genes, and a gene regulatory network or GRN describing the different regulatory interactions occuring between the genes. The system is created by a call to the function `createInSilicoSystem`. The user can control different aspects of the system with the arguments passed to the function. For example:
 ```r
 mysystem = createInSilicoSystem(G = 10, PC.p = 0.7)
 ```
-generates an *in silico* system with 10 genes,and during the generation process each of the genes has a probability of 0.7 to be designated protein-coding gene (as opposed to noncoding gene). The system returned by the function is an object of class `insilicosystem`, i.e. a list whose different attributes are presented below.
+generates an *in silico* system with 10 genes, and during the generation process each gene has a probability of 0.7 to be a protein-coding gene (as opposed to noncoding gene). The system returned by the function is an object of class `insilicosystem`, i.e. a list whose different attributes are presented below.
 
 ## The list of genes
 
@@ -40,23 +42,23 @@ The different genes constituting the system are stored in a data-frame, and can 
 10 10     PC             TC       0        P10 2.972445e-03 0.03415530 3.167154e-04 1.828237e-05
 ```
 
-Each gene is labeled with an ID (column `id`) and possess the following parameters:
+Each gene is labeled with an ID (column `id`) and possesses the following parameters:
 
 - `coding`: gives the **coding status** of the gene, i.e. describes if the gene is protein-coding (`coding = "PC"`) or noncoding (`coding = "NC"`);
-- `TargetReaction`: describes the biological function of the gene, i.e. the type of regulation that it performs on its target. This parameter can take one of the following values:
+- `TargetReaction`: describes the biological function of the gene, i.e. the type of regulation that it performs on its targets. This parameter can take one of the following values:
   - `"TC"`: regulator of transcription
   - `"TL"`: regulator of translation
   - `"RD"`: regulator of RNA decay
   - `"PD"`: regulator of protein decay
   - `"PTM"`: regulator of protein post-translational modification
-  - `"MR"`: metabolic enzyme (only for protein-coding genes, indicates that the gene cannot regulate the expression of another gene)
-- `PTMform`: does the protein of the gene has a modified form? Will always be `"0"` for noncoding genes.
-- `ActiveForm`: what is the active form of the gene? If the gene is noncoding, `ActiveForm = R[gene ID]`, and for a protein-coding gene `ActiveForm = "P[gene ID]"`. If the protein of a protein-coding gene is targeted for post-translational modification (`PTMform = "1"`) then we assume that only the modified form of the protein is active, and thus `ActiveForm = Pm[gene ID]`.
-- `TCrate`, `TLrate`, `RDrate` and `PDrate`: give the transcription, translation, RNA decay and protein decay rates of the genes, respectively. `TLrate` and `PDrate` are set to 0 for noncoding genes.
+  - `"MR"`: metabolic enzyme (only for protein-coding genes, indicates that the gene cannot regulate the expression of another gene);
+- `PTMform`: does the protein of the gene has a (post-translationally) modified form? Will always be `"0"` for noncoding genes;
+- `ActiveForm`: what is the active form of the gene? If the gene is noncoding, then `ActiveForm` is set to `"R[gene ID]"` (e.g. `R1` for gene 1), and for a protein-coding gene `ActiveForm = "P[gene ID]"`. If the protein of a protein-coding gene is targeted for post-translational modification (`PTMform = "1"`) then we assume that only the modified form of the protein is active, and thus `ActiveForm = Pm[gene ID]`;
+- `TCrate`, `TLrate`, `RDrate` and `PDrate`: give the transcription (in RNA.s$$^{-1}$$), translation (in protein.RNA$$^{-1}$$.s$$^{-1}$$), RNA decay and protein decay (in s$$^{-1}$$) rates of the genes, respectively. `TLrate` and `PDrate` are set to 0 for noncoding genes.
 
-## The GRN
+## The Gene Regulatory Network
 
-The regulatory network describing the regulatory interaction between the genes are stored in a data-frame, and accessible with:
+The regulatory network describing the regulatory interactions between the genes are stored in a data-frame, and accessible with:
 ```r
 > mysystem$edg
 
@@ -80,13 +82,13 @@ The regulatory network describing the regulatory interaction between the genes a
 ```
 Each edge in the network is characterised by the following parameters:
 
-- `from`: ID of the regulator gene. Note that for the edge 15, the regulator is not a gene but a regulatory complex (identifiable by its ID starting with `'C'`);
+- `from`: ID of the regulator gene. Note that for the edge at row 15, the regulator is not a gene but a regulatory complex (identifiable by its ID starting with `'C'`);
 - `RegBy`: type of regulator (`"PC"` for a protein-coding regulator, `"NC"` for a noncoding regulator and `"C"` for a regulatory complex);
 - `to`: ID of the target gene;
-- `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled? An edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc (see the [Abbreviations](#abbreviations) section);
+- `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled. For example an edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc (see the [Abbreviations](#abbreviations) section);
 - `RegSign`: sign of the regulation (`"1"` for an activation and `"-1"` for a repression). Edges corresponding to the regulation of RNA or protein decay always have `RegSign = "1"`, meaning that the regulator increases the decay rate of the target.
 
-This shows the global GRN, with the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
+The `edge` dataframe shows the global GRN, with all the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
 ```r
 > names(mysystem$mosystem)
 
@@ -104,7 +106,7 @@ This shows the global GRN, with the different types of regulations. The element 
 7    9  8             TC       1    NC   0.008571345     0.001387365    21.336259
 8    6  9             TC      -1    PC   0.005159756     0.009424001     0.000000
 ```
-Here you can only see the edges of the GRN corresponding to the regulation of transcription. Each of the sub-GRNs stored in the `mosystem` element contains additional information about the kinetic parameters associated with each edge. For example as we can see here each edge is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (notice that for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, `TCfoldchange = 0`). The kinetic parameters associated with each edge depend on the type of regulation:
+Here you can only see the edges of the GRN corresponding to the regulation of transcription. Each of the sub-GRNs stored in the `mosystem` element contains additional information about the kinetic parameters associated with each edge. For example, we can see that each edge corresponding to a regulatory interaction targeting the transcription is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (notice that for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, `TCfoldchange = 0`). The kinetic parameters associated with each edge depend on the type of regulation:
 
 ```r
 > lapply(mysystem$mosystem, function(x){colnames(x)[-(1:5)]})
@@ -135,7 +137,7 @@ In the GRN, some regulations can be performed by regulatory complexes. The compo
 $`CTL1`
 [1] "4" "7"
 ```
-This means that the products of genes 4 and 7 assemble in the system to form a regulatory complex labelled "CTL1". The kinetic parameters associated with these complexes (i.e. binding and unbinding rates of the components) are available with:
+This means that the products of genes 4 and 7 assemble in the system to form a regulatory complex labelled "CTL1". The kinetic parameters associated with these complexes (i.e. association and dissociation rates of the components) are available with:
 
 ```r
 > mysystem$complexeskinetics
@@ -147,12 +149,19 @@ $`CTL1`$`formationrate`
 $`CTL1`$dissociationrate
 [1] 0.001773972
 ```
-The element `complexesTargetReaction` of the `insilicosystem` object simply gives the type of regulation that the complexes accomplish.
+The element `complexesTargetReaction` of the `insilicosystem` object simply gives the type of regulation that the complexes accomplish, here regulation of translation:
+
+```r
+> mysystem$complexesTargetReaction
+
+$`CTL1`
+[1] "TL"
+```
 
 
 ## The `sysargs` element
 
-The different parameters used to generate the in silico system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
+The different parameters used to generate the *in silico* system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
 
 ## Empty *in silico* system
 
