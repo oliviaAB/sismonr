@@ -26,12 +26,16 @@ Imports:
     ggpubr,
     ggplot2,
     rlang,
-    grDevices
+    grDevices,
+    igraph,
+    graphics
 Remotes: 
     johnmchambers/XRJulia,
     kassambara/ggpubr
 RoxygenNote: 6.1.0
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    tcltk,
+    rgl
 VignetteBuilder: knitr

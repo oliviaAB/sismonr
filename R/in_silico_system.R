@@ -934,46 +934,170 @@ removeEdge = function(insilicosystem, regID, tarID){
 }
 
 
-# ## depends on package VisNetwork
-# plotRegulatoryNetwork = function(insilicosystem){
-#   mysystem = createInSilicoSystem(G = 15, PC.p = 0.5)
-#   colsCS = c("PC" = "#4da6ff",  "NC" = "#ff3333", "Complexes" = "#808080")
-#   nodes = mysystem$genes %>%
-#     select(id, coding) %>%
-#     dyplr::rename(group = coding) %>%
-#     mutate(color = colsCS[group],
-#            label = paste0("Gene ", id),
-#            shadow = T)
-#
-#   for(i in names(mysystem$complexes)){
-#     nodes = rbind(nodes, data.frame(id = i, group = "Complex", color = colsCS["Complexes"], label = paste0("Complex ", i), shadow = T, row.names = i))
-#   }
-#
-#   colsGF = c("TC" = "#b30000", "TL" = "#0033cc", "RD" = "#ff6600", "PD" = "#33ccff", "PTM" = "#8000ff", "Complex formation" = "#808080")
-#   edges = mysystem$edg %>%
-#     select(-RegBy) %>%
-#     mutate(dashes = RegSign == "-1",
-#            color = colsGF[TargetReaction],
-#            arrows = "to")
-#
-#   legendnodes = data.frame(label = c("Protein-coding genes", "Noncoding genes", "Complexes"),
-#                            color = colsCS)
-#
-#   legendedges = data.frame(label = c("TC regulation", "TL regulation", "RD regulation", "PD regulation", "PTM regulation", "Complex formation", "Activation", "Repression"),
-#                            color = c(colsGF, "black", "black"), dashes = rep(c(F, T), c(6, 2)))
-#
-#   for(i in names(mysystem$complexes)){
-#     components = mysystem$complexes[[i]]
-#     edges = rbind(edges, data.frame(from = components,
-#                                     to = i,
-#                                     TargetReaction = "Complex formation",
-#                                     RegSign = "1",
-#                                     dashes = F,
-#                                     color = colsGF["Complex formation"],
-#                                     arrows = "to"))
-#   }
-#
-#   visNetwork::visNetwork(nodes, edges, main = paste(nrow(mysystem$genes), "genes,", nrow(mysystem$edg), "interactions", sep = " ")) %>%
-#     visNetwork::visOptions(highlightNearest = T, , selectedBy = "group") %>%
-#     visNetwork::visLegend(addEdges = legendedges, addNodes = legendnodes, useGroups = F)
-# }
+#' Returns an igraph object (network) of the GRN of the in silico system
+#'
+#' Returns an igraph object (network) of the gene regulatory network of the insilico system, including all types of regulation of only those defined by the user.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param edgeType The type of interactions to plot. If NULL (default value), all the interactions are plot. Otherwise, can be either:
+#' \itemize{
+#' \item "TC": plot only regulation of transcription
+#' \item "TL": plot only regulation of translation
+#' \item "RD": plot only regulation of RNA decay
+#' \item "PD": plot only regulation of protein decay
+#' \item "PTM": plot only regulation of protein post-translational modification
+#' \item "RegComplexes": plot only binding interactions, i.e. linking the regulatory complexes to their components.
+#' }
+#' @param showAllVertices Display vertices that don't have any edge? Default is FALSE.
+#' @export
+getGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F){
+
+  ## Create the list of vertices
+  vertices = rbind(data.frame(vertexID = insilicosystem$genes$id, type = rep("Gene", length(insilicosystem$genes$id)), coding = insilicosystem$genes$coding),
+                   data.frame(vertexID = names(insilicosystem$complexes), type = rep("Complex", length(insilicosystem$complexes)), coding = rep("none", length(insilicosystem$complexes))))
+
+  ## Create the list of edges
+  if(is.null(edgeType)){
+    edges = rbind(data.frame(from = insilicosystem$edg$from,
+                             to = insilicosystem$edg$to,
+                             type = rep("Regulation", length(insilicosystem$edg$from)),
+                             targetReaction = insilicosystem$edg$TargetReaction,
+                             sign = insilicosystem$edg$RegSign),
+                  data.frame(from = unname(unlist(insilicosystem$complexes)),
+                             to = rep(names(insilicosystem$complexes), sapply(insilicosystem$complexes, length)),
+                             type = rep("Binding", sum(unlist(sapply(insilicosystem$complexes, length)))),
+                             targetReaction = rep("none", sum(unlist(sapply(insilicosystem$complexes, length)))),
+                             sign = rep("none", sum(unlist(sapply(insilicosystem$complexes, length))))))
+
+  }else if(edgeType %in% c("TC", "TL", "RD", "PD", "PTM")){
+    edges = rbind(data.frame(from = insilicosystem$mosystem[[paste0(edgeType, "RN_edg")]]$from,
+                             to = insilicosystem$mosystem[[paste0(edgeType, "RN_edg")]]$to,
+                             type = rep("Regulation", length(insilicosystem$mosystem[[paste0(edgeType, "RN_edg")]]$from)),
+                             targetReaction = insilicosystem$mosystem[[paste0(edgeType, "RN_edg")]]$TargetReaction,
+                             sign = insilicosystem$mosystem[[paste0(edgeType, "RN_edg")]]$RegSign),
+                  data.frame(from = unname(unlist(insilicosystem$complexes[insilicosystem$complexesTargetReaction == edgeType])),
+                             to = rep(names(insilicosystem$complexes[insilicosystem$complexesTargetReaction == edgeType]), sapply(insilicosystem$complexes[insilicosystem$complexesTargetReaction == edgeType], length)),
+                             type = rep("Binding", sum(unlist(sapply(insilicosystem$complexes[insilicosystem$complexesTargetReaction == edgeType], length)))),
+                             targetReaction = rep("none", sum(unlist(sapply(insilicosystem$complexes[insilicosystem$complexesTargetReaction == edgeType], length)))),
+                             sign = rep("none", sum(unlist(sapply(insilicosystem$complexes[insilicosystem$complexesTargetReaction == edgeType], length))))))
+
+  }else if(edgeType == "RegComplexes"){
+    edges = data.frame(from = unname(unlist(insilicosystem$complexes)),
+                       to = rep(names(insilicosystem$complexes), sapply(insilicosystem$complexes, length)),
+                       type = rep("Binding", sum(unlist(sapply(insilicosystem$complexes, length)))),
+                       targetReaction = rep("none", sum(unlist(sapply(insilicosystem$complexes, length)))),
+                       sign = rep("none", sum(unlist(sapply(insilicosystem$complexes, length)))))
+  }else{
+    stop("EdgeType must be either NULL or one of \"TC\", \"TL\", \"RD\", \"PD\", \"PTM\" or \"RegComplexes\".")
+  }
+
+  network = igraph::graph_from_data_frame(edges, vertices = vertices)
+
+  if(!showAllVertices){
+    network = igraph::delete.vertices(network, igraph::degree(network) == 0)
+  }
+
+  return(network)
+}
+
+
+plotGRNlegend = function(verticesColour, edgesColour){
+
+  legendKey = c("protein-coding\ngene", "noncoding\ngene", "Regulatory\ncomplex",
+                "Activative\nregulation","Repressive\nregulation","Complex\nformation",
+                "Transcription\nregulation", "Translation\nregulation", "RNA decay\nregulation",
+                "Protein decay\nregulation", "Post-translational\nmodification", "")
+  legendCol = c("black", "black", "black", "black", "black", edgesColour["none"], edgesColour[1:5], NA)
+  legendPtBg = c(verticesColour, NA, NA, NA, NA, NA, NA, NA, NA, NA)
+  legendLty = c(NA, NA, NA, 1, 3, 1, 1, 1, 1, 1, 1, NA)
+  legendLwd = c(NA, NA, NA, 1.5, 1.5, 1, 1.5, 1.5, 1.5, 1.5, 1.5, NA)*2
+  legendPch = c(21, 21, 22, NA, NA, NA, NA, NA, NA, NA, NA, NA)
+
+  orderRow = as.vector(matrix(1:12, ncol = 3, byrow = F))
+
+  graphics::par(fig = c(0, 1, 0, 1), oma = c(0, 0, 0, 0), mar = c(0, 0, 0, 0), new = TRUE)
+  graphics::plot(0, 0, type = "n", bty = "n", xaxt = "n", yaxt = "n")
+  graphics::legend("bottom", legend = legendKey[orderRow],
+         col = legendCol[orderRow],
+         pt.bg = legendPtBg[orderRow],
+         lty = legendLty[orderRow],
+         lwd = legendLwd[orderRow],
+         pch = legendPch[orderRow],
+         ncol = 4, y.intersp = 2, pt.cex = 2, bty = "n", cex = 0.7,
+         xpd = TRUE, inset = c(0, 0))
+}
+
+#' Plots the GRN of the in silico system
+#'
+#' Plots the gene regulatory network of the insilico system, including all types of regulation of only those defined by the user.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param edgeType The type of interactions to plot. If NULL (default value), all the interactions are plot. Otherwise, can be either:
+#' \itemize{
+#' \item "TC": plot only regulation of transcription
+#' \item "TL": plot only regulation of translation
+#' \item "RD": plot only regulation of RNA decay
+#' \item "PD": plot only regulation of protein decay
+#' \item "PTM": plot only regulation of protein post-translational modification
+#' \item "RegComplexes": plot only binding interactions, i.e. linking the regulatory complexes to their components.
+#' }
+#' @param showAllVertices Display vertices that don't have any edge? Default is FALSE
+#' @param plotType The type of plot function to use for the network: can be either
+#' \"2D\" (default, use the function \code{\link[igraph]{plot.igraph}}), \"interactive2D\" (use the function
+#'  \code{\link[igraph]{tkplot}}) or \"interactive3D\" (use the function \code{\link[igraph]{rglplot}}).
+#' @param ... any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.
+#' @export
+plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotType = "2D", ...){
+
+  ## Checking the input values ----
+  if(class(insilicosystem) != "insilicosystem"){
+    stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  }
+
+  network = getGRN(insilicosystem, edgeType, showAllVertices)
+
+  ## Graphical properties of the network
+
+  verticesShape = c("Gene" = "circle", "Complex" = "square")
+  verticesColour = c("PC" = "cyan", "NC" = "yellow", "none" = "gray")
+
+  edgesArrow = c("Regulation" = 2, "Binding" = 0)
+  edgesLty = c("1" = 1, "-1" = 2, "none" = 1)
+  edgesWidth = c("Regulation" = 1.5, "Binding" = 1)
+  edgesColour = c("TC" = "red", "TL" = "navy", "RD" = "darkorange", "PD" = "dodgerblue", "PTM" = "green", "none" = "gray")
+
+  igraph::V(network)$shape = verticesShape[igraph::V(network)$type]
+  igraph::V(network)$color = verticesColour[igraph::V(network)$coding]
+
+  igraph::E(network)$lty = edgesLty[igraph::E(network)$sign]
+  igraph::E(network)$width = edgesWidth[igraph::E(network)$type]
+  igraph::E(network)$color = edgesColour[igraph::E(network)$targetReaction]
+  igraph::E(network)$arrow.mode = edgesArrow[igraph::E(network)$type]
+
+  if(igraph::gorder(network)>0){
+    if(plotType == "2D"){
+        # layout(matrix(c(1, 2), ncol = 1), widths = c(1, 1), heights = c(0.8, 0.2))
+        graphics::par(oma = c(7, 0, 0, 0))
+        igraph::plot.igraph(network, edge.curved = T, vertex.label.color = "black", ...)
+        plotGRNlegend(verticesColour, edgesColour)
+        graphics::par(oma = c(0, 0, 0, 0))
+    }else if(plotType == "interactive2D"){
+      # requireNamespace("tcltk", quietly = TRUE)
+      if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
+      igraph::tkplot(network, edge.curved = T, vertex.label.color = "black", ...)
+    }else if(plotType == "interactive3D"){
+      # requireNamespace("rgl", quietly = TRUE)
+      if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
+      igraph::rglplot(network, edge.curved = T, vertex.label.color = "black", ...)
+    }else{
+      stop("Parameter plotType must be one of \"2D\", \"interactive2D\" or \"interactive3D\".")
+    }
+  }else{
+    graphics::plot.new()
+    return(cat("No edges to plot."))
+  }
+}
+
+
+
+

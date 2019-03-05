@@ -227,7 +227,7 @@ insilicosystemargs <- function(
   ## Probability of each protein-coding gene biological function
   temp = c(PC.TC.p, PC.TL.p, PC.RD.p, PC.PD.p, PC.PTM.p, PC.MR.p)
 
-  if(sum(temp) == 0){ ## if no values are provided, give default values
+  if(is.null(temp)){ ## if no values are provided, give default values
     PC.TC.p = 0.4
     PC.TL.p = 0.3
     PC.RD.p = 0.1
@@ -248,7 +248,7 @@ insilicosystemargs <- function(
   ## Probability of each noncoding gene biological function
   temp = c(NC.TC.p, NC.TL.p, NC.RD.p, NC.PD.p, NC.PTM.p)
 
-  if(sum(temp) == 0){ ## if no values are provided, give default values
+  if(is.null(temp)){ ## if no values are provided, give default values
     NC.TC.p = 0.3
     NC.TL.p = 0.3
     NC.RD.p = 0.3
