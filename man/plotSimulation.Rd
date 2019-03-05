@@ -7,7 +7,8 @@
 plotSimulation(simdf, inds = unique(simdf$Ind),
   trials = unique(simdf$trial), timeMin = min(simdf$time),
   timeMax = max(simdf$time), mergeAllele = T, mergePTM = T,
-  mergeComplexes = F, yLogScale = T, nIndPerRow = 3, ...)
+  mergeComplexes = F, yLogScale = T, nIndPerRow = 3,
+  nCompPerRow = 10, ...)
 }
 \arguments{
 \item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})}
@@ -29,6 +30,8 @@ plotSimulation(simdf, inds = unique(simdf$Ind),
 \item{yLogScale}{Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.}
 
 \item{nIndPerRow}{Positive integer, the number of individuals to plot per row. Default 3.}
+
+\item{nCompPerRow}{Positive integer, the number of components to plot per row in the legend. Default 10.}
 
 \item{...}{Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.}
 }

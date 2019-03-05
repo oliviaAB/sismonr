@@ -609,7 +609,7 @@ function createPDregReactions(edg, genes, activeform, complexes, complexesvarian
       push!(pform, "Pm"*tar)
     end
 
-    for complvar in complexesvariants[compl]
+    for p in pform, complvar in complexesvariants[compl]
       push!(reac, reactBioSim([p, complvar], [complvar]))
       push!(reacnames, "proteindecay"*p*"reg"*complvar)
       tempprop = """$(edg["PDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlPDregrate")"][$(tarid)]"""*"*"*complexesqtlactivity[complvar]

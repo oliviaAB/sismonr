@@ -204,7 +204,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
   if(i %%no_cores == 1){
     utils::setTxtProgressBar(progress, min(i + (no_cores-1), maxprogress))
   }
-  return(simJulia %>% mutate_("trial" = ~trial + increment[i], "Ind" = ~ind))
+  return(simJulia %>% mutate("trial" = !!sym("trial") + increment[i], "Ind" = ind))
 }
 
 
@@ -332,7 +332,7 @@ sumColAbundance = function(df, colsid){
 #' }
 #' @export
 mergeAlleleAbundance = function(df){
-  mergeddf = df %>% select_("time", "trial", "Ind")
+  mergeddf = df %>% select(!!sym("time"), !!sym("trial"), !!sym("Ind"))
   molsGCN = colnames(df)
   mols = stringr::str_replace_all(molsGCN, "GCN[[:digit:]]+", "")
 
@@ -361,7 +361,7 @@ mergeAlleleAbundance = function(df){
 #' }
 #' @export
 mergePTMAbundance = function(df){
-  mergeddf = df %>% select_("time", "trial", "Ind")
+  mergeddf = df %>% select(!!sym("time"), !!sym("trial"), !!sym("Ind"))
   molsPTM = colnames(df)
   mols = stringr::str_replace(molsPTM, "Pm", "P")
 
@@ -458,6 +458,89 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
   return(simuplot)
 }
 
+plotLegendComponents = function(palette, nCompPerRow = 10){
+  genesDF = data.frame("Components" = names(palette)) %>%
+            filter(!(stringr::str_detect(!!sym("Components"), "^C"))) %>%
+            mutate("GeneID" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<!GCN)\\d+")),
+                   "Allele" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<=GCN)\\d+")),
+                   "Allele" = case_when(is.na(.data$Allele)~0,
+                                        !is.na(.data$Allele)~.data$Allele),
+                   "PTM" = case_when(stringr::str_detect(.data$Components, "$PTM")~1,
+                                    !stringr::str_detect(.data$Components, "$PTM")~0)) %>%
+            dplyr::arrange(!!sym("GeneID"), !!sym("Allele"), !!sym("PTM"))
+
+  complexesDF = data.frame("Components" = names(palette)) %>%
+    filter((stringr::str_detect(!!sym("Components"), "^C"))) %>%
+    mutate("TargetReaction" = stringr::str_extract(!!sym("Components"),"(?<=^C)[[:alpha:]]{2,3}"),
+           "TargetReaction" = case_when(.data$TargetReaction == "TC" ~ 1,
+                                        .data$TargetReaction == "TL" ~ 2,
+                                        .data$TargetReaction == "RD" ~ 3,
+                                        .data$TargetReaction == "PD" ~ 4,
+                                        .data$TargetReaction == "PTM" ~ 5),
+           "ComplID" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<=^C[[:alpha:]]{2,3})\\d+"))) %>%
+    dplyr::arrange(!!sym("TargetReaction"), !!sym("ComplID"), !!sym("Components"))
+
+  palette = palette[c(genesDF$Components, complexesDF$Components)]
+  isComplex = rep(c(F, T), c(nrow(genesDF), nrow(complexesDF)))
+
+  nrows = length(palette) %/% nCompPerRow + (length(palette) %% nCompPerRow != 0)
+  plots = vector("list", length = nrows)
+
+  for(i in 1:nrows){
+    rowpalette = palette[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
+    rowisComplex = isComplex[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
+
+    # namesComp = names(rowpalette)
+    # namesComp[is.na(namesComp)] = ""
+    # cols = unname(rowpalette)
+    # cols[is.na(cols)] = "white"
+    nbc = sum(rowisComplex)
+    nbg = length(rowpalette) - nbc
+
+    if(nbg > 0){
+      legend_points = data.frame("Components" = rep(names(rowpalette)[1:nbg], each = 2),
+                                     "x" = rep(1:nbg, each = 2),
+                                     "y" = rep(1:2, nbg))
+    }else{
+      legend_points = data.frame("Components" = character(),
+                                 "x" = numeric(),
+                                 "y" = numeric())
+    }
+
+    if(nbc > 0) legend_points = rbind(legend_points, data.frame("Components" = names(rowpalette)[(nbg+1):(nbg + nbc)],
+                                     "x" = (1:nbc) + nbg,
+                                     "y" = rep(3, nbc)))
+
+    legend_text =  rbind(data.frame("Names" = names(rowpalette),
+                                    "x" = 1:(nbg+nbc),
+                                    "y" = 4.1,
+                                    "angle" = 30,
+                                    "size" = 3,
+                                    "hjust" = 0.5, stringsAsFactors = F),
+                         data.frame("Names" = c("RNAs", "Proteins", "Complexes"),
+                                    "x" = 0.2,
+                                    "y" = 1:3,
+                                    "angle" = 0,
+                                    "size" = 4,
+                                    "hjust" = 1), stringsAsFactors = F)
+    legend_lines = rbind(data.frame("x" = seq(0.5, length(rowpalette)+0.5, by = 1), "xend" = seq(0.5, length(rowpalette)+0.5, by = 1), "y" = 0.5, "yend" = 3.9),
+                         data.frame("x" = 0.4, "xend" = length(rowpalette)+0.6, "y" = seq(0.5, 3.5, by = 1), "yend" = seq(0.5, 3.5, by = 1)))
+
+    rowplot = ggplot2::ggplot() +
+      ggplot2::geom_point(data = legend_points, size = 5, shape = 15, aes_string(x = "x", y = "y", group = "Components", colour = "Components"), show.legend = F) +
+      ggplot2::geom_text(data = legend_text, aes_string(label = "Names", x = "x", y = "y", angle = "angle", size = "size", hjust = "hjust"), show.legend = F) +
+      ggplot2::geom_segment(data = legend_lines, colour = "gray90", aes_string(x = "x", xend = "xend", y = "y", yend = "yend")) +
+      ggplot2::scale_colour_manual(values = rowpalette, breaks = names(rowpalette)) +
+      ggplot2::scale_size(range = c(2.5, 3.5), guide = F) +
+      ggplot2::xlim(-1.6, nCompPerRow+1) + ggplot2::ylim(0.45, 4.5) +
+      ggplot2::theme_void()
+
+    plots[[i]] = rowplot
+
+  }
+  return(plots)
+}
+
 #' Plots the result of a simulation
 #'
 #' Automatically plots the result of a simulation for the selected in silico individuals.
@@ -475,6 +558,7 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
 #' @param yLogScale Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
 #' @param nIndPerRow Positive integer, the number of individuals to plot per row. Default 3.
+#' @param nCompPerRow Positive integer, the number of components to plot per row in the legend. Default 10.
 #' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
 #' @return A plot from \code{\link[ggpubr]{ggarrange}}.
 #' @examples
@@ -486,13 +570,13 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
-plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, ...){
+plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, nCompPerRow = 10, ...){
 
   ## Select the requested inviduals (in principle we could only do this later but this avoids transforming the whole dataset
   ## if we want to plot only a couple of individuals)
-  simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds) %>%
-                     dplyr::filter(!!as.name("trial") %in% trials) %>%
-                     dplyr::filter(!!as.name("time") >= timeMin & !!as.name("time") <= timeMax)
+  simind = simdf %>% dplyr::filter(!!sym("Ind") %in% inds) %>%
+                     dplyr::filter(!!sym("trial") %in% trials) %>%
+                     dplyr::filter(!!sym("time") >= timeMin & !!sym("time") <= timeMax)
 
   ## Are there mutliple trials?
   multitrials = length(unique(simind$trial)) > 1
@@ -511,12 +595,12 @@ plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf
            "Components" = stringr::str_replace(.data$Components, "^m", "PTM"))
 
   ## If plot in log-scale, need to have non-zero abundances
-  if(yLogScale) toplot = toplot %>% mutate_("Abundance" = ~Abundance + 1)
+  if(yLogScale) toplot = toplot %>% mutate("Abundance" = !!sym("Abundance") + 1)
 
   ## If multiple trials, summarise them with mean, min and max
   if(multitrials){
     toplot = toplot %>%
-      dplyr::group_by_("Ind", "time", "Components", "Type", "ID") %>%
+      dplyr::group_by(!!sym("Ind"), !!sym("time"), !!sym("Components"), !!sym("Type"), !!sym("ID")) %>%
       dplyr::summarise("mean" = mean(!!sym("Abundance")), "LB" = min(!!sym("Abundance")), "UB" = max(!!sym("Abundance")))
   }
 
@@ -537,16 +621,21 @@ plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf
   ## Create a plot for each individual
   plots = vector("list", length = length(inds))
   for(i in 1:length(inds)){
-    plots[[i]] = plotBase(filter(toplot, !!as.name("Ind") == inds[i]), palette, multitrials, yLogScale, ...)
+    plots[[i]] = plotBase(filter(toplot, !!sym("Ind") == inds[i]), palette, multitrials, yLogScale, ...)
   }
 
   ## How many rows of plot given the nb of inds to plot and nb of inds per row
   nbrows = length(inds) %/% nIndPerRow + (length(inds) %% nIndPerRow != 0)
 
-  simuplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = min(nIndPerRow, length(inds)), common.legend = T, heights = rep(1, length(plots)), legend = "bottom")
+  simuplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = min(nIndPerRow, length(inds)), common.legend = T, heights = rep(1, length(plots)), legend = "none")
+
+  ## add the legend
+  legendplots = plotLegendComponents(palette, nCompPerRow)
+  finalplot = ggpubr::ggarrange(simuplot, plotlist = legendplots, nrow = length(legendplots) + 1, ncol = 1, heights = c(7, rep(1, length(legendplots))))
+
 
   ##simuplot
-  return(simuplot)
+  return(finalplot)
 }
 
 plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
@@ -601,9 +690,9 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 #' }
 #' @export
 plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, VirPalOption = "plasma", ...){
-  simind = simdf %>% dplyr::filter(!!as.name("Ind") %in% inds) %>%
-                     dplyr::filter(!!as.name("trial") %in% trials) %>%
-                     dplyr::filter(!!as.name("time") >= timeMin & !!as.name("time") <= timeMax)
+  simind = simdf %>% dplyr::filter(!!sym("Ind") %in% inds) %>%
+                     dplyr::filter(!!sym("trial") %in% trials) %>%
+                     dplyr::filter(!!sym("time") >= timeMin & !!sym("time") <= timeMax)
 
   if(mergePTM)  simind = mergePTMAbundance(simind)
   if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
@@ -619,17 +708,17 @@ plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$tr
            "Components" = stringr::str_replace(.data$Components, "^m", "PTM"))
 
   ## If plot in log-scale, need to have non-zero abundances
-  if(yLogScale) toplot = toplot %>% mutate_("Abundance" = ~Abundance + 1)
+  if(yLogScale) toplot = toplot %>% mutate("Abundance" = !!sym("Abundance") + 1)
 
   ## Only plot the mean (even if only one trial to be plotted)
-  toplot = toplot %>% dplyr::group_by_("Ind", "time", "Components", "Type", "ID") %>%
+  toplot = toplot %>% dplyr::group_by(!!sym("Ind"), !!sym("time"), !!sym("Components"), !!sym("Type"), !!sym("ID")) %>%
            dplyr::summarise("mean" = mean(!!sym("Abundance")))
 
 
   ## Create a plot for each individual
   plots = vector("list", length = length(inds))
   for(i in 1:length(inds)){
-    plots[[i]] = plotBaseHM(filter(toplot, !!as.name("Ind") == inds[i]), yLogScale, VirPalOption, ...)
+    plots[[i]] = plotBaseHM(filter(toplot, !!sym("Ind") == inds[i]), yLogScale, VirPalOption, ...)
   }
 
   ## How many rows of plot given the nb of inds to plot and nb of inds per row

@@ -726,11 +726,11 @@ removeComplex = function(insilicosystem, name){
   insilicosystem$complexesTargetReaction[[name]] = NULL
 
   ## Remove any edge involving the complex in the general edges list
-  insilicosystem$edg = dplyr::filter(insilicosystem$edg, !!as.name("from") != name)
+  insilicosystem$edg = dplyr::filter(insilicosystem$edg, !!sym("from") != name)
 
   ## Remove any edge involving the gene in the specific multi-omic edges list
   for(rn in names(insilicosystem$mosystem)){
-    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], !!as.name("from") != name)
+    insilicosystem$mosystem[[rn]] = dplyr::filter(insilicosystem$mosystem[[rn]], !!sym("from") != name)
   }
 
   return(insilicosystem)
@@ -797,7 +797,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
     }
   }else{ ## if the regulator is a gene product
     targetreaction = insilicosystem$genes[insilicosystem$genes$id == as.integer(regID), "TargetReaction"]
-    regby = dplyr::filter(insilicosystem$genes, !!as.name("id") == as.integer(regID))[1,"coding"]
+    regby = dplyr::filter(insilicosystem$genes, !!sym("id") == as.integer(regID))[1,"coding"]
   }
 
   if(grepl("^C", tarID)){ ## if the tarID given is a complex
@@ -808,7 +808,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
   }
 
   ## Checking if an edge already exists between the 2 genes ----
-  if(nrow(dplyr::filter(insilicosystem$edg, !!as.name("from") == regID & !!as.name("to") == tarID)) != 0){
+  if(nrow(dplyr::filter(insilicosystem$edg, !!sym("from") == regID & !!sym("to") == tarID)) != 0){
     stop(paste0("An edge already exists from gene ", regID, " to gene ", tarID, "."))
   }
 
@@ -917,7 +917,7 @@ removeEdge = function(insilicosystem, regID, tarID){
   }
 
   ## The row to remove ----
-  theedg = dplyr::filter(insilicosystem$edg, !!as.name("from") == regID & !!as.name("to") == tarID)
+  theedg = dplyr::filter(insilicosystem$edg, !!sym("from") == regID & !!sym("to") == tarID)
 
   if(nrow(theedg) == 0){ ## if the edge doesn't exists, no need to remove it!
     message("No edge exists from gene ", regID, " to gene ", tarID,".", sep = "")
@@ -926,8 +926,8 @@ removeEdge = function(insilicosystem, regID, tarID){
     stop("More than one edge in the system meets the criterion! There must be a mistake somewhere.")
   }else{ ## If no problem, remove the edge from the data frames edg and XXRN_edg
     targetreaction = theedg[1, "TargetReaction"]
-    insilicosystem$edg = dplyr::filter(insilicosystem$edg, !!as.name("from") != regID | !!as.name("to") != tarID)
-    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], !!as.name("from") != regID | !!as.name("to") != tarID)
+    insilicosystem$edg = dplyr::filter(insilicosystem$edg, !!sym("from") != regID | !!sym("to") != tarID)
+    insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]] = dplyr::filter(insilicosystem$mosystem[[paste0(targetreaction, "RN_edg")]], !!sym("from") != regID | !!sym("to") != tarID)
   }
 
   return(insilicosystem)
