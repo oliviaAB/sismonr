@@ -13,8 +13,12 @@ mysystem$genes
 
 mysystem$edg
 
+plotGRN(mysystem)
+
 names(mysystem$mosystem)
 mysystem$mosystem$TCRN_edg
+
+plotGRN(mysystem, "TC")
 
 lapply(mysystem$mosystem, function(x){colnames(x)[-(1:5)]})
 
@@ -71,10 +75,7 @@ head(simNothing)
 
 
 plotSimulation(sim$Simulation)
-ggplot2::ggsave("plotSimulation.png")
 
 plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
-ggplot2::ggsave("plotSimulation2.png")
 
 plotHeatMap(sim$Simulation)
-ggplot2::ggsave("plotHeatMap.png")

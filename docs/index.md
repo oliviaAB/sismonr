@@ -88,6 +88,14 @@ Each edge in the network is characterised by the following parameters:
 - `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled. For example an edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc (see the [Abbreviations](#abbreviations) section);
 - `RegSign`: sign of the regulation (`"1"` for an activation and `"-1"` for a repression). Edges corresponding to the regulation of RNA or protein decay always have `RegSign = "1"`, meaning that the regulator increases the decay rate of the target.
 
+It is possible to visualise the GRN, with:
+
+```r
+plotGRN(mysystem)
+```
+
+![plotGRN](images/GRN.png)
+
 The `edge` dataframe shows the global GRN, with all the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
 ```r
 > names(mysystem$mosystem)
@@ -126,6 +134,14 @@ $PDRN_edg
 $PTMRN_edg
 [1] "PTMregrate"
 ```
+
+Again, it is possible to visualise these subnetworks: the function `plotGRN` can restrict the type of edges displayed to a specific type of regulation. For example to only see edges in the GRN corresponding to regulation of transcription, you can use:
+
+```r
+plotGRN(mysystem, "TC")
+```
+
+![plotGRNTC](images/GRN_TC.png)
 
 ## The regulatory complexes
 
