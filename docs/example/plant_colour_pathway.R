@@ -80,6 +80,8 @@ for(inter in interactions){
 }
 
 
+## To visualise the GRN
+plotGRN(colsystem)
 
 ## ---------------------------------- ##
 ## Creating the in silico individuals ##

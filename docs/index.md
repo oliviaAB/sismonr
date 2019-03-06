@@ -482,11 +482,58 @@ This returns a plot of the abundance of the different species (separated by RNAs
 
 By default, the different alleles are merged before plotting (`mergeAllele = T`), and similarly the non-modified and modified versions of the proteins are merged before plotting (`mergePTM = T`). On the contrary, the free and in complex components of the system are not merged (`mergeComplexes = F`).
 
+To help you get an idea of the general tendencies of the abundance of the different components, the function `summariseSimulation` returns a dataframe giving for each component (row) and each individual (column) the maximum and final average abundance over the different trials:
+
+```r
+> sumtable = summariseSimulation(sim$Simulation)
+--------------------------
+Summary of simulation for:
+--------------------------
+Individuals: Ind1 Ind2 Ind3 
+Trials: 1 2 3 4 5 
+Time: 0 s - 2000 s
+--------------------------
+
+> head(sumtable)
+
+  Components Abundance     Ind1     Ind2     Ind3
+1         R1       Max     94.0     93.0    110.0
+2         R1     Final     72.2     68.2     83.6
+3         R2       Max      2.4      2.2      2.0
+4         R2     Final      2.4      2.2      2.0
+5         P2       Max 213070.8 184679.0 190255.2
+6         P2     Final 213070.8 184679.0 190255.2
+```
+
+The function prints on your console the individuals, trials and time considered for the summary. You can suppress this display with the argument `verbose = F` in the function call.
 If you want to focus on one *in silico* individual, and zoom on a smaller time-period, you can use:
 ```r
 plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
 ```
 ![plotSimulation2](images/plotSimulation2.png)
+
+The function `summariseSimulation` takes as input the same arguments as the function `plotSimulation`, so you can also do:
+
+```r
+> sumtable = summariseSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
+--------------------------
+Summary of simulation for:
+--------------------------
+Individuals: Ind1 
+Trials: 1 2 3 4 5 
+Time: 200 s - 300 s
+--------------------------
+
+> head(sumtable)
+
+  Components Abundance     Ind1
+1         R1       Max     70.2
+2         R1     Final     69.8
+3         R2       Max      2.0
+4         R2     Final      2.0
+5         P2       Max 209822.4
+6         P2     Final 209822.4
+```
 
 Alernatively, you can plot the abundance of the different components as a heatmap:
 ```r
@@ -496,6 +543,10 @@ plotHeatMap(sim$Simulation)
 
 The settings of this function are the same as those of the `plotSimulation` function presented above. Plotting this specific simulation as a heatmap is not really useful, but such plot can get really interesting for more complex cases, as for example the anthocyanin biosynthesis regulation pathway (included as an example [here](https://github.com/oliviaAB/sismonr/tree/master/docs/example/plant_colour_pathway.R)):
 ![plotcolpw](images/heatmap_colpw_tmax100.png)
+
+The GRN for this example is:
+
+![plotGRNcolpw](images/GRNcolpw.png)
 
 ## The stochastic model
 

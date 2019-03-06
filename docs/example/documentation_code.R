@@ -76,6 +76,12 @@ head(simNothing)
 
 plotSimulation(sim$Simulation)
 
+sumtable = summariseSimulation(sim$Simulation)
+head(sumtable)
+
 plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
+
+sumtable = summariseSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
+head(sumtable)
 
 plotHeatMap(sim$Simulation)
