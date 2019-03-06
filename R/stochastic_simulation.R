@@ -458,18 +458,53 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
   return(simuplot)
 }
 
-plotLegendComponents = function(palette, nCompPerRow = 10){
-  genesDF = data.frame("Components" = names(palette)) %>%
-            filter(!(stringr::str_detect(!!sym("Components"), "^C"))) %>%
-            mutate("GeneID" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<!GCN)\\d+")),
-                   "Allele" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<=GCN)\\d+")),
-                   "Allele" = case_when(is.na(.data$Allele)~0,
-                                        !is.na(.data$Allele)~.data$Allele),
-                   "PTM" = case_when(stringr::str_detect(.data$Components, "$PTM")~1,
-                                    !stringr::str_detect(.data$Components, "$PTM")~0)) %>%
-            dplyr::arrange(!!sym("GeneID"), !!sym("Allele"), !!sym("PTM"))
+#' Sort component names
+#'
+#' Sorts the components of an in silico system (for plotting or summary).
+#'
+#' Sort components into:
+#' \itemize{
+#' \item Genes (first) vs regulatory complexes
+#' }
+#' Then genes are sorted according to:
+#' \itemize{
+#' \item Gene ID (numeric)
+#' \item Gene type (RNAs, then proteins, then modified proteins)
+#' \item Allele
+#' \item If the components don't have a type (e.g. see the legend resulting from \code{\link{plotSimulation}}),
+#' non-modified vs modified
+#' }
+#' Then sort complexes according to:
+#' \itemize{
+#' \item Target reaction in the following order: regulators of transcription, translation, RNA decay,
+#' protein decay, post-translational modification
+#' \item Allele of their components
+#' }
+#'
+#' @param componames A character vector, giving the names of the components
+#' @return A dataframe: first column: sorted names of the components, second column: is the component a
+#' regulatory complex?, third column: is the component a modified protein?
+#' @export
+sortComponents = function(componames){
 
-  complexesDF = data.frame("Components" = names(palette)) %>%
+  componames = as.character(componames)
+  ## To sort the genes
+  genesDF = data.frame("Components" = componames, stringsAsFactors = F) %>%
+    filter(!(stringr::str_detect(!!sym("Components"), "^C"))) %>%
+    mutate("GeneID" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<!GCN)\\d+")),
+           "Allele" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<=GCN)\\d+")),
+           "Allele" = case_when(is.na(.data$Allele)~0,
+                                !is.na(.data$Allele)~.data$Allele),
+           "PTM" = case_when(stringr::str_detect(.data$Components, "^PTM")~1,
+                             !stringr::str_detect(.data$Components, "^PTM")~0),
+           "Type" = case_when(stringr::str_detect(.data$Components, "^\\d|^PTM")~0,
+                              stringr::str_detect(.data$Components, "^R")~1,
+                              stringr::str_detect(.data$Components, "^P\\d")~2,
+                              stringr::str_detect(.data$Components, "^Pm")~3)) %>%
+    dplyr::arrange(!!sym("GeneID"), !!sym("Type"), !!sym("Allele"), !!sym("PTM"))
+
+  ## To sort the complexes when plotting the legend
+  complexesDF = data.frame("Components" = componames, stringsAsFactors = F) %>%
     filter((stringr::str_detect(!!sym("Components"), "^C"))) %>%
     mutate("TargetReaction" = stringr::str_extract(!!sym("Components"),"(?<=^C)[[:alpha:]]{2,3}"),
            "TargetReaction" = case_when(.data$TargetReaction == "TC" ~ 1,
@@ -480,15 +515,25 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
            "ComplID" = as.numeric(stringr::str_extract(!!sym("Components"),"(?<=^C[[:alpha:]]{2,3})\\d+"))) %>%
     dplyr::arrange(!!sym("TargetReaction"), !!sym("ComplID"), !!sym("Components"))
 
-  palette = palette[c(genesDF$Components, complexesDF$Components)]
-  isComplex = rep(c(F, T), c(nrow(genesDF), nrow(complexesDF)))
+  sorted = data.frame("Components" = c(genesDF$Components, complexesDF$Components),
+                      "isComplex" = rep(c(F, T), c(nrow(genesDF), nrow(complexesDF))),
+                      "isPTM" = c((genesDF$PTM == 1 | genesDF$Type == 3), rep(F, nrow(complexesDF))),stringsAsFactors = F)
+  return(sorted)
+}
+
+plotLegendComponents = function(palette, nCompPerRow = 10){
+
+  sortedComp = sortComponents(names(palette))
+  palette = palette[sortedComp$Components]
+
 
   nrows = length(palette) %/% nCompPerRow + (length(palette) %% nCompPerRow != 0)
   plots = vector("list", length = nrows)
 
   for(i in 1:nrows){
     rowpalette = palette[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
-    rowisComplex = isComplex[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
+    rowisComplex = sortedComp$isComplex[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
+    rowisPTM = sortedComp$isPTM[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
 
     # namesComp = names(rowpalette)
     # namesComp[is.na(namesComp)] = ""
@@ -497,10 +542,12 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
     nbc = sum(rowisComplex)
     nbg = length(rowpalette) - nbc
 
+    rowisPTM = rowisPTM[1:nbg]
+
     if(nbg > 0){
-      legend_points = data.frame("Components" = rep(names(rowpalette)[1:nbg], each = 2),
-                                     "x" = rep(1:nbg, each = 2),
-                                     "y" = rep(1:2, nbg))
+      legend_points = data.frame("Components" = rep(names(rowpalette)[1:nbg], sapply(rowisPTM, function(x){if(x){1}else{2}})),
+                                     "x" = rep(1:nbg, sapply(rowisPTM, function(x){if(x){1}else{2}})),
+                                     "y" = unlist(lapply(rowisPTM, function(x){if(x){2}else{1:2}})))
     }else{
       legend_points = data.frame("Components" = character(),
                                  "x" = numeric(),
@@ -514,7 +561,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
     legend_text =  rbind(data.frame("Names" = names(rowpalette),
                                     "x" = 1:(nbg+nbc),
                                     "y" = 4.1,
-                                    "angle" = 30,
+                                    "angle" = 0,
                                     "size" = 3,
                                     "hjust" = 0.5, stringsAsFactors = F),
                          data.frame("Names" = c("RNAs", "Proteins", "Complexes"),
@@ -532,7 +579,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
       ggplot2::geom_segment(data = legend_lines, colour = "gray90", aes_string(x = "x", xend = "xend", y = "y", yend = "yend")) +
       ggplot2::scale_colour_manual(values = rowpalette, breaks = names(rowpalette)) +
       ggplot2::scale_size(range = c(2.5, 3.5), guide = F) +
-      ggplot2::xlim(-1.6, nCompPerRow+1) + ggplot2::ylim(0.45, 4.5) +
+      ggplot2::xlim(-1.6, nCompPerRow+1) + ggplot2::ylim(0.45, 4.9) +
       ggplot2::theme_void()
 
     plots[[i]] = rowplot
@@ -728,6 +775,71 @@ plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$tr
 
   ##simuplot
   return(simuplot)
+}
 
+#' Returns a summary dataframe of a simulation
+#'
+#' Returns a summary dataframe of a simulation (i.e. the maximum average abundance of each components over the different trials and the average abundance of the components at the final time of the simulation) for the selected in silico individuals.
+#'
+#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
+#' @param inds A vector of in silico individual names for which to compute the summary values.
+#' @param trials A vector of trials ID (=number) to use for the summary.
+#' @param timeMin Numeric. The minimum simulation time to take into account. Default value set to the minimum time in the simulation.
+#' @param timeMax Numeric. The maximum simulation time to take into account. Default value set to the maximum time in the simulation.
+#' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
+#' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
+#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
+#' @param verbose If TRUE (default), print the individuals, trials, min and max time considered for the computation of the summary.
+#' @return A dataframe giving for each component (rows) and each individuals (Columns) the max and final average abundance over the different trials.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
+#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+#' summariseSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"))
+#' }
+#' @export
+summariseSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, verbose = T){
 
+  simind = simdf %>% dplyr::filter(!!sym("Ind") %in% inds) %>%
+    dplyr::filter(!!sym("trial") %in% trials) %>%
+    dplyr::filter(!!sym("time") >= timeMin & !!sym("time") <= timeMax)
+
+  if(mergePTM)  simind = mergePTMAbundance(simind)
+  if(mergeComplexes)  simind = mergeComplexesAbundance(simind)
+  if(mergeAllele) simind = mergeAlleleAbundance(simind)
+
+  sumtable = simind %>%
+    tidyr::gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
+    dplyr::group_by(!!sym("Ind"), !!sym("ID"), !!sym("time")) %>%
+    dplyr::summarise("mean" = mean(!!sym("Abundance")))
+
+  sumtable_max = sumtable  %>%
+    dplyr::summarise("Max" = max(!!sym("mean")))
+
+  sumtable_final = sumtable %>%
+    dplyr::filter(!!sym("time") == timeMax) %>%
+    dplyr::rename("Final" = !!sym("mean")) %>%
+    dplyr::select(-time)
+
+  sumtable = dplyr::full_join(sumtable_max, sumtable_final, by = c("Ind", "ID")) %>%
+    tidyr::gather(key = "Abundance", value = "val", "Max", "Final") %>%
+    tidyr::spread(!!sym("Ind"), !!sym("val")) %>%
+    dplyr::rename("Components" = !!sym("ID")) %>%
+    dplyr::arrange(!!sym("Components"), dplyr::desc(!!sym("Abundance")))
+
+  ## Sort values by component name
+  sortedComp = sortComponents(unique(sumtable$Components))
+  sumtable = dplyr::left_join(data.frame(Components =sortedComp$Components, stringsAsFactors = F),sumtable, by="Components")
+
+  if(verbose){
+    cat("--------------------------\n")
+    cat("Summary of simulation for:\n")
+    cat("--------------------------\n")
+    cat("Individuals:", inds, "\n")
+    cat("Trials:", trials, "\n")
+    cat("Time:", timeMin, "s -", timeMax, "s\n")
+    cat("--------------------------\n")
+  }
+  return(sumtable)
 }
