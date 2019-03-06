@@ -5,15 +5,32 @@
 
 # Introduction
 
-*Explain the concepts of in silico system and individual*
+The sismonr package aims at simulating random *in silico* biological systems, containing genes linked through networks of regulatory interactions. The regulatory interactions can be of different type, i.e. we account for regulation of transcription, translation, RNA decay, protein decay and protein post-translational modification. sismonr then simulates the stochastic expression profiles of the different genes in these systems over time for different *in silico* individuals, where the individuals are distinguised by the genetic mutations they carry for each gene, affecting the properties of the genes. The user has control over the different parameters used in the generation of the genes, the regulatory network and the individuals.
 
-The code used throughout this documentation as well as the created variables saved as `.RData` objects are available [here](https://github.com/oliviaAB/sismonr/tree/master/docs/example).
+Here we describe how to use the sismonr package. The code used throughout this documentation as well as the created variables saved as `.RData` objects are available [here](https://github.com/oliviaAB/sismonr/tree/master/docs/example).
 
 ## Abbreviations
 
-## Quickstart
+Here are the notations used throughout the sismonr package:
 
-*Write a quick tuto?*
+| Abbreviations | Meaning |
+| ------------- | ------- |
+| TC | Transcription |
+| TL | Translation |
+| RD | RNA decay |
+| PD | Protein decay |
+| PTM | Post-translational modification |
+| | | 
+| PC | Protein-coding |
+| NC | Noncoding |
+| | |
+| Pr | Promoter binding site |
+| RBS | RNA binding site |
+| R | RNA |
+| P | Protein |
+| Pm | Modified protein |
+| C | Regulatory complex | 
+
 
 # Creating an *in silico* system
 
@@ -174,10 +191,75 @@ $`CTL1`
 [1] "TL"
 ```
 
-
 ## The `sysargs` element
 
 The different parameters used to generate the *in silico* system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
+
+
+## Modifying the *in silico* system
+
+It is possible to modify your system. In particular, you can:
+
+* **Add a gene**:
+
+```r
+> mysystem2 = addGene(mysystem)
+> mysystem2$genes
+
+   id coding TargetReaction PTMform ActiveForm       TCrate      TLrate       RDrate       PDrate
+1   1     NC             TL       0         R1 8.887839e-03 0.000000000 1.736133e-04 0.000000e+00
+2   2     PC             TL       0         P2 6.711473e-05 0.132263279 8.512016e-05 1.164180e-06
+3   3     PC             TC       0         P3 3.193124e-04 0.057708215 1.553645e-04 7.507520e-06
+4   4     PC             TL       0         P4 3.748385e-04 0.507068866 6.013606e-04 6.906099e-06
+5   5     PC             TL       0         P5 4.415198e-04 0.053028145 4.046843e-04 7.347904e-06
+6   6     PC             TC       0         P6 4.691504e-04 0.064397648 6.992371e-04 2.385040e-06
+7   7     PC             TL       1        Pm7 7.079025e-04 0.029802319 1.160875e-03 1.338248e-05
+8   8     PC            PTM       0         P8 1.611630e-03 0.169762151 1.779581e-04 7.994026e-06
+9   9     NC             TC       0         R9 1.325744e-03 0.000000000 1.185721e-03 0.000000e+00
+10 10     PC             TC       0        P10 2.972445e-03 0.034155301 3.167154e-04 1.828237e-05
+11 11     PC             MR       0        P11 5.115404e-04 0.001216813 5.316441e-05 8.979209e-06
+```
+
+Notice that the function does not modify the `mysystem` system but creates a new *insilicosystem* object. Here we simply asked for a new gene to be created, and the function chooses whether it is protein-coding or noncoding and samples its kinetic parameters. Alternatively we can specify these different arguments:
+
+```r
+> mysystem2 = addGene(mysystem, coding = "PC", TargetReaction = "TL", TCrate = 0.005, PDrate = 0.0007)
+> mysystem2$genes
+
+   id coding TargetReaction PTMform ActiveForm       TCrate     TLrate       RDrate       PDrate
+1   1     NC             TL       0         R1 8.887839e-03 0.00000000 1.736133e-04 0.000000e+00
+2   2     PC             TL       0         P2 6.711473e-05 0.13226328 8.512016e-05 1.164180e-06
+3   3     PC             TC       0         P3 3.193124e-04 0.05770822 1.553645e-04 7.507520e-06
+4   4     PC             TL       0         P4 3.748385e-04 0.50706887 6.013606e-04 6.906099e-06
+5   5     PC             TL       0         P5 4.415198e-04 0.05302814 4.046843e-04 7.347904e-06
+6   6     PC             TC       0         P6 4.691504e-04 0.06439765 6.992371e-04 2.385040e-06
+7   7     PC             TL       1        Pm7 7.079025e-04 0.02980232 1.160875e-03 1.338248e-05
+8   8     PC            PTM       0         P8 1.611630e-03 0.16976215 1.779581e-04 7.994026e-06
+9   9     NC             TC       0         R9 1.325744e-03 0.00000000 1.185721e-03 0.000000e+00
+10 10     PC             TC       0        P10 2.972445e-03 0.03415530 3.167154e-04 1.828237e-05
+11 11     PC             TL       0        P11 5.000000e-03 0.08047725 2.487492e-04 7.000000e-04
+```
+
+There is for now no way to remove a gene from an existing *in silico* system (for computational reasons).
+
+* **Add or remove an edge in the GRN**:
+
+If we want gene 1, a regulator of transcription, to repress the expression of gene 3, we can use:
+
+```r
+
+```
+
+Note that the kinetic parameters of the regulatory interaction are passed in a named list. If the names of the parameters provided are wrong, the function won't stop with an error but will instead sample values for the parameters, as it would do if the parameters weren't provided at all. You cannot choose which expression step of the target is regulated, as it depends on the biological function of the regulator.
+
+Similarly you can remove the edge, with:
+
+```r
+
+```
+
+* **Add or remove a regulatory complex**:
+
 
 ## Empty *in silico* system
 
@@ -482,6 +564,14 @@ This returns a plot of the abundance of the different species (separated by RNAs
 
 By default, the different alleles are merged before plotting (`mergeAllele = T`), and similarly the non-modified and modified versions of the proteins are merged before plotting (`mergePTM = T`). On the contrary, the free and in complex components of the system are not merged (`mergeComplexes = F`).
 
+The legend is presented as a table that gives for each component (columns) the different forms it can be found in. For example if we decide not to merge the non-modified and modified versions of the proteins, we have:
+
+```r
+plotSimulation(sim$Simulation, mergePTM = F)
+```
+
+The first component names are numbers, they correspond to the gene IDs. We can find the different genes either as RNAs or proteins. As gene 7 is targeted for post-translational modification, there exists a modified form of its protein, `PTM7`. The component `CTL1` is a regulatory complex. Its full name, `CTL1_P4_Pm7` contains the list of its constituents, here the protein of gene 4 and the modified protein of gene 7.
+
 To help you get an idea of the general tendencies of the abundance of the different components, the function `summariseSimulation` returns a dataframe giving for each component (row) and each individual (column) the maximum and final average abundance over the different trials:
 
 ```r
@@ -505,7 +595,7 @@ Time: 0 s - 2000 s
 6         P2     Final 213070.8 184679.0 190255.2
 ```
 
-The function prints on your console the individuals, trials and time considered for the summary. You can suppress this display with the argument `verbose = F` in the function call.
+The function prints on your console the individuals, trials and timespan considered for the summary. You can suppress this display with the argument `verbose = F` in the function call.
 If you want to focus on one *in silico* individual, and zoom on a smaller time-period, you can use:
 ```r
 plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
