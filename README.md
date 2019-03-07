@@ -1,6 +1,6 @@
 # sismonr - Simulation of In Silico Multi-Omic Networks R package
-[![Travis build status](https://travis-ci.org/oliviaAB/sismonr.svg?branch=master)](https://travis-ci.org/oliviaAB/sismonr)
 
+[![Travis build status](https://travis-ci.org/oliviaAB/sismonr.svg?branch=master)](https://travis-ci.org/oliviaAB/sismonr)  [![Latest](https://img.shields.io/badge/Documentation-latest-blue.svg)](https://oliviaab.github.io/sismonr/)
 ## sismonr
 
 `sismonr` is a package for the simulation of gene expression profiles for *in silico* regulatory systems. Some inovative features of the model include:
@@ -17,6 +17,7 @@ The algorithm relies on the programming language `Julia` for computational speed
 
 3. **Simulate the expression profiles of the different genes** (that is the abundance of the corresponding RNAs and proteins if applicable) for each individual in the *in silico* population. This is done with the function `simulateInSilicoSystem(...)`. Alternatively, for large systems, a parallel version of this function, `simulateParallelInSilicoSystem(...)`, is available (only for Linux).
 
+The documentation, detailing how to use sismonr, is available at [https://oliviaab.github.io/sismonr/](https://oliviaab.github.io/sismonr/).
 
 ## Installation
 The sismonr package depends on the programming language [Julia](https://julialang.org/). It is preferable to install Julia on your computer before installing sismonr.
@@ -41,7 +42,3 @@ You can install sismonr from R or Rstudio using the following commands:
 library(devtools)
 install_github("oliviaAB/sismonr")
 ```
-
-## Documentation
-
-The documentation is currently under development, and will be available at [https://oliviaab.github.io/sismonr/](https://oliviaab.github.io/sismonr/).
