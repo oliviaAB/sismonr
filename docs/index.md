@@ -122,7 +122,7 @@ plotGRN(mysystem)
 
 ![plotGRN](images/GRN.png)
 
-For small networks, you can try to use `plotGRN(mysystem, plotType = "interactive2D")` or `plotGRN(mysystem, plotType = "interactive3D")` to get dynamic 2D or 3D plots (the latter command requires the package `rgl`). Note that you can pass additional arguments to `plotGRN` that will be used by the `plot.igraph` function from the `igraph` package to plot the network (see https://igraph.org/r/doc/plot.common.html for the list of available arguments). This can be useful for example if your network is large, because the arrows will look too big and you won't be able to see much. To correct that you can use `plotGRN(mysystem, edge.arrow.size = 0.5)`.
+For small networks, you can try to use `plotGRN(mysystem, plotType = "interactive2D")` or `plotGRN(mysystem, plotType = "interactive3D")` to get dynamic 2D or 3D plots (the latter command requires the package `rgl`). Note that you can pass additional arguments to `plotGRN` that will be used by the `plot.igraph` function from the `igraph` package to plot the network (see [https://igraph.org/r/doc/plot.common.html](https://igraph.org/r/doc/plot.common.html) for the list of available arguments). This can be useful for example if your network is large, because the arrows will look too big and you won't be able to see much. To correct that you can use `plotGRN(mysystem, edge.arrow.size = 0.5)`.
 
 The `edge` dataframe shows the global GRN, with all the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
 ```r
@@ -695,7 +695,7 @@ The GRN for this example is:
 
 ![plotGRNcolpw](images/GRNcolpw.png)
 
-Note that both `plotSimulation` and `plotHeatMap` can take as input additional parameters that will be passed to `ggplot2::theme()` when plotting the simulation (see https://ggplot2.tidyverse.org/reference/theme.html for the list of available parameters). This is useful for example if your axis titles are too small or too large (or if you want them in red). 
+Note that both `plotSimulation` and `plotHeatMap` can take as input additional parameters that will be passed to `ggplot2::theme()` when plotting the simulation (see [https://ggplot2.tidyverse.org/reference/theme.html](https://ggplot2.tidyverse.org/reference/theme.html) for the list of available parameters). This is useful for example if your axis titles are too small or too large (or if you want them in red). 
 
 ## The stochastic model
 
