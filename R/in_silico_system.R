@@ -1049,6 +1049,9 @@ plotGRNlegend = function(verticesColour, edgesColour){
 #' @export
 plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotType = "2D", ...){
 
+  opar = par()[c("oma", "fig", "mar")]
+  on.exit(par(opar))
+
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
@@ -1077,10 +1080,10 @@ plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotTyp
   if(igraph::gorder(network)>0){
     if(plotType == "2D"){
         # layout(matrix(c(1, 2), ncol = 1), widths = c(1, 1), heights = c(0.8, 0.2))
-        graphics::par(oma = c(7, 0, 0, 0))
+        graphics::par(oma = c(7, 0, 0, 0), mar = c(0, 0, 0, 0))
         igraph::plot.igraph(network, edge.curved = T, vertex.label.color = "black", ...)
         plotGRNlegend(verticesColour, edgesColour)
-        graphics::par(oma = c(0, 0, 0, 0))
+        # graphics::par(oma = c(0, 0, 0, 0))
     }else if(plotType == "interactive2D"){
       # requireNamespace("tcltk", quietly = TRUE)
       if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
