@@ -1049,8 +1049,8 @@ plotGRNlegend = function(verticesColour, edgesColour){
 #' @export
 plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotType = "2D", ...){
 
-  opar = par()[c("oma", "fig", "mar")]
-  on.exit(par(opar))
+  opar = graphics::par()[c("oma", "fig", "mar")]
+  on.exit(graphics::par(opar))
 
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
