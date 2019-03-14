@@ -22,6 +22,12 @@ mysystem$edg
 
 plotGRN(mysystem)
 
+plotGRN(mysystem, plotType = "interactive2D")
+
+# install.packages("rgl")
+plotGRN(mysystem, plotType = "interactive3D")
+plotGRN(mysystem, edge.arrow.size = 0.5)
+
 names(mysystem$mosystem)
 mysystem$mosystem$TCRN_edg
 
