@@ -826,8 +826,14 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
       regsign = "-1"
     }
   }else{
-    regsign = sample(c("1","-1"), 1, prob = c(insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]],
+    if(targetreaction == "PTM" & !(tarID %in% insilicosystem$mosystem$PTMRN_edg$to)){ ## force the first PTM reaction to be positive
+      regsign = "1"
+      insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "PTMform"] = 1
+      insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "ActiveForm"] = paste0("Pm", tarID)
+    }else{
+      regsign = sample(c("1","-1"), 1, prob = c(insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]],
                                               1 - insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]]), replace = T)
+    }
   }
 
 

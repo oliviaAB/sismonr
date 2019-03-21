@@ -216,9 +216,9 @@ insilicosystemargs <- function(
   if(is.null(TLbindingrate_samplingfct)) TLbindingrate_samplingfct = function(means){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(means), sd = 0.1); return(10^logval)  }
   if(is.null(TLunbindingrate_samplingfct)) TLunbindingrate_samplingfct = function(x){ logval = rnorm(x, mean = -3, sd = 0.2); return(10^(logval)) }
   if(is.null(TLfoldchange_samplingfct)) TLfoldchange_samplingfct = function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10)  }
-  if(is.null(RDregrate_samplingfct)) RDregrate_samplingfct = function(x){ logval = rnorm(x, mean = 1, sd = 1.2); return(10^logval) }
-  if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ logval = rnorm(x, mean = 1, sd = 1.2); return(10^logval) }
-  if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ logval = rnorm(x, mean = 1, sd = 1.2); return(10^logval) }
+  if(is.null(RDregrate_samplingfct)) RDregrate_samplingfct = function(x){ logval = rnorm(x, mean = -5, sd = 1.5); return(10^logval) }
+  if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ logval = rnorm(x, mean = -5, sd = 1.5); return(10^logval) }
+  if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ logval = rnorm(x, mean = -8, sd = 1.5); return(10^logval) }
   if(is.null(complexesformationrate_samplingfct)) complexesformationrate_samplingfct = function(x){ logval = rnorm(x, mean = -3, sd = 0.7); return(10^(logval)) }
   if(is.null(complexesdissociationrate_samplingfct)) complexesdissociationrate_samplingfct = function(x){ logval = rnorm(x, mean = 3, sd = 0.9); return(10^(logval)) }
 
