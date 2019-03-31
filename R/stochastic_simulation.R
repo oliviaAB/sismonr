@@ -28,10 +28,11 @@ df2list = function(mydf){
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
 #' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions (default: none).
+#' @param verbose If TRUE (default), print messages to signal the start and finish of the function
 #' @param ev A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @export
-createStochSystem = function(insilicosystem, indargs, writefile, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
+createStochSystem = function(insilicosystem, indargs, writefile, filepath = getwd(), filename = "simulation", verbose = T, ev = getJuliaEvaluator()){
 
   ## Creating the networks lists to be sent to Julia (converted to dictionaries in Julia)
   temp = names(insilicosystem$mosystem)
@@ -48,12 +49,12 @@ createStochSystem = function(insilicosystem, indargs, writefile, filepath = getw
   complexeskinetics = switch((length(insilicosystem$complexeskinetics) == 0) + 1, insilicosystem$complexeskinetics, character(0))
 
 
-  message("Generating the stochastic system...")
+  if(verbose) message("Generating the stochastic system...")
   juliastochsystem = juliaCall("juliaCreateStochasticSystem",
                           genes, get("TCRN_edg"), get("TLRN_edg"), get("RDRN_edg"), get("PDRN_edg"), get("PTMRN_edg"),
                           complexes, complexeskinetics, indargs$gcnList,
                           writefile, filepath, filename, evaluator = ev)
-  message("Done.")
+  if(verbose) message("Done.")
 
   return(juliastochsystem)
 }
@@ -148,7 +149,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' @export
 simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
 
-  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, ev = ev)
+  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, verbose = T, ev = ev)
   message("\n")
 
   ## Store the running time of each simulation
@@ -182,9 +183,9 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
 
 
 ## function to start a Julia evaluator on a node of the cluster, given the port id (for parallel simulation)
-startJuliaEvCluster = function(portid, stochmodel_string){
+startJuliaEvCluster = function(portid, insilicosystem, indargs, writefile, filepath, filename){
   myev = newJuliaEvaluator(port = portid) ## start on the node a Julia evaluator with specified port number
-  mystochmodel = juliaEval("eval(Meta.parse(%s))", stochmodel_string, .get = F, evaluator = myev) ## create in the Julia process the stochmodel object
+  mystochmodel = createStochSystem(insilicosystem, indargs, writefile, filepath, filename, verbose = F, ev = myev)
   return(list("myev" = myev, "mystochmodelvar" = mystochmodel@.Data)) ## return the Julia evaluator ID and the name on the Julia process of the stochmodel object
 }
 
@@ -241,10 +242,8 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' @export
 simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
 
-  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, ev = ev)
+  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, verbose = T, ev = ev)
   message("\n")
-
-  stochmodel_string = juliaEval("string(%s)", stochmodel, evaluator = ev)
 
   mybaseport = ev$port ## Get the port of the current Julia evaluator
   portList = sapply(1:no_cores, sum, mybaseport) ## Assign to each core a port number, starting from 1+port number of the current evaluator
@@ -254,13 +253,14 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   parallel::clusterEvalQ(mycluster, library(XRJulia))
   parallel::clusterEvalQ(mycluster, library(utils))
   parallel::clusterExport(mycluster, "newJuliaEvaluator")
+  parallel::clusterExport(mycluster, "createStochSystem")
   parallel::clusterExport(mycluster, "callJuliaStochasticSimulation")
   # parallel::clusterExport(mycluster, "stochmodel_string", envir = environment())
   # parallel::clusterExport(mycluster, "no_cores", envir = environment())
 
   ## Start a Julia evaluator on each cluster
   message("Starting Julia evaluators on each cluster node ... \n")
-  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster, stochmodel_string = stochmodel_string)
+  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster, insilicosystem, insilicopopulation$indargs, writefile, filepath, filename)
   message("Done.\n")
   # parallel::clusterExport(mycluster, "infocores", envir = environment())
 

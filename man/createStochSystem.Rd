@@ -5,7 +5,7 @@
 \title{Creates a stochastic system from an in silico system.}
 \usage{
 createStochSystem(insilicosystem, indargs, writefile, filepath = getwd(),
-  filename = "simulation", ev = getJuliaEvaluator())
+  filename = "simulation", verbose = T, ev = getJuliaEvaluator())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}
@@ -17,6 +17,8 @@ createStochSystem(insilicosystem, indargs, writefile, filepath = getwd(),
 \item{filepath}{If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).}
 
 \item{filename}{If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions (default: none).}
+
+\item{verbose}{If TRUE (default), print messages to signal the start and finish of the function}
 
 \item{ev}{A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.}
 }
