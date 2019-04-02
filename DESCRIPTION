@@ -28,7 +28,8 @@ Imports:
     rlang,
     grDevices,
     igraph,
-    graphics
+    graphics,
+    scales
 Remotes: 
     johnmchambers/XRJulia,
     kassambara/ggpubr

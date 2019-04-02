@@ -219,3 +219,98 @@ createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, ge
   return(value)
 }
 
+#' Plots the QTL effect coefficients of a population
+#'
+#' Plots the QTL effect coefficients for all the genes of a system of the in silico individuals in a population.
+#'
+#' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @param insilicosystem The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).
+#' @param scaleLims A vector of length 2 giving the lower and upper limits of the continuous scale (of the QTL effect coefficient
+#' values). QTL effect coefficients with values outside these limits are plotted as NA (gray). If NULL (default), the limits are
+#' automatically set to the min and max values in the dataset.
+#' @param qtlEffectCoeffs A character vector of QTL effect coefficient names to plot. By default, all QTL effect coefficients are
+#' represented.
+#' @param inds A character vector giving the names of the individuals to plot. By default, all individuals in the population
+#' are represented.
+#' @param alleles A character vector of allele names giving the names of the alleles to plot. By default, all the alleles are represented.
+#' @param genes A character or numeric vector of gene IDs to plot. By default, all the genes in the system are represented.
+#' @param nGenesPerRow Integer. Number of genes to plot per row.
+#' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
+#' @return A plot representing the value (colour) of each QTL effect coefficient (x-axis) of each allele (y-axis) of the different
+#' individuals (rows) for each gene (column) in the system. For noncoding genes, some QTL effect coefficients are not relevant (the ones
+#' related to protein or translation) and are represented in gray as NA.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 10)
+#' mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
+#' plotMutations(mypop, mysystem)
+#' ## Only plot the 1st allele of each genes for the genes 1 to 5 and the individuals 1 to 3
+#' plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5, inds = c("Ind1", "Ind2", "Ind3"))
+#' }
+#' @export
+plotMutations = function(insilicopopulation, insilicosystem, scaleLims = NULL, qtlEffectCoeffs = insilicopopulation$indargs$qtlnames, inds = names(insilicopopulation$individualsList), alleles = insilicopopulation$indargs$gcnList, genes = 1:length(insilicopopulation$GenesVariants), nGenesPerRow = 10, ...){
+
+  genes = as.numeric(genes)
+
+  allqtlEffectCoeffs = insilicopopulation$indargs$qtlnames
+  allGenes = 1:length(insilicopopulation$GenesVariants)
+
+  dflist = lapply(inds, function(i){
+    mutationsEffect = unname(unlist(insilicopopulation$individualsList[[i]]$QTLeffects[alleles]))
+
+    res = data.frame(Ind = i,
+                     Gene = rep(allGenes, times = length(allqtlEffectCoeffs)*length(alleles)),
+                     Allele = rep(alleles, each = length(allqtlEffectCoeffs)*length(allGenes)),
+                     QTLeffectCoefficient = rep(allqtlEffectCoeffs, each = length(allGenes), times = length(alleles)),
+                     MutationsEffect = mutationsEffect,
+                     stringsAsFactors = "F")
+    res$Allele = factor(res$Allele, levels = sort(alleles, decreasing = T))
+    res = dplyr::filter(res, !!sym("Gene") %in% genes & !!sym("QTLeffectCoefficient") %in% qtlEffectCoeffs)
+    res$Gene = sapply(res$Gene, function(x){paste0("Gene ", x)})
+    res$Gene = factor(res$Gene, levels = sapply(sort(genes), function(x){paste0("Gene ", x)}))
+    return(res)
+  })
+
+  df = do.call(rbind, dflist)
+  df$QTLeffectCoefficient = factor(df$QTLeffectCoefficient, levels = insilicopopulation$indargs$qtlnames)
+  indsID = as.numeric(stringr::str_extract(inds, "\\d+"))
+  df$Ind = factor(df$Ind, levels = sapply(sort(indsID), function(x){paste0("Ind", x)}))
+
+  isNC = insilicosystem$genes[insilicosystem$genes$coding == "NC", "id"]
+  isNC = sapply(isNC, function(x){paste0("Gene ", x)})
+
+  df[df$Gene %in% isNC & df$QTLeffectCoefficient %in% insilicopopulation$indargs$qtlnames[6:10], "MutationsEffect"] = NA
+
+  if(is.null(scaleLims)) scaleLims = c( min(df$MutationsEffect, na.rm = T), max(df$MutationsEffect, na.rm = T))
+
+
+  # myplot = ggplot2::ggplot(df, aes_string(x = "QTLeffectCoefficient", y = "Allele", fill = "MutationsEffect")) +
+  #   ggplot2::geom_tile() +
+  #   ggplot2::scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+  #                                 midpoint = 1, na.value = "gray", limits = scaleLims, oob = scales::censor) +
+  #   ggplot2::facet_grid(Ind~Gene) +
+  #   ggplot2::theme_classic() +
+  #   ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90), legend.direction = "horizontal", legend.position = "bottom",
+  #                  strip.background = ggplot2::element_rect(colour="black", fill="white"))
+
+  nbrows = length(genes)%/%nGenesPerRow + (length(genes)%%nGenesPerRow !=0)
+  geneNames = sapply(sort(genes), function(x){paste0("Gene ", x)})
+
+  plots =  lapply(1:nbrows, function(i){
+    genesrow = geneNames[(nGenesPerRow*(i-1) + 1):min(nGenesPerRow*i, length(genes))]
+    dfGene = dplyr::filter(df, !!sym("Gene") %in% genesrow)
+    myplot = ggplot2::ggplot(dfGene, aes_string(x = "QTLeffectCoefficient", y = "Allele", fill = "MutationsEffect")) +
+      ggplot2::geom_tile() +
+      ggplot2::scale_fill_gradient2(low = "blue", high = "red", mid = "white",
+                                    midpoint = 1, na.value = "gray", limits = scaleLims, oob = scales::censor, name = "QTL effect coefficient values\n(1 = no mutation)") +
+      ggplot2::facet_grid(Ind~Gene) +
+      ggplot2::theme_classic() +
+      ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 90), legend.direction = "horizontal", legend.position = "bottom", ...) +
+      ggplot2::xlab("QTL effect coefficients") + ggplot2::ylab("Alleles")
+    return(myplot)
+  })
+
+  resplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = 1, common.legend = T, heights = rep(1, length(plots)), legend = "bottom")
+
+  return(resplot)
+}
