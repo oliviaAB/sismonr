@@ -2,7 +2,7 @@
 % Please edit documentation in R/stochastic_simulation.R
 \name{callJuliaStochasticSimulation}
 \alias{callJuliaStochasticSimulation}
-\title{Calls the Julia simulation}
+\title{Calls the Julia simulation function.}
 \usage{
 callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
   simtime, modelname = "MySimulation", ntrials, nepochs, simalgorithm,

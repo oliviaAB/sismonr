@@ -2,25 +2,25 @@
 % Please edit documentation in R/in_silico_system.R
 \name{getGRN}
 \alias{getGRN}
-\title{Returns an igraph object (network) of the GRN of the in silico system}
+\title{Returns an igraph object (network) of the GRN of the in silico system.}
 \usage{
 getGRN(insilicosystem, edgeType = NULL, showAllVertices = F)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{edgeType}{The type of interactions to plot. If NULL (default value), all the interactions are plot. Otherwise, can be either:
+\item{edgeType}{The type of interactions to include in the network. If NULL (default value), all the interactions are included. Otherwise, can be either:
 \itemize{
-\item "TC": plot only regulation of transcription
-\item "TL": plot only regulation of translation
-\item "RD": plot only regulation of RNA decay
-\item "PD": plot only regulation of protein decay
-\item "PTM": plot only regulation of protein post-translational modification
-\item "RegComplexes": plot only binding interactions, i.e. linking the regulatory complexes to their components.
+\item "TC": return only regulation of transcription
+\item "TL": return only regulation of translation
+\item "RD": return only regulation of RNA decay
+\item "PD": return only regulation of protein decay
+\item "PTM": return only regulation of protein post-translational modification
+\item "RegComplexes": return only binding interactions, i.e. linking the regulatory complexes to their components.
 }}
 
 \item{showAllVertices}{Display vertices that don't have any edge? Default is FALSE.}
 }
 \description{
-Returns an igraph object (network) of the gene regulatory network of the insilico system, including all types of regulation of only those defined by the user.
+Returns an igraph object (network) corresponding to the gene regulatory network of the insilico system, including all types of regulation of only those defined by the user.
 }

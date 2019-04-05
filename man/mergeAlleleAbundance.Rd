@@ -14,7 +14,7 @@ or \code{\link{simulateParallelInSilicoSystem}}).}
 A dataframe in which the abundance of the different allelic versions of the same molecule have been merged to give the abundance of the molecule (without distinction of the allele of origin).
 }
 \description{
-Merge (i.e. sum) the abundance of the different allelic versions of each molecule.
+Merge (i.e. sum) the abundance of the different allelic versions of each molecule in the results of a simulation.
 }
 \examples{
 \donttest{

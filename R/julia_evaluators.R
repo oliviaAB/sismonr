@@ -1,4 +1,4 @@
-#' Creates a new ready-to-use Julia evaluator
+#' Creates a new ready-to-use Julia evaluator.
 #'
 #' \code{newJuliaEvaluator} opens a new Julia evaluator and loads the required functions on it.
 #'
@@ -27,12 +27,12 @@ newJuliaEvaluator <- function(port = NULL) {
   return(ev)
 }
 
-#' Returns the current Julia evaluator
+#' Returns the current Julia evaluator.
 #'
-#' Returns the current Julia evaluator; if none, starts a new one
+#' Returns the current Julia evaluator; if none, starts a new one.
 #'
 #' \code{getJuliaEvaluator} is similar to the \code{XRJulia} function \code{RJulia},
-#' but if no evaluator exists, creates a new one and load \code{sismonr} Julia functions
+#' but if no evaluator exists, creates a new one and loads \code{sismonr} Julia functions
 #' on it.
 #'
 #'@return A Julia evalutator from \code{XRJulia} package.

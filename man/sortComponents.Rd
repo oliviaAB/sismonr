@@ -2,19 +2,19 @@
 % Please edit documentation in R/stochastic_simulation.R
 \name{sortComponents}
 \alias{sortComponents}
-\title{Sort component names}
+\title{Sort component names.}
 \usage{
 sortComponents(componames)
 }
 \arguments{
-\item{componames}{A character vector, giving the names of the components}
+\item{componames}{A character vector, giving the names of the components.}
 }
 \value{
 A dataframe: first column: sorted names of the components, second column: is the component a
 regulatory complex?, third column: is the component a modified protein?
 }
 \description{
-Sorts the components of an in silico system (for plotting or summary).
+Sorts the names of the components of an in silico system (for plotting or summary).
 }
 \details{
 Sort components into:

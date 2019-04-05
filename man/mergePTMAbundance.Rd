@@ -14,7 +14,7 @@ or \code{\link{simulateParallelInSilicoSystem}}).}
 A dataframe in which the abundance of original and modified versions of a protein have been merged to give the abundance of the protein (without distinction of its post-translational modification state).
 }
 \description{
-Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein.
+Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein in the results of a simulation.
 }
 \examples{
 \donttest{

@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{createGenes}
 \alias{createGenes}
-\title{Creates genes for the in silico system}
+\title{Creates genes for the in silico system.}
 \usage{
 createGenes(sysargs)
 }
@@ -13,18 +13,26 @@ createGenes(sysargs)
 A data frame of in silico genes. Attributes:
 \itemize{
 \item \code{id}: Integer, ID of the genes;
-\item \code{coding}: coding status of the genes (either "PC" for protein-coding or "NC" for non-coding). Sampled according to the parameter \code{PC.p} in \code{sysargs};
+\item \code{coding}: coding status of the genes (either "PC" for protein-coding or "NC" for noncoding). Sampled according to the parameter \code{PC.p} in \code{sysargs};
 \item \code{TargetReaction}: the biological function of the genes ("TC": transcription regulator, "TL": translation regulator, "RD": RNA decay
 regulator, "PD": protein decay regulator, "PTM": post-translational modification regulator, "MR": metabolic enzyme). Sampled according to the parameters \code{PC.TC.p}, etc for protein-coding genes or \code{NC.TC.p}, etc for noncoding genes, in \code{sysargs};
 \item \code{PTMform}: Does the gene have a PTM form? "0" or "1" (here all "0", PTM form will be assigned later);
 \item \code{Active form}: what is the active form of the gene? "R" for noncoding genes, "P" for protein-coding genes,
 "Pm" for protein-coding genes with a PTM form;
-\item \code{TCrate}: transcription rate of the genes. Sampled according to the parameter \code{basal_transcription_rate_samplingfct} in \code{sysargs};
-\item \code{TLrate}: translation rate of the genes. Sampled according to the parameter \code{basal_translation_rate_samplingfct} in \code{sysargs} (0 for noncoding genes);
-\item \code{RDrate}: RNA decay rate of the genes. Sampled according to the parameter \code{basal_RNAlifetime_rate_samplingfct} in \code{sysargs};
-\item \code{PDrate}: Protein decay rate of the genes. Sampled according to the parameter \code{basal_protlifetime_rate_samplingfct} in \code{sysargs} (0 for noncoding genes).
+\item \code{TCrate}: transcription rate of the genes. Sampled according to the parameter
+
+\code{basal_transcription_rate_samplingfct} in \code{sysargs};
+\item \code{TLrate}: translation rate of the genes. Sampled according to the parameter
+
+\code{basal_translation_rate_samplingfct} in \code{sysargs} (0 for noncoding genes);
+\item \code{RDrate}: RNA decay rate of the genes. Sampled according to the parameter
+
+\code{basal_RNAlifetime_rate_samplingfct} in \code{sysargs};
+\item \code{PDrate}: Protein decay rate of the genes. Sampled according to the parameter
+
+\code{basal_protlifetime_rate_samplingfct} in \code{sysargs} (0 for noncoding genes).
 }
 }
 \description{
-Generate the genes in the system and their attributes, according to the user parameters.
+Generates the genes in the system and their attributes, according to the user parameters.
 }

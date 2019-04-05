@@ -2,7 +2,7 @@
 % Please edit documentation in R/julia_evaluators.R
 \name{getJuliaEvaluator}
 \alias{getJuliaEvaluator}
-\title{Returns the current Julia evaluator}
+\title{Returns the current Julia evaluator.}
 \usage{
 getJuliaEvaluator()
 }
@@ -10,10 +10,10 @@ getJuliaEvaluator()
 A Julia evalutator from \code{XRJulia} package.
 }
 \description{
-Returns the current Julia evaluator; if none, starts a new one
+Returns the current Julia evaluator; if none, starts a new one.
 }
 \details{
 \code{getJuliaEvaluator} is similar to the \code{XRJulia} function \code{RJulia},
-but if no evaluator exists, creates a new one and load \code{sismonr} Julia functions
+but if no evaluator exists, creates a new one and loads \code{sismonr} Julia functions
 on it.
 }

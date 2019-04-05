@@ -18,5 +18,5 @@ coefficients (rows) of the different variants (columns) segregating in the in si
 mutations carried by the variant on the different kinetic parameters of the gene.
 }
 \description{
-Create variants that segregate in the in silico population for each gene in the system. Returns a list that gives for each gene in the system the existing variants segregating in the in silico population.
+Create variants that segregate in the in silico population for each gene in the system.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{plotGRN}
 \alias{plotGRN}
-\title{Plots the GRN of the in silico system}
+\title{Plots the GRN of the in silico system.}
 \usage{
 plotGRN(insilicosystem, edgeType = NULL, showAllVertices = F,
   plotType = "2D", ...)
@@ -10,7 +10,7 @@ plotGRN(insilicosystem, edgeType = NULL, showAllVertices = F,
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{edgeType}{The type of interactions to plot. If NULL (default value), all the interactions are plot. Otherwise, can be either:
+\item{edgeType}{The type of interactions to plot. If NULL (default value), all the interactions are plotted. Otherwise, can be either:
 \itemize{
 \item "TC": plot only regulation of transcription
 \item "TL": plot only regulation of translation
@@ -23,11 +23,11 @@ plotGRN(insilicosystem, edgeType = NULL, showAllVertices = F,
 \item{showAllVertices}{Display vertices that don't have any edge? Default is FALSE}
 
 \item{plotType}{The type of plot function to use for the network: can be either
-\"2D\" (default, use the function \code{\link[igraph]{plot.igraph}}), \"interactive2D\" (use the function
- \code{\link[igraph]{tkplot}}) or \"interactive3D\" (use the function \code{\link[igraph]{rglplot}}).}
+"2D" (default, use the function \code{\link[igraph]{plot.igraph}}), "interactive2D" (use the function
+ \code{\link[igraph]{tkplot}}) or "interactive3D" (use the function \code{\link[igraph]{rglplot}}).}
 
 \item{...}{any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.}
 }
 \description{
-Plots the gene regulatory network of the insilico system, including all types of regulation of only those defined by the user.
+Plots the gene regulatory network of the insilico system, including all types of regulation or only those defined by the user.
 }

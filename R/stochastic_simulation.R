@@ -1,6 +1,6 @@
 #' Tranforms a data-frame into a list.
 #'
-#' Transforms a data-frame into a list. The elements of the lists correspond to
+#' Transforms a data-frame into a list. The elements of the list correspond to
 #' the columns of the data-frame.
 #'
 #' @param mydf A data-frame.
@@ -26,9 +26,9 @@ df2list = function(mydf){
 #' @param insilicosystem The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).
 #' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
+#' @param filepath If writefile = \code{TRUE}, path to the folder in which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions (default: none).
-#' @param verbose If TRUE (default), print messages to signal the start and finish of the function
+#' @param verbose If TRUE (default), print messages to signal the start and finish of the function.
 #' @param ev A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @export
@@ -59,7 +59,7 @@ createStochSystem = function(insilicosystem, indargs, writefile, filepath = getw
   return(juliastochsystem)
 }
 
-#' Calls the Julia simulation
+#' Calls the Julia simulation function.
 #'
 #' Calls the Julia function for simulating a stochastic system. Should not be used by itself (this function is called by the wrapper functions \link{simulateInSilicoSystem} and \link{simulateParallelInSilicoSystem}).
 #'
@@ -102,49 +102,36 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
   return(resdf)
 }
 
-#' Simulates a in-silico system
+#' Simulates an in silico system.
 #'
-#' Simulates (stochastically) the behaviour of an in silico system over time.
+#' Simulates (stochastically) the behaviour of an in silico system over time, i.e. the expression of the different genes.
 #'
 #' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
 #' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
 #' @param simtime The final time of the simulation (in seconds).
 #' @param nepochs The number of times to record the state of the system during the simulation.
-#' @param ntrials The number of times the simulation must be replicated.
+#' @param ntrials The number of times the simulation must be replicated (for each individual).
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
+#' @param filepath If writefile = \code{TRUE}, path to the folder in which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A list composed of:
 #' \itemize{
 #' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
-#' RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds to molecules (RNAs or proteins) originated from the j-th allele of the gene.
-#' \item \code{runningtime}: A vector of running time of all simulations.
+#' RNA form of the gene, "Pi" to the protein form of the gene. The suffix "GCNj" indicates that the molecule comes from the j-th allele of the gene.
+#' \item \code{runningtime}: A vector of running time of all runs of the simulation for each in silico individuals.
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
 #' @examples
-#' \dontrun{
+#' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
 #' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
-#' sim = simulateInSilicoSystem(mysystem, mypop, 1000)
-#' ## For visualisation
-#' library(tidyr)
-#' library(dplyr)
-#' library(ggplot2)
-#' library(RColorBrewer)
-#' cols = brewer.pal(10, "Paired")
-#' names(cols) = unlist(sapply(1:5, function(x){c(paste0(x, "GCN1"), paste0(x, "GCN2"))}))
-#' toplot = sim$Simulation %>%
-#' gather(key = "ID", value = "Abundance",
-#'  setdiff(names(sim$Simulation), c("time", "trial", "Ind"))) %>%
-#' mutate(Type = case_when(str_detect(ID, "^R") ~ "RNAs",
-#'                          str_detect(ID, "^P") ~ "Proteins"),
-#'         Components = stringr::str_replace(ID, "^R|^P", ""))
-#' ggplot(toplot, aes(x = time, y = Abundance, colour = Components)) +
-#' geom_line() + facet_grid(Type~., scales = "free_y") +
-#' scale_colour_manual(values = cols, breaks = names(cols))
+#' sim = simulateInSilicoSystem(mysystem, mypop, simtime = 1000, ntrials = 10)
+#' head(sim$Simulation)
+#' ## Visualising the result
+#' plotSimulation(sim$Simulation)
 #' }
 #' @export
 simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
@@ -209,27 +196,27 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 }
 
 
-#' Simulates a in-silico system in parallel
+#' Simulates an in silico system in parallel.
 #'
-#' Simulates (stochastically) the behaviour of an in silico system over time using parallelisation.
+#' Simulates (stochastically) the behaviour of an in silico system over time using parallelisation, i.e. the expression of the different genes.
 #'
 #' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
 #' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
 #' @param simtime The final time of the simulation (in seconds).
 #' @param nepochs The number of times to record the state of the system during the simulation.
-#' @param ntrials The number of times the simulation must be replicated.
+#' @param ntrials The number of times the simulation must be replicated (for each individual).
 #' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
 #' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in the which the files will be created (default: current working directory).
+#' @param filepath If writefile = \code{TRUE}, path to the folder in which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
 #' @param no_cores The number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
-#' package to detect the number of available cores, and use this number-1 for the simulation.
+#' package to detect the number of available cores, and use this number - 1 for the simulation.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A list composed of:
 #' \itemize{
 #' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
-#' RNA form of the gene, "Pi" to the protein form of the gene. "GCNj" corresponds to molecules (RNAs or proteins) originated from the j-th allele of the gene.
+#' RNA form of the gene, "Pi" to the protein form of the gene. The suffix "GCNj" indicates that the molecule comes from the j-th allele of the gene.
 #' \item \code{runningtime}: The running time (elapsed seconds) of the parallel simulation (only 1 value).
 #' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' }
@@ -238,6 +225,9 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
 #' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
 #' sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
+#' head(sim$Simulation)
+#' ## Visualising the result
+#' plotSimulation(sim$Simulation)
 #' }
 #' @export
 simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
@@ -316,7 +306,7 @@ sumColAbundance = function(df, colsid){
 
 #' Merge the different allelic versions of the molecules.
 #'
-#' Merge (i.e. sum) the abundance of the different allelic versions of each molecule.
+#' Merge (i.e. sum) the abundance of the different allelic versions of each molecule in the results of a simulation.
 #'
 #' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
 #' or \code{\link{simulateParallelInSilicoSystem}}).
@@ -345,7 +335,7 @@ mergeAlleleAbundance = function(df){
 
 #' Merge the original and PTM versions of the proteins.
 #'
-#' Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein.
+#' Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein in the results of a simulation.
 #'
 #' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
 #' or \code{\link{simulateParallelInSilicoSystem}}).
@@ -374,7 +364,7 @@ mergePTMAbundance = function(df){
 
 #' Merge the free and in-complex versions of molecules.
 #'
-#' Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule.
+#' Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule in the results of a simulation.
 #'
 #' @param df A dataframe with the abundance of the different molecules over time (from \code{\link{simulateInSilicoSystem}}
 #' or \code{\link{simulateParallelInSilicoSystem}}).
@@ -458,9 +448,9 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
   return(simuplot)
 }
 
-#' Sort component names
+#' Sort component names.
 #'
-#' Sorts the components of an in silico system (for plotting or summary).
+#' Sorts the names of the components of an in silico system (for plotting or summary).
 #'
 #' Sort components into:
 #' \itemize{
@@ -481,7 +471,7 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
 #' \item Allele of their components
 #' }
 #'
-#' @param componames A character vector, giving the names of the components
+#' @param componames A character vector, giving the names of the components.
 #' @return A dataframe: first column: sorted names of the components, second column: is the component a
 #' regulatory complex?, third column: is the component a modified protein?
 #' @export
@@ -588,22 +578,23 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
   return(plots)
 }
 
-#' Plots the result of a simulation
+#' Plots the result of a simulation.
 #'
-#' Automatically plots the result of a simulation for the selected in silico individuals.
+#' Automatically plots the result of a simulation (i.e. the abundance of RNAs, proteins and complexes over time)
+#' for the selected in silico individuals.
 #'
 #' If more than one trial is to be plotted, the mean abundance of each molecule over the different trials is plotted with a solid line,
 #' and the min and max abundances represented as coloured areas around the mean.
 #'
-#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
-#' @param inds A vector of in silico individual names for which to plot the expression profiles
-#' @param trials A vector of trials ID (=number) to use for the plot (see details).
+#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).
+#' @param inds A vector of in silico individual names for which to plot the expression profiles.
+#' @param trials A vector of trials ID (= number) to use for the plot (see details).
 #' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
 #' @param timeMax Numeric. The maximum simulation time to plot. Default value set to the maximum time in the simulation.
 #' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
 #' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
-#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
-#' @param yLogScale Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
+#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}
+#' @param yLogScale Plot the y-axis in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
 #' @param nIndPerRow Positive integer, the number of individuals to plot per row. Default 3.
 #' @param nCompPerRow Positive integer, the number of components to plot per row in the legend. Default 10.
 #' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
@@ -707,30 +698,30 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 
 }
 
-#' Plots the result of a simulation as a heatmap
+#' Plots the result of a simulation as a heatmap.
 #'
 #' Automatically plots the result of a simulation for the selected in silico individuals as a heatmap.
 #'
 #' If more than one trial is to be plotted, the mean abundance of each molecule over the different trials is plotted with a solid line,
 #' and the min and max abundances represented as coloured areas around the mean.
 #'
-#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
-#' @param inds A vector of in silico individual names for which to plot the expression profiles
-#' @param trials A vector of trials ID (=number) to use for the plot (see details).
+#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).
+#' @param inds A vector of in silico individual names for which to plot the expression profiles.
+#' @param trials A vector of trials ID (= number) to use for the plot (see details).
 #' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
 #' @param timeMax Numeric. The maximum simulation time to plot. Default value set to the maximum time in the simulation.
 #' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
 #' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
-#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
-#' @param yLogScale Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
+#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}
+#' @param yLogScale Plot the y-axis in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.
 #' @param nIndPerRow Positive integer, the number of individuals to plot per row. Default 3.
 #' @param VirPalOption String, palette name option to be passed to \code{\link[ggplot2]{scale_fill_viridis_c}}; can be one of "magma", "inferno", "plasma", "viridis" or "cividis". Default value is "plasma".
 #' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
 #' @return A plot from \code{\link[ggpubr]{ggarrange}}.
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+#' mysystem = createInSilicoSystem(G = 5)
+#' mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
 #' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 #' plotHeatMap(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
 #'  axis.title = element_text(color = "red"))
@@ -777,20 +768,20 @@ plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$tr
   return(simuplot)
 }
 
-#' Returns a summary dataframe of a simulation
+#' Returns a summary data-frame of a simulation.
 #'
-#' Returns a summary dataframe of a simulation (i.e. the maximum average abundance of each components over the different trials and the average abundance of the components at the final time of the simulation) for the selected in silico individuals.
+#' Returns a summary data-frame of a simulation giving the maximum average abundance of each component over the different trials and the average abundance of the components at the final time of the simulation, for the selected in silico individuals.
 #'
-#' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})
+#' @param simdf The data frame with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).
 #' @param inds A vector of in silico individual names for which to compute the summary values.
-#' @param trials A vector of trials ID (=number) to use for the summary.
+#' @param trials A vector of trials ID (= number) to use for the summary.
 #' @param timeMin Numeric. The minimum simulation time to take into account. Default value set to the minimum time in the simulation.
 #' @param timeMax Numeric. The maximum simulation time to take into account. Default value set to the maximum time in the simulation.
 #' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
 #' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
-#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}
+#' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}
 #' @param verbose If TRUE (default), print the individuals, trials, min and max time considered for the computation of the summary.
-#' @return A dataframe giving for each component (rows) and each individuals (Columns) the max and final average abundance over the different trials.
+#' @return A data-frame giving for each component (rows) and each individual (columns) the max and final average abundance over the different trials.
 #' @examples
 #' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_population.R
 \name{plotMutations}
 \alias{plotMutations}
-\title{Plots the QTL effect coefficients of a population}
+\title{Plots the QTL effect coefficients of a population.}
 \usage{
 plotMutations(insilicopopulation, insilicosystem, scaleLims = NULL,
   qtlEffectCoeffs = insilicopopulation$indargs$qtlnames,
@@ -17,7 +17,7 @@ plotMutations(insilicopopulation, insilicosystem, scaleLims = NULL,
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}
 
 \item{scaleLims}{A vector of length 2 giving the lower and upper limits of the continuous scale (of the QTL effect coefficient
-values). QTL effect coefficients with values outside these limits are plotted as NA (gray). If NULL (default), the limits are
+values) to be plotted. QTL effect coefficients with values outside these limits are plotted as NA (gray). If NULL (default), the limits are
 automatically set to the min and max values in the dataset.}
 
 \item{qtlEffectCoeffs}{A character vector of QTL effect coefficient names to plot. By default, all QTL effect coefficients are
@@ -26,13 +26,13 @@ represented.}
 \item{inds}{A character vector giving the names of the individuals to plot. By default, all individuals in the population
 are represented.}
 
-\item{alleles}{A character vector of allele names giving the names of the alleles to plot. By default, all the alleles are represented.}
+\item{alleles}{A character vector giving the names of the alleles to plot. By default, all the alleles are represented.}
 
 \item{genes}{A character or numeric vector of gene IDs to plot. By default, all the genes in the system are represented.}
 
 \item{nGenesPerRow}{Integer. Number of genes to plot per row.}
 
-\item{...}{Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.}
+\item{...}{Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot.}
 }
 \value{
 A plot representing the value (colour) of each QTL effect coefficient (x-axis) of each allele (y-axis) of the different
@@ -40,7 +40,7 @@ individuals (rows) for each gene (column) in the system. For noncoding genes, so
 related to protein or translation) and are represented in gray as NA.
 }
 \description{
-Plots the QTL effect coefficients for all the genes of a system of the in silico individuals in a population.
+Plots the QTL effect coefficients for all the genes of a in silico system of the in silico individuals.
 }
 \examples{
 \donttest{

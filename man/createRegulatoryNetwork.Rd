@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_system.R
 \name{createRegulatoryNetwork}
 \alias{createRegulatoryNetwork}
-\title{Creates an in silico regulatory network}
+\title{Creates an in silico regulatory network.}
 \usage{
 createRegulatoryNetwork(regsList, tarsList, reaction, sysargs,
   ev = getJuliaEvaluator())
@@ -23,18 +23,18 @@ regulators.}
 \value{
 A list of two elements:
 \itemize{
-\item \code{edg} a data-frame of edges of the network with the following variables:
+\item \code{edg}: a data-frame of edges of the network with the following variables:
 \itemize{
-\item \code{from} gene ID of the regulator, as a character;
-\item \code{to} gene ID of the target, as an integer;
-\item \code{TargetReaction} the ID of the reaction (as given by \code{reaction});
-\item \code{RegSign} The sign of the reaction ("1" or "-1");
-\item \code{RegBy} Is the regulator a protein-coding gene ("PC"), a noncoding gene ("NC") or a complex ("C")?
-};
-\item \code{complexes} a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
-\item \code{complexesTargetReaction} a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
+\item \code{from}: gene ID of the regulator, as a character;
+\item \code{to}: gene ID of the target, as an integer;
+\item \code{TargetReaction}: the ID of the reaction (as given by \code{reaction});
+\item \code{RegSign}: The sign of the reaction ("1" or "-1");
+\item \code{RegBy}: Is the regulator a protein-coding gene ("PC"), a noncoding gene ("NC") or a complex ("C")?
+}
+\item \code{complexes}: a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
+\item \code{complexesTargetReaction}: a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
 }
 }
 \description{
-Creates an in silico regulatory network given a list of regulators and targets
+Creates an in silico regulatory network given a list of regulators and targets.
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/stochastic_simulation.R
 \name{plotSimulation}
 \alias{plotSimulation}
-\title{Plots the result of a simulation}
+\title{Plots the result of a simulation.}
 \usage{
 plotSimulation(simdf, inds = unique(simdf$Ind),
   trials = unique(simdf$trial), timeMin = min(simdf$time),
@@ -11,11 +11,11 @@ plotSimulation(simdf, inds = unique(simdf$Ind),
   nCompPerRow = 10, ...)
 }
 \arguments{
-\item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})}
+\item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}
 
-\item{inds}{A vector of in silico individual names for which to plot the expression profiles}
+\item{inds}{A vector of in silico individual names for which to plot the expression profiles.}
 
-\item{trials}{A vector of trials ID (=number) to use for the plot (see details).}
+\item{trials}{A vector of trials ID (= number) to use for the plot (see details).}
 
 \item{timeMin}{Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.}
 
@@ -25,9 +25,9 @@ plotSimulation(simdf, inds = unique(simdf$Ind),
 
 \item{mergePTM}{Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}}
 
-\item{mergeComplexes}{Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}}
+\item{mergeComplexes}{Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}}
 
-\item{yLogScale}{Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.}
+\item{yLogScale}{Plot the y-axis in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.}
 
 \item{nIndPerRow}{Positive integer, the number of individuals to plot per row. Default 3.}
 
@@ -39,7 +39,8 @@ plotSimulation(simdf, inds = unique(simdf$Ind),
 A plot from \code{\link[ggpubr]{ggarrange}}.
 }
 \description{
-Automatically plots the result of a simulation for the selected in silico individuals.
+Automatically plots the result of a simulation (i.e. the abundance of RNAs, proteins and complexes over time)
+for the selected in silico individuals.
 }
 \details{
 If more than one trial is to be plotted, the mean abundance of each molecule over the different trials is plotted with a solid line,

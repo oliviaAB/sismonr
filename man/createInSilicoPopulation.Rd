@@ -2,7 +2,7 @@
 % Please edit documentation in R/in_silico_population.R
 \name{createInSilicoPopulation}
 \alias{createInSilicoPopulation}
-\title{Creates a population of In Silico individuals}
+\title{Creates a population of in silico individuals.}
 \usage{
 createInSilicoPopulation(nInd, insilicosystem, genvariants = NULL,
   genvariants.freq = NULL, sameInit = F, ...)
@@ -10,7 +10,7 @@ createInSilicoPopulation(nInd, insilicosystem, genvariants = NULL,
 \arguments{
 \item{nInd}{Integer. The number of in silico individuals to create.}
 
-\item{insilicosystem}{An \code{insilicosystem} object. The in silico system based on which which individuals are created. See \code{\link{createInSilicoSystem}}.}
+\item{insilicosystem}{An \code{insilicosystem} object. The in silico system based on which individuals are created. See \code{\link{createInSilicoSystem}}.}
 
 \item{genvariants}{A named list giving the variants segregating in the population for each gene. Each element corresponds to one gene in the system (name of the element = gene ID).
 Each element is a matrix, in which each column represents a variant of the gene segregating in the population. The rows represent the QTL effect coefficients of each variant
@@ -28,7 +28,7 @@ If none provided, it is assumed that all variants of a given gene have the same 
 An object of class \code{insilicopopulation}, that is a list composed of:
 \itemize{
 \item \code{GenesVariants} A list of variants segregating in the population for each genes (see \code{\link{createVariants}}).
-\item \code{individualsList} A list of In Silico individuals (i.e. objects of class \code{insilicoindividual}, see \code{\link{createIndividual}}).
+\item \code{individualsList} A list of in silico individuals (i.e. objects of class \code{insilicoindividual}, see \code{\link{createIndividual}}).
 \item \code{indargs} An object of class \code{\link{insilicoindividualargs}}; the parameters used to create the in silico individuals.
 }
 }
@@ -37,16 +37,17 @@ Creates a population of in silico individuals to be simulated.
 }
 \examples{
 \donttest{
-## Creates the in silico system (with 6 genes)
+## Creating the in silico system (with 6 genes)
 mysystem = createInSilicoSystem(G = 6)
-## Creates a first population with 3 diploid individuals,
-## With 2 variants of each gene segregating in the population
+
+## Creating a first population with 3 diploid individuals,
+## with 2 variants of each gene segregating in the population
 mypop1 = createInSilicoPopulation(nInd = 3, mysystem, ploidy = 2, ngenevariants = 2)
 
-## Creates an other population with 10 tetraploid individuals
+## Creating a population with 10 tetraploid individuals
 mypop2 = createInSilicoPopulation(nInd = 10, mysystem, ploidy = 4)
 
-## Creates a population with a given list of gene variants
+## Creating a population with a given list of gene variants
 mysystem = createInSilicoSystem(G = 3, PC.p = 1)
 
 ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
@@ -66,7 +67,7 @@ genvariants = lapply(nbvariants, function(x){
 names(genvariants) = mysystem$genes$id
 
 ## the 2nd variant of gene 2 has a mutation reducing its transcription rate by 3
-genvariants$`2`["qtlTCrate", 2] = 0.3
+genvariants$`2`["qtlTCrate", 2] = 0.33
 ## and the 3rd variant has an increased translation rate
 genvariants$`2`["qtlTLrate", 2] = 1.5
 

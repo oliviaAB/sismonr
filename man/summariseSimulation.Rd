@@ -2,7 +2,7 @@
 % Please edit documentation in R/stochastic_simulation.R
 \name{summariseSimulation}
 \alias{summariseSimulation}
-\title{Returns a summary dataframe of a simulation}
+\title{Returns a summary data-frame of a simulation.}
 \usage{
 summariseSimulation(simdf, inds = unique(simdf$Ind),
   trials = unique(simdf$trial), timeMin = min(simdf$time),
@@ -10,11 +10,11 @@ summariseSimulation(simdf, inds = unique(simdf$Ind),
   mergeComplexes = F, verbose = T)
 }
 \arguments{
-\item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})}
+\item{simdf}{The data frame with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}
 
 \item{inds}{A vector of in silico individual names for which to compute the summary values.}
 
-\item{trials}{A vector of trials ID (=number) to use for the summary.}
+\item{trials}{A vector of trials ID (= number) to use for the summary.}
 
 \item{timeMin}{Numeric. The minimum simulation time to take into account. Default value set to the minimum time in the simulation.}
 
@@ -24,15 +24,15 @@ summariseSimulation(simdf, inds = unique(simdf$Ind),
 
 \item{mergePTM}{Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}}
 
-\item{mergeComplexes}{Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}}
+\item{mergeComplexes}{Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}}
 
 \item{verbose}{If TRUE (default), print the individuals, trials, min and max time considered for the computation of the summary.}
 }
 \value{
-A dataframe giving for each component (rows) and each individuals (Columns) the max and final average abundance over the different trials.
+A data-frame giving for each component (rows) and each individual (columns) the max and final average abundance over the different trials.
 }
 \description{
-Returns a summary dataframe of a simulation (i.e. the maximum average abundance of each components over the different trials and the average abundance of the components at the final time of the simulation) for the selected in silico individuals.
+Returns a summary data-frame of a simulation giving the maximum average abundance of each component over the different trials and the average abundance of the components at the final time of the simulation, for the selected in silico individuals.
 }
 \examples{
 \donttest{

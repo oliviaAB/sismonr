@@ -2,7 +2,7 @@
 % Please edit documentation in R/julia_evaluators.R
 \name{newJuliaEvaluator}
 \alias{newJuliaEvaluator}
-\title{Creates a new ready-to-use Julia evaluator}
+\title{Creates a new ready-to-use Julia evaluator.}
 \usage{
 newJuliaEvaluator(port = NULL)
 }

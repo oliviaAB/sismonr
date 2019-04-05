@@ -2,7 +2,7 @@
 % Please edit documentation in R/stochastic_simulation.R
 \name{plotHeatMap}
 \alias{plotHeatMap}
-\title{Plots the result of a simulation as a heatmap}
+\title{Plots the result of a simulation as a heatmap.}
 \usage{
 plotHeatMap(simdf, inds = unique(simdf$Ind),
   trials = unique(simdf$trial), timeMin = min(simdf$time),
@@ -11,11 +11,11 @@ plotHeatMap(simdf, inds = unique(simdf$Ind),
   VirPalOption = "plasma", ...)
 }
 \arguments{
-\item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}})}
+\item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}
 
-\item{inds}{A vector of in silico individual names for which to plot the expression profiles}
+\item{inds}{A vector of in silico individual names for which to plot the expression profiles.}
 
-\item{trials}{A vector of trials ID (=number) to use for the plot (see details).}
+\item{trials}{A vector of trials ID (= number) to use for the plot (see details).}
 
 \item{timeMin}{Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.}
 
@@ -25,9 +25,9 @@ plotHeatMap(simdf, inds = unique(simdf$Ind),
 
 \item{mergePTM}{Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}}
 
-\item{mergeComplexes}{Are the free and in complex gene products merged? Default FALSE Also see \code{\link{mergeComplexesAbundance}}}
+\item{mergeComplexes}{Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}}
 
-\item{yLogScale}{Is the y-axis of the plot in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.}
+\item{yLogScale}{Plot the y-axis in log10-scale? If so, the abundance of each species at each time-point is increased by 1 to avoid zero values. Default TRUE.}
 
 \item{nIndPerRow}{Positive integer, the number of individuals to plot per row. Default 3.}
 
@@ -47,8 +47,8 @@ and the min and max abundances represented as coloured areas around the mean.
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+mysystem = createInSilicoSystem(G = 5)
+mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
 sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 plotHeatMap(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
  axis.title = element_text(color = "red"))

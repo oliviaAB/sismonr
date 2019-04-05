@@ -44,11 +44,7 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
   PTMregrate_samplingfct = NULL, regcomplexes = "prot",
   regcomplexes.p = 0.3, regcomplexes.size = 2,
   complexesformationrate_samplingfct = NULL,
-  complexesdissociationrate_samplingfct = NULL, mycolsCS = c(PC =
-  "#e03616", NC = "#58355e", Tot = "#31161F"), mycolsGF = c(TC =
-  "#FF7F11", TL = "#FF963C", RD = "#5AB7A4", PD = "#78C4B4", PTM =
-  "#FF1B1C", MR = "#FF6D6E"), mycolsPosNeg = c(`1` = "#D63230", `-1` =
-  "#69BAF4"))
+  complexesdissociationrate_samplingfct = NULL)
 }
 \arguments{
 \item{G}{Integer. Number of genes in the system. Default value is 10.}
@@ -85,16 +81,16 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
 is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.}
 
 \item{basal_transcription_rate_samplingfct}{Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is
-\code{function(x){ logval = rnorm(x, mean = 0.3, sd = 0.5); val = 10^logval; return(val/3600) }}.}
+a function returning \code{(10^v)/3600}, with \code{v} a vector of size x sampled from a normal distribution with mean of 3 and sd of 0.5.}
 
 \item{basal_translation_rate_samplingfct}{Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is
-\code{function(x){ logval = rnorm(x, mean = 2.146, sd = 0.7); val = 10^logval; return(val/3600) }}.}
+a function returning \code{(10^v)/3600}, with \code{v} a vector of size x sampled from a normal distribution with mean of 2.146 and sd of 0.7.}
 
 \item{basal_RNAlifetime_samplingfct}{Function from which the transcript lifetimes are sampled (input x is the required sample size). Default value is
-\code{function(x){ logval = rnorm(x, mean = 0.95, sd = 0.2); val = 10^logval; return(val*3600) }}.}
+a function returning \code{(10^v)*3600}, with \code{v} a vector of size x sampled from a normal distribution with mean of 0.95 and sd of 0.2.}
 
 \item{basal_protlifetime_samplingfct}{Function from which the protein lifetime are sampled (input x is the required sample size). Default value is
-\code{function(x){ logval = rnorm(x, mean = 1.3, sd = 0.4); val = 10^logval; return(val*3600) }}.}
+a function returning \code{(10^v)*3600}, with \code{v} a vector of size x sampled from a normal distribution with mean of 1.3 and sd of 0.4.}
 
 \item{TC.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
@@ -102,7 +98,7 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{TC.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the transcription regulation graph. Default value is 3.}
 
-\item{TC.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the transcription regulation graph. Default value is 1.}
+\item{TC.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the transcription regulation graph. Default value is 5.}
 
 \item{TC.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
@@ -116,23 +112,28 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{TC.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the transcription regulation graph with noncoding regulators? Default value is FALSE.}
 
-\item{TCbindingrate_samplingfct}{Function from which the binding rates of transcription regulators on their targets are sampled (input mean is a vector of length equal to the required sample size). Default value is \code{function(means){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(meansbindingrates), sd = 0.1)}}.}
+\item{TCbindingrate_samplingfct}{Function from which the binding rates of transcription regulators on their targets are sampled (input \code{means} is a vector of length equal to the required sample size, giving for each
+edge (regulatory interaction) for which a binding rate is being sampled the value of the sampled unbinding rate divided by the steady-state abundance of the regulator
+in absence of any regulation in the system). Default value is a function returning \code{10^v}, where \code{v} is a vector with the same length as \code{means} whose elements are sampled
+from a truncated normal distribution with mean equal to the log10 of the corresponding element in \code{means}, and sd = 0.1, the minimum authorised value being the log10 of the corresponding element in \code{means}.}
 
-\item{TCunbindingrate_samplingfct}{Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is \code{ function(x){logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval))} }.}
+\item{TCunbindingrate_samplingfct}{Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of -3 and sd of 0.2.}
 
-\item{TCfoldchange_samplingfct}{Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is \code{function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10) }}.}
+\item{TCfoldchange_samplingfct}{Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is
+a truncated normal distribution with a mean of 3, sd of 10 and minimum authorised value of 1.5.}
 
 \item{TL.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TL.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{TL.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the translation regulation graph. Default value is 3.}
+\item{TL.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the translation regulation graph. Default value is 4.}
 
-\item{TL.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the translation regulation graph. Default value is 1.}
+\item{TL.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the translation regulation graph. Default value is 6.}
 
 \item{TL.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{TL.NC.indeg.distr}{Type of preferential attachment for the targets of ncRNAs in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
+\item{TL.NC.indeg.distr}{Type of preferential attachment for the targets of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{TL.PC.autoregproba}{Numeric. Probability of protein regulators to perform autoregulation in the translation regulation graph. Default value is 0.2.}
 
@@ -142,19 +143,24 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{TL.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the translation regulation graph with noncoding regulators? Default value is FALSE.}
 
-\item{TLbindingrate_samplingfct}{Function from which the binding rate of translation regulators on target are sampled (input mean is a vector of length equal to the required sample size). Default value is \code{function(x){ logval = truncnorm::rtruncnorm(length(means),a = log10(means), mean = log10(meansbindingrates), sd = 0.1); return(10^logval)  }}.}
+\item{TLbindingrate_samplingfct}{Function from which the binding rate of translation regulators on target are sampled (input \code{means} is a vector of length equal to the required sample size, giving for each
+edge (regulatory interaction) for which a binding rate is being sampled the value of the sampled unbinding rate divided by the steady-state abundance of the regulator
+in absence of any regulation in the system). Default value is a function returning \code{10^v}, where \code{v} is a vector with the same length as \code{means} whose elements are sampled
+from a truncated normal distribution with mean equal to the log10 of the corresponding element in \code{means}, and sd = 0.1, the minimum authorised value being the log10 of the corresponding element in \code{means}.}
 
-\item{TLunbindingrate_samplingfct}{Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = 3, sd = 0.2); return(10^(-logval)) }}.}
+\item{TLunbindingrate_samplingfct}{Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of -3 and sd of 0.2.}
 
-\item{TLfoldchange_samplingfct}{Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is \code{function(x){ truncnorm::rtruncnorm(x, a = 1.5, mean = 3, sd = 10)  }}.}
+\item{TLfoldchange_samplingfct}{Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is
+a truncated normal distribution with a mean of 3, sd of 10 and minimum authorised value of 1.5.}
 
 \item{RD.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{RD.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{RD.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the RNA decay regulation graph. Default value is 3.}
+\item{RD.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the RNA decay regulation graph. Default value is 4.}
 
-\item{RD.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the RNA decay regulation graph. Default value is 1.}
+\item{RD.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the RNA decay regulation graph. Default value is 6.}
 
 \item{RD.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
@@ -168,15 +174,16 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{RD.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with noncoding regulators? Default value is FALSE.}
 
-\item{RDregrate_samplingfct}{Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
+\item{RDregrate_samplingfct}{Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of -5 and sd of 1.5.}
 
 \item{PD.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PD.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{PD.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein decay regulation graph. Default value is 3.}
+\item{PD.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein decay regulation graph. Default value is 4.}
 
-\item{PD.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein decay regulation graph. Default value is 1.}
+\item{PD.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein decay regulation graph. Default value is 6.}
 
 \item{PD.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
@@ -190,15 +197,16 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{PD.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the protein decay graph with noncoding regulators in the protein decay regulation graph? Default value is FALSE.}
 
-\item{PDregrate_samplingfct}{Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size).  Default value is a uniform distribution with boundaries [0.001, 0.01].}
+\item{PDregrate_samplingfct}{Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size).  Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of -5 and sd of 1.5.}
 
 \item{PTM.PC.outdeg.distr}{Form of the distribution of the number of targets (out-degree) of protein regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
 \item{PTM.NC.outdeg.distr}{Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
-\item{PTM.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein post-translational modification graph. Default value is 3.}
+\item{PTM.PC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein post-translational modification graph. Default value is 4.}
 
-\item{PTM.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein post-translational modification graph. Default value is 1.}
+\item{PTM.NC.outdeg.exp}{Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein post-translational modification graph. Default value is 6.}
 
 \item{PTM.PC.indeg.distr}{Type of preferential attachment for the targets of protein regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".}
 
@@ -212,24 +220,21 @@ is transformed into its modified form, as opposed to the modified protein being 
 
 \item{PTM.NC.twonodesloop}{Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with noncoding regulators? Default value is FALSE.}
 
-\item{PTMregrate_samplingfct}{Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is a uniform distribution with boundaries [0.001, 0.01].}
+\item{PTMregrate_samplingfct}{Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of -5 and sd of 1.5.}
 
 \item{regcomplexes}{Can the regulators controlling a common target form regulatory complexes in the different regulatory graphs? Can be 'none', 'prot' (only protein can form regulatory complexes) or 'both'
-(both RNAs and proteins can form regulatory complexes). Default value is "prot".}
+(both regulatory RNAs and proteins can form regulatory complexes). Default value is "prot".}
 
-\item{regcomplexes.p}{Numeric. Probability that regulators controlling a common target form regulatory complexes; ignore if regcomplexes = 'none'. Default value is 0.3.}
+\item{regcomplexes.p}{Numeric. Probability that regulators controlling a common target form regulatory complexes; ignore if \code{regcomplexes} = 'none'. Default value is 0.3.}
 
-\item{regcomplexes.size}{Integer. Number of components of a regulatory complex; ignore if regcomplexes = 'none'. Default value is 2.}
+\item{regcomplexes.size}{Integer. Number of components of a regulatory complex; ignore if \code{regcomplexes} = 'none'. Default value is 2.}
 
-\item{complexesformationrate_samplingfct}{Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = -4, sd = 0.7); return(10^(-logval)) }}.}
+\item{complexesformationrate_samplingfct}{Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of -3 and sd of 0.7.}
 
-\item{complexesdissociationrate_samplingfct}{Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is \code{function(x){ logval = rnorm(x, mean = 3, sd = 0.7); return(10^(-logval)) }}.}
-
-\item{mycolsCS}{Named vector of colour names or code. Colours used in the plots to represent portein-coding and noncoding genes. Default value is c("PC" = "#e03616",  "NC" = "#58355e", "Tot" = "#31161F").}
-
-\item{mycolsGF}{Colours used in the plots to represent the different gene expression steps (transcription, translation, etc). Default value is c("TC" = "#FF7F11", "TL" = "#FF963C", "RD" = "#5AB7A4", "PD" = "#78C4B4", "PTM" = "#FF1B1C", "MR" = "#FF6D6E").}
-
-\item{mycolsPosNeg}{Colours used in plots to represent positive/negative regulatory interactions. Default value is c("1" = "#D63230", "-1" = "#69BAF4").}
+\item{complexesdissociationrate_samplingfct}{Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is
+a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of 3 and sd of 0.9.}
 }
 \value{
 An object of the class \code{insilicosystemargs}, that is a named list of the different parameters.

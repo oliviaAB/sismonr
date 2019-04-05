@@ -10,23 +10,23 @@ addEdge(insilicosystem, regID, tarID, regsign = NULL,
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{regID}{Integer. The ID of the regulator gene.}
+\item{regID}{Character. The ID of the regulator gene or complex.}
 
-\item{tarID}{Integer. The ID of the target gene.}
+\item{tarID}{Character. The ID of the target gene.}
 
 \item{regsign}{The sign of the regulation: either "1" (positive regulation) or "-1" (negative regulation). If none provided,
 will be randomly chosen according to the parameter \code{TC.pos.p}, \code{TL.pos.p} or \code{PTM.pos.p} (depending on the type
 of regulation - regulation of RNA or protein decay can only be negative) provided in sysargs (see \code{\link{insilicosystemargs}}).}
 
-\item{kinetics}{Optional: named vector of kinetics parameters of the reaction. If none provided,
+\item{kinetics}{Optional: named list of kinetics parameters of the reaction. If none provided,
 will be randomly chosen according to the parameters \code{[name of the param]_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}). The parameters
 to provide depend on the type of regulation (i.e. parameter \code{TargetReaction} of the regulator):
 \itemize{
-\item TargetReaction = "TC". The parameters to specify are "TCbindingrate", "TCunbindingrate" and "TCfoldchange";
-\item TargetReaction = "TL". The parameters to specify are "TLbindingrate", "TLunbindingrate" and "TLfoldchange";
-\item TargetReaction = "RD". The parameter to specify is "RDregrate";
-\item TargetReaction = "PD". The parameter to specify is "PDregrate";
-\item TargetReaction = "PTM". The parameter to specify is "PTMregrate".
+\item TargetReaction = "TC": the parameters to specify are "TCbindingrate", "TCunbindingrate" and "TCfoldchange";
+\item TargetReaction = "TL": the parameters to specify are "TLbindingrate", "TLunbindingrate" and "TLfoldchange";
+\item TargetReaction = "RD": the parameter to specify is "RDregrate";
+\item TargetReaction = "PD": the parameter to specify is "PDregrate";
+\item TargetReaction = "PTM": the parameter to specify is "PTMregrate".
 }}
 }
 \value{
@@ -34,6 +34,10 @@ The modified in silico system.
 }
 \description{
 Adds an edge in the in silico system's regulatory network between specified genes.
+}
+\details{
+It must be noted that the type of regulation depends on the biological function of the regulator gene/complex
+(parameter \code{TargetReaction}).
 }
 \examples{
 \donttest{

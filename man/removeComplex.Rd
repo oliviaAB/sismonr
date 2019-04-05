@@ -9,7 +9,7 @@ removeComplex(insilicosystem, name)
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{name}{String. The name of the regulatory complex to remove.}
+\item{name}{Character. The name of the regulatory complex to remove.}
 }
 \value{
 The modified in silico system.

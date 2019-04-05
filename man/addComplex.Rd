@@ -10,7 +10,7 @@ addComplex(insilicosystem, compo, formationrate = NULL,
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
-\item{compo}{An vector of integers, corresponding to the ID of the genes composing the complex. All genes composing the complex must
+\item{compo}{An character vector, each element corresponding to the ID of the genes or regulatory complexes composing the complex. All genes/complexes composing the complex must
 have the same biological function (i.e. same \code{TargetReaction} parameter).}
 
 \item{formationrate}{The formation rate of the complex. If none provided, randomly chosen according to the
@@ -28,7 +28,7 @@ Adds a regulatory complex in the in silico system with specified parameters (if 
 \examples{
 \donttest{
 mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1)
-mysystem$complexes ## no complex in the system
+mysystem$complexes ## list of complexes existing in the system
 mysystem2 = addComplex(mysystem, c(1, 2, 3))
 mysystem2$complexes
 }

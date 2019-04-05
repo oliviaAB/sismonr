@@ -18,12 +18,12 @@ An object of class \code{insilicosystem}, that is a list composed of:
 \itemize{
 \item \code{genes}: a data-frame of genes (see \code{\link{createGenes}});
 \item \code{edg}: a data-frame of edges in the regulatory network (see \code{\link{createMultiOmicNetwork}});
-\item \code{mosystem}: a list defining the multi-omic regulatory network (see \code{\link{createMultiOmicNetwork}});
+\item \code{mosystem}: a list defining the regulatory network (see \code{\link{createMultiOmicNetwork}});
 \item \code{sysargs}: An object of class \code{insilicosystemargs}; the parameters used to create the system.
 }
 }
 \description{
-Creates an in silico system, i.e. the genes and the regulatory networks defining the system.
+Creates an in silico system, i.e. the genes and the regulatory network defining the system.
 }
 \examples{
 \donttest{

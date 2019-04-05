@@ -2,26 +2,26 @@
 % Please edit documentation in R/in_silico_system.R
 \name{steadyStateAbundance}
 \alias{steadyStateAbundance}
-\title{Computes the steady state abundance}
+\title{Computes the steady state abundance of a molecule.}
 \usage{
 steadyStateAbundance(id, genes, complexes)
 }
 \arguments{
-\item{id}{the ID of the molecule}
+\item{id}{the ID of the molecule.}
 
-\item{genes}{the data frame of genes in the in silico system}
+\item{genes}{the data frame of genes in the in silico system.}
 
-\item{complexes}{the list of regulatory complexes and their composition}
+\item{complexes}{the list of regulatory complexes and their composition.}
 }
 \value{
-The steady state abundance of the active product of the gene/regulatory complex
+The steady state abundance of the active product of the gene/regulatory complex.
 }
 \description{
-Computes the steady state abundance of the active product of a gene/regulatory complex
+Computes the steady state abundance of the active product of a gene/regulatory complex (in absence of any regulation).
 }
 \details{
 If \code{id} represents a gene ID, returns the steady state abundance of its RNA (transcription rate/RNA decay rate)
 if it is a noncoding gene or the steady state abundance of its protein (RNA steady state * translation rate/protein decay rate)
 if it is a protein-coding gene. If \code{id} represents a regulatory complex, returns the minimum of the steady state abundance
-of its components (recursively if the regulatory complex is composed by other regulatory complexes)
+of its components (recursively if the regulatory complex is composed of other regulatory complexes).
 }

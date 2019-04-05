@@ -14,7 +14,7 @@ or \code{\link{simulateParallelInSilicoSystem}}).}
 A dataframe in which the abundance of free and in complex versions of a molecule have been merged to give the abundance of the molecule (without distinction of whether or not it is bound in a molecular complex).
 }
 \description{
-Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule.
+Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule in the results of a simulation.
 }
 \examples{
 \donttest{
