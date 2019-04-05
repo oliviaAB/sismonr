@@ -97,7 +97,13 @@ mypop$individualsList$Ind1$QTLeffects$GCN1
 
 mypop$individualsList$Ind1$InitVar
 
+plotMutations(mypop, mysystem, nGenesPerRow = 5)
 
+plotMutations(mypop, mysystem, scaleLims = c(0.95, 1.05),
+              qtlEffectCoeffs = c("qtlTCrate", "qtlTLrate", "qtlRDrate", "qtlPDrate"),
+              inds = c("Ind1", "Ind2"),
+              alleles = "GCN2",
+              genes = 1:3)
 
 ## --------------------- ##
 ## Simulating the system ##
