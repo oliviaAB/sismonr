@@ -229,7 +229,7 @@ insilicosystemargs <- function(
   if(is.null(PDregrate_samplingfct)) PDregrate_samplingfct = function(x){ logval = rnorm(x, mean = -5, sd = 1.5); return(10^logval) }
   if(is.null(PTMregrate_samplingfct)) PTMregrate_samplingfct = function(x){ logval = rnorm(x, mean = -8, sd = 1.5); return(10^logval) }
   if(is.null(complexesformationrate_samplingfct)) complexesformationrate_samplingfct = function(x){ logval = rnorm(x, mean = -3, sd = 0.7); return(10^(logval)) }
-  if(is.null(complexesdissociationrate_samplingfct)) complexesdissociationrate_samplingfct = function(x){ logval = rnorm(x, mean = 3, sd = 0.9); return(10^(logval)) }
+  if(is.null(complexesdissociationrate_samplingfct)) complexesdissociationrate_samplingfct = function(x){ logval = rnorm(x, mean = 2, sd = 1.2); return(10^(logval)) }
 
   NC.p = 1 - PC.p
 
@@ -380,7 +380,8 @@ insilicosystemargs <- function(
                  "regcomplexes" = regcomplexes,
                  "regcomplexes.p" = regcomplexes.p,
                  "regcomplexes.size" = regcomplexes.size ,
-                 "complexesformationrate_samplingfct" = complexesformationrate_samplingfct)
+                 "complexesformationrate_samplingfct" = complexesformationrate_samplingfct,
+                 "complexesdissociationrate_samplingfct" = complexesdissociationrate_samplingfct)
 
   attr(value, "class") = "insilicosystemargs"
   return(value)
