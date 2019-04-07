@@ -257,7 +257,10 @@ There is for now no way to remove a gene from an existing *in silico* system (fo
 If we want gene 1, a regulator of translation, to repress the expression of gene 5, we can use:
 
 ```r
-> mysystem2 = addEdge(mysystem, regID = 1, tarID = 5, regsign = "-1", kinetics = list("TLbindingrate" = 0.01, "TLunbindingrate" = 0.1, "TLfoldchange" = 10))
+> mysystem2 = addEdge(mysystem, regID = 1, tarID = 5, regsign = "-1",
+                       kinetics = list("TLbindingrate" = 0.01,
+                                       "TLunbindingrate" = 0.1,
+                                       "TLfoldchange" = 10))
 > tail(mysystem2$edg)
 
    from to TargetReaction RegSign RegBy
@@ -419,7 +422,7 @@ The different generated *in silico* individuals are stored in the element `indiv
 9     2    2
 10    4    2
 ```
-Here the first individuals (`Ind1`) carries two copies of variant 4 of gene 1, and the variants 2 and 1 of gene 5.
+Here the first individual (`Ind1`) carries two copies of variant 4 of gene 1, and the variants 2 and 1 of gene 5.
 
 - `QTLeffects`: gives for each allele (i.e. "GCN1", "GCN2", etc) the value of each QTL effect coefficient for the genes (value for gene `i` at the `i`-st position in the vector of QTL effect coefficients).
 
@@ -482,6 +485,36 @@ $GCN2$P
 ```
 
 For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st allele of gene 1, then the initial abundance of the RNAs produced by gene 1's first allele is $$\sim$$ 0.92 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub> for individual `Ind1`.
+
+It is possible to visualise the QTL effect coefficients of all the genes in the system for each *in silico* individual in the population, with:
+
+```r
+plotMutations(mypop, mysystem, nGenesPerRow = 5)
+```
+
+![plotMutations](images/plotMutations.png)
+
+
+The function `plotMutations` takes as arguments the *in silico* population and the *in silico* system, and plot the value (colour) of each QTL effect coefficient (x-axis) for each allele (y-axis) of each gene (columns) for each individual in the population (rows). (The argument `nGenesPerRow` simply indicates how many genes to plot per row in the final plot, useful when the number of genes is large to avoid too wide plots). 
+
+As we saw with the `haplotype` element, we can see that the first individual `Ind1` carries two identical copies of gene 1, because the values of the QTL effect coefficients are identical in each allele. However individual `Ind2` carries two different versions of gene 1 (the values of the QTL effect coefficients are different for the two alleles GCN1 and GCN2). 
+
+The first allele (GCN1) of gene 4 for individual `Ind4`  is the original version of the gene, i.e. the QTL effect coefficients all have a value of 1 (white) meaning that this version does not have any mutation. Notice that genes 2, 3, 6, 7, 9 and 10 are nocoding genes. Consequently, the QTL effect coefficients related to protein or translation are not applicable, and they are represented in gray.
+
+You can of course focus the plot on only some individuals, genes, alleles, QTL effect coefficients or even values, with the arguments passed to `plotMutations`, as in: 
+
+```r
+plotMutations(mypop, mysystem,
+              scaleLims = c(0.95, 1.05), 
+              qtlEffectCoeffs = c("qtlTCrate", "qtlTLrate", "qtlRDrate", "qtlPDrate"),
+              inds = c("Ind1", "Ind2"),
+              alleles = "GCN2",
+              genes = 1:3)
+```
+
+![plotMutations2](images/plotMutations2.png)
+
+Here we restricted the plot to the second allele of genes 1, 2, and 3 for the first two individuals. We only represented the QTL effect coefficients affecting the basal kinetic properties of the gene (transcription, translation, RNA decay and protein decay rate). We also restricted the plot to QTL effect coefficients whose values were between 0.95 and 1.05. This is why `qtlTCrate` and `qtlRDrate` of genes 1 and 3 for `Ind2` are in gray: not because they are not applicable but because their values range outside these limits.   
 
 ## The `indargs` element
 

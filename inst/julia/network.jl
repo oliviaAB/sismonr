@@ -256,13 +256,13 @@ function compreg(edg, compsize, compprob, reacname)
 
       for i in 1:ntry
         if rand()<= compprob ## with probability compprob form a complex
-          compo = sample(temp, compsize, replace=false) ## sample the components of the complex (in fact sample rows in the edg matrix)
-          temp = setdiff(temp, compo) ## remove the selected rows (regulators) from the list of possible components (future sampling)
+          compo = sample(temp, compsize, replace=true) ## sample the components of the complex (in fact sample rows in the edg matrix)
+          # temp = setdiff(temp, compo) ## remove the selected rows (regulators) from the list of possible components (future sampling)
           append!(rowstoremove, compo) ## the edges correpsponding to the selected components of the complex will be removed
-            compid = string("C", reacname, complexid) ## create the new complex ID
-            complexid +=1
-            complexes[compid] = edg[compo, 1] ## in the dictionary of complexes add the composition (ie array of components) of the new complex
-            edgtoadd = vcat(edgtoadd, [compid tar "C"]) ## create a new regulatory edge from the complex to the target, with regBy = "C" (complex)
+          compid = string("C", reacname, complexid) ## create the new complex ID
+          complexid +=1
+          complexes[compid] = edg[compo, 1] ## in the dictionary of complexes add the composition (ie array of components) of the new complex
+          edgtoadd = vcat(edgtoadd, [compid tar "C"]) ## create a new regulatory edge from the complex to the target, with regBy = "C" (complex)
         end
       end
     end
