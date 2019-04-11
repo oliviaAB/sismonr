@@ -840,6 +840,23 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
 
 ```r
+
+Ind1$haplotype
+
+   GCN1 GCN2
+1     4    4
+2     3    3
+3     1    1
+4     1    3
+5     2    1
+6     4    2
+7     4    3
+8     2    2
+9     2    2
+10    4    2
+
+Ind2$haplotype
+
    GCN1 GCN2
 1     4    3
 2     4    1
@@ -852,6 +869,7 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 9     2    1
 10    4    2
 
+Ind3$haplotype
 
    GCN1 GCN2
 1     2    4
