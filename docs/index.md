@@ -839,5 +839,32 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 # Appendix
 *Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
 
+```r
+   GCN1 GCN2
+1     4    3
+2     4    1
+3     2    4
+4     4    1
+5     3    1
+6     3    2
+7     4    2
+8     4    2
+9     2    1
+10    4    2
+
+
+   GCN1 GCN2
+1     2    4
+2     2    4
+3     2    2
+4     1    1
+5     1    4
+6     2    1
+7     3    4
+8     2    2
+9     2    2
+10    1    4
+
+```
 
 {% include lib/mathjax.html %}
