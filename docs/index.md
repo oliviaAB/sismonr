@@ -394,13 +394,13 @@ QTL effect coefficient name | Effect
 `qtlTCrate` | Affects the basal transcription rate of the gene
 `qtlRDrate` | Affects the basal RNA decay rate of the gene
 `qtlTCregbind` | Affects the binding rate of the regulators of transcription on the gene's promoter (affects all transcription regulators targeting this gene)
-`qtlRDregbind` | Affects the rate at which regulators of RNA decay encountering the RNAs of the gene trigger their degradation (affects all RNA decay regulators targeting this gene)
+`qtlRDregrate` | Affects the rate at which regulators of RNA decay encountering the RNAs of the gene trigger their degradation (affects all RNA decay regulators targeting this gene)
 `qtlactivity` | Affects the activity of the active product of the gene. If the gene is encoding for a regulator of transcription or translation, this affects the binding rate of its active products (i.e. RNAs or proteins) to their binding sites on their targets (affects the binding to all targets of the gene). If the gene encodes a regulator of RNA or protein decay or of protein post-translational modification, this affects the rate at which its active products (i.e. RNAs or proteins) trigger the degradation/transformation of their targets (effect for all targets of the gene).
 `qtlTLrate` | Affects the basal translation rate of the gene 
 `qtlPDrate` | Affects the basal protein decay rate of the gene
 `qtlTLregbind` | Affects the binding rate of the regulators of translation on the gene's RNA binding sites (affects all translation regulators targeting this gene)
-`qtlPDregbind` | Affects the rate at which regulators of protein decay encountering the proteins of the gene trigger their degradation (affects all protein decay regulators targeting this gene)
-`qtlPTMregbind` | Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene trigger their modification (affects all protein post-translational modification regulators targeting this gene)
+`qtlPDregrate` | Affects the rate at which regulators of protein decay encountering the proteins of the gene trigger their degradation (affects all protein decay regulators targeting this gene)
+`qtlPTMregrate` | Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene trigger their modification (affects all protein post-translational modification regulators targeting this gene)
 
 ## The *in silico* individuals
 
@@ -841,47 +841,57 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 
 ```r
 
-Ind1$haplotype
+  time trial R5GCN2 P5GCN2 R7GCN2 R3GCN1 R1GCN2 P1GCN2 Pm1GCN2 R9GCN1 R6GCN2 R10GCN2 R1GCN1 P1GCN1 Pm1GCN1 R4GCN2 P4GCN2
+1    0     1      1      6      2      2     14    178       0      2      1       2     13    186       0      9     33
+2    1     1      0      6      0      0     14      0      48      2      0       0     13      0      40      0      0
+3    2     1      0      6      0      0     14      0      14      2      0       0     13      0       3      0      0
+4    3     1      0      6      0      0     14      0       2      2      0       0     13      0       1      0      0
+5    4     1      0      6      0      0     14      1       0      2      0       0     13      0       0      0      0
+6    5     1      0      6      0      0     14      1       1      2      0       0     13      0       0      0      0
+  R8GCN1 P8GCN1 R6GCN1 R10GCN1 R2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 R2GCN1 R9GCN2 R7GCN1
+1      3     37      1       2      5      3     33      1      6      8     34      2      5      2      2
+2      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
+3      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
+4      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
+5      0     36      0       0      5      0     31      0      6      0      1      0      5      2      0
+6      0     36      0       0      5      0     32      0      6      0      1      0      4      2      0
+  CTL1_P8GCN1_Pm1GCN2 CTL1_P8GCN1_Pm1GCN1 CTL1_P8GCN2_Pm1GCN1 CTL1_P8GCN2_Pm1GCN2  Ind
+1                   0                   0                   0                   0 Ind1
+2                   0                   0                   0                   0 Ind1
+3                   0                   0                   0                   0 Ind1
+4                   0                   0                   0                   0 Ind1
+5                   1                   0                   1                   1 Ind1
+6                   1                   0                   1                   0 Ind1
 
-   GCN1 GCN2
-1     4    4
-2     3    3
-3     1    1
-4     1    3
-5     2    1
-6     4    2
-7     4    3
-8     2    2
-9     2    2
-10    4    2
 
-Ind2$haplotype
 
-   GCN1 GCN2
-1     4    3
-2     4    1
-3     2    4
-4     4    1
-5     3    1
-6     3    2
-7     4    2
-8     4    2
-9     2    1
-10    4    2
+  time trial  Ind R5 P5 R7 R3 R1  P1 Pm1 R9 R6 R10 R4 P4 R8 P8 R2 CTL1_P8_Pm1
+1    0     1 Ind1  2 12  4  4 27 364   0  4  2   4 17 67  6 70 10           0
+2    1     1 Ind1  0 12  0  0 27   0  88  4  0   0  0  1  0 70 10           0
+3    2     1 Ind1  0 12  0  0 27   0  17  4  0   0  0  1  0 70 10           0
+4    3     1 Ind1  0 12  0  0 27   0   3  4  0   0  0  1  0 70 10           0
+5    4     1 Ind1  0 12  0  0 27   1   0  4  0   0  0  1  0 67 10           3
+6    5     1 Ind1  0 12  0  0 27   1   1  4  0   0  0  1  0 68  9           2
 
-Ind3$haplotype
 
-   GCN1 GCN2
-1     2    4
-2     2    4
-3     2    2
-4     1    1
-5     1    4
-6     2    1
-7     3    4
-8     2    2
-9     2    2
-10    1    4
+
+  time trial  Ind R5 P5 R7 R3 R1  P1 R9 R6 R10 R4 P4 R8 P8 R2 CTL1_P8_P1
+1    0     1 Ind1  2 12  4  4 27 364  4  2   4 17 67  6 70 10          0
+2    1     1 Ind1  0 12  0  0 27  88  4  0   0  0  1  0 70 10          0
+3    2     1 Ind1  0 12  0  0 27  17  4  0   0  0  1  0 70 10          0
+4    3     1 Ind1  0 12  0  0 27   3  4  0   0  0  1  0 70 10          0
+5    4     1 Ind1  0 12  0  0 27   1  4  0   0  0  1  0 67 10          3
+6    5     1 Ind1  0 12  0  0 27   2  4  0   0  0  1  0 68  9          2
+
+
+  time trial  Ind R5 P5 R7 R3 R1  P1 Pm1 R9 R6 R10 R4 P4 R8 P8 R2
+1    0     1 Ind1  2 12  4  4 27 364   0  4  2   4 17 67  6 70 10
+2    1     1 Ind1  0 12  0  0 27   0  88  4  0   0  0  1  0 70 10
+3    2     1 Ind1  0 12  0  0 27   0  17  4  0   0  0  1  0 70 10
+4    3     1 Ind1  0 12  0  0 27   0   3  4  0   0  0  1  0 70 10
+5    4     1 Ind1  0 12  0  0 27   1   3  4  0   0  0  1  0 70 10
+6    5     1 Ind1  0 12  0  0 27   1   3  4  0   0  0  1  0 70  9
+
 
 ```
 
