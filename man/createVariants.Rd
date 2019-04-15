@@ -15,7 +15,21 @@ createVariants(genes, indargs)
 A list of size G (number of genes in the system) where each element is a matrix corresponding to the QTL effect
 coefficients (rows) of the different variants (columns) segregating in the in silico population for the corresponding gene. A variant is defined by a set of QTL effect coefficients ("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDregrate",
 "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregrate") that correspond to the impact of genetic
-mutations carried by the variant on the different kinetic parameters of the gene.
+mutations carried by the variant on the different kinetic parameters of the gene, as follow:
+\itemize{
+\item \code{qtlTCrate}: affects the basal transcription rate of the gene;
+\item \code{qtlRDrate}: Affects the basal RNA decay rate of the gene;
+\item \code{qtlTCregbind}: Affects the binding rate of the regulators of transcription on the gene's promoter (affects all transcription regulators targeting this gene);
+\item \code{qtlRDregrate}: Affects the rate at which regulators of RNA decay encountering the RNAs of the gene trigger their degradation (affects all RNA decay regulators targeting this gene);
+\item \code{qtlactivity}: Affects the activity of the active product of the gene. If the gene is encoding for a regulator of transcription or translation, this affects the binding rate of its active products (i.e. RNAs or proteins) to their
+binding sites on their targets (affects the binding to all targets of the gene). If the gene encodes a regulator of RNA or protein decay or of protein post-translational modification, this affects the rate at which its active products
+(i.e. RNAs or proteins) trigger the degradation/transformation of their targets (effect for all targets of the gene);
+\item \code{qtlTLrate}: Affects the basal translation rate of the gene;
+\item \code{qtlPDrate}: Affects the basal protein decay rate of the gene;
+\item \code{qtlTLregbind}: Affects the binding rate of the regulators of translation on the gene's RNA binding sites (affects all translation regulators targeting this gene);
+\item \code{qtlPDregrate}: Affects the rate at which regulators of protein decay encountering the proteins of the gene trigger their degradation (affects all protein decay regulators targeting this gene);
+\item \code{qtlPTMregrate}: Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene trigger their modification (affects all protein post-translational modification regulators targeting this gene).
+}
 }
 \description{
 Create variants that segregate in the in silico population for each gene in the system.
