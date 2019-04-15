@@ -203,7 +203,7 @@ $`CTL1`
 
 ## The `sysargs` element
 
-The different parameters used to generate the *in silico* system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`.
+The different parameters used to generate the *in silico* system are stored in the `sysargs` element of the `insilicosystem` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoSystem`. The list of all parameters is shown in [Appendix](#appendix).
 
 
 ## Modifying the *in silico* system
@@ -518,7 +518,7 @@ Here we restricted the plot to the second allele of genes 1, 2, and 3 for the fi
 
 ## The `indargs` element
 
-The different parameters used to generate the *in silico* individuals are stored in the `indargs` element of the `insilicopopulation` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoPopulation`.
+The different parameters used to generate the *in silico* individuals are stored in the `indargs` element of the `insilicopopulation` object. You can specify a value for each of these parameters during the construction of the system, by passing them to the function `generateInSilicoPopulation`. The list of all parameters is shown in [Appendix](#appendix).
 
 # Simulating the system
 
@@ -837,62 +837,104 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 
 
 # Appendix
-*Create an appendix to list all arguments of insilicosystemargs and insilicoindivargs*
 
-```r
+## Parameters for *in silico* system generation
 
-  time trial R5GCN2 P5GCN2 R7GCN2 R3GCN1 R1GCN2 P1GCN2 Pm1GCN2 R9GCN1 R6GCN2 R10GCN2 R1GCN1 P1GCN1 Pm1GCN1 R4GCN2 P4GCN2
-1    0     1      1      6      2      2     14    178       0      2      1       2     13    186       0      9     33
-2    1     1      0      6      0      0     14      0      48      2      0       0     13      0      40      0      0
-3    2     1      0      6      0      0     14      0      14      2      0       0     13      0       3      0      0
-4    3     1      0      6      0      0     14      0       2      2      0       0     13      0       1      0      0
-5    4     1      0      6      0      0     14      1       0      2      0       0     13      0       0      0      0
-6    5     1      0      6      0      0     14      1       1      2      0       0     13      0       0      0      0
-  R8GCN1 P8GCN1 R6GCN1 R10GCN1 R2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 R2GCN1 R9GCN2 R7GCN1
-1      3     37      1       2      5      3     33      1      6      8     34      2      5      2      2
-2      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-3      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-4      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-5      0     36      0       0      5      0     31      0      6      0      1      0      5      2      0
-6      0     36      0       0      5      0     32      0      6      0      1      0      4      2      0
-  CTL1_P8GCN1_Pm1GCN2 CTL1_P8GCN1_Pm1GCN1 CTL1_P8GCN2_Pm1GCN1 CTL1_P8GCN2_Pm1GCN2  Ind
-1                   0                   0                   0                   0 Ind1
-2                   0                   0                   0                   0 Ind1
-3                   0                   0                   0                   0 Ind1
-4                   0                   0                   0                   0 Ind1
-5                   1                   0                   1                   1 Ind1
-6                   1                   0                   1                   0 Ind1
+This is the list of all the parameters that can be passed to the `createInSilicoSystem` function when generating an *in silico* system, that control the different properties of the system.
 
+- `G`: Integer. Number of genes in the system. Default value is 10.
+- `PC.p`: Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.
+- `PC.TC.p`: Numeric. Probability of a protein-coding gene to be a regulator of transcription. Default value is 0.4.
+- `PC.TL.p`: Numeric. Probability of a protein-coding gene to be a regulator of translation. Default value is 0.3.
+- `PC.RD.p`: Numeric. Probability of a protein-coding gene to be a regulator of RNA decay. Default value is 0.1.
+- `PC.PD.p`: Numeric. Probability of a protein-coding gene to be a regulator of protein decay. Default value is 0.1.
+- `PC.PTM.p`: Numeric. Probability of a protein-coding gene to be a regulator of protein post-translational modification. Default value is 0.05.
+- `PC.MR.p`: Numeric. Probability of a protein-coding gene to be a metabolic enzyme. Default value is 0.05.
+- `NC.TC.p`: Numeric. Probability of a noncoding gene to be a regulator of transcription. Default value is 0.3.
+- `NC.TL.p`: Numeric. Probability of a noncoding gene to be a regulator of translation. Default value is 0.3.
+- `NC.RD.p`: Numeric. Probability of a noncoding gene to be a regulator of RNA decay. Default value is 0.3.
+- `NC.PD.p`: Numeric. Probability of a noncoding gene to be a regulator of protein decay. Default value is 0.05.
+- `NC.PTM.p`: Numeric. Probability of a noncoding gene to be a regulator of protein post-translational modification. Default value is 0.05.
+- `TC.pos.p`: Numeric. Probability of a regulation targeting gene transcription to be positive. Default value is 0.5.
+- `TL.pos.p`: Numeric. Probability of a regulation targeting gene translation to be positive. Default value is 0.5.
+- `PTM.pos.p`: Numeric. Probability of a regulation targeting protein post-translational modification to be positive (i.e the targeted protein is transformed into its modified form, as opposed to the modified protein being transformed back into its original form). Default value is 0.5.
+- `basal_transcription_rate_samplingfct`: Function from which the transcription rates of genes are sampled (input x is the required sample size). Default value is a function returning $$(10^v)/3600$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of 3 and sd of 0.5.
+- `basal_translation_rate_samplingfct`: Function from which the translation rates of genes are sampled (input x is the required sample size). Default value is a function returning $$(10^v)/3600$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of 2.146 and sd of 0.7.
+- `basal_RNAlifetime_samplingfct`: Function from which the transcript lifetimes are sampled (input x is the required sample size). Default value is a function returning $$(10^v)*3600$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of 0.95 and sd of 0.2.
+- `basal_protlifetime_samplingfct`: Function from which the protein lifetime are sampled (input x is the required sample size). Default value is a function returning $$(10^v)*3600$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of 1.3 and sd of 0.4.
+- `TC.PC.outdeg.distr`: Form of the distribution of the number of targets (out-degree) of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TC.NC.outdeg.distr`: Form of the distribution of the number of targets (out-degree) of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TC.PC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the protein regulators in the transcription regulation graph. Default value is 3.
+- `TC.NC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the transcription regulation graph. Default value is 5.
+- `TC.PC.indeg.distr`: Type of preferential attachment for the targets of protein regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TC.NC.indeg.distr`: Type of preferential attachment for the targets of noncoding regulators in the transcription regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TC.PC.autoregproba`: Numeric. Probability of protein regulators to perform autoregulation in the transcription regulation graph. Default value is 0.2.
+- `TC.NC.autoregproba`: Numeric. Probability of noncoding regulators to perform autoregulation in the transcription regulation graph. Default value is 0.
+- `TC.PC.twonodesloop`: Logical. Are 2-nodes loops authorised in the transcription regulation graph with protein regulators? Default value is FALSE.
+- `TC.NC.twonodesloop`: Logical. Are 2-nodes loops authorised in the transcription regulation graph with noncoding regulators? Default value is FALSE.
+- `TCbindingrate_samplingfct`: Function from which the binding rates of transcription regulators on their targets are sampled (input $$means$$ is a vector of length equal to the required sample size, giving for each edge (regulatory interaction) for which a binding rate is being sampled the value of the sampled unbinding rate divided by the steady-state abundance of the regulator in absence of any regulation in the system). Default value is a function returning $$10^v$$, where $$v$$ is a vector with the same length as $$means$$ whose elements are sampled from a truncated normal distribution with mean equal to the log10 of the corresponding element in $$means$$, and sd = 0.1, the minimum authorised value being the log10 of the corresponding element in $$means$$.
+- `TCunbindingrate_samplingfct`: Function from which the unbinding rates of transcription regulators from their target are sampled (input x is the required sample size). Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of -3 and sd of 0.2.
+- `TCfoldchange_samplingfct`: Function from which the transcription fold change induced by a bound regulator is sampled (input x is the required sample size). Default value is a truncated normal distribution with a mean of 3, sd of 10 and minimum authorised value of 1.5.
+- `TL.PC.outdeg.distr`: Form of the distribution of the number of targets (out-degree) of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TL.NC.outdeg.distr`: Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TL.PC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the protein regulators in the translation regulation graph. Default value is 4.
+- `TL.NC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the translation regulation graph. Default value is 6.
+- `TL.PC.indeg.distr`: Type of preferential attachment for the targets of protein regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TL.NC.indeg.distr`: Type of preferential attachment for the targets of noncoding regulators in the translation regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `TL.PC.autoregproba`: Numeric. Probability of protein regulators to perform autoregulation in the translation regulation graph. Default value is 0.2.
+- `TL.NC.autoregproba`: Numeric. Probability of noncoding regulators to perform autoregulation in the translation regulation graph. Default value is 0.
+- `TL.PC.twonodesloop`: Logical. Are 2-nodes loops authorised in the translation regulation graph with protein regulators? Default value is FALSE.
+- `TL.NC.twonodesloop`: Logical. Are 2-nodes loops authorised in the translation regulation graph with noncoding regulators? Default value is FALSE.
+- `TLbindingrate_samplingfct`: Function from which the binding rate of translation regulators on target are sampled (input $$means$$ is a vector of length equal to the required sample size, giving for each edge (regulatory interaction) for which a binding rate is being sampled the value of the sampled unbinding rate divided by the steady-state abundance of the regulator in absence of any regulation in the system). Default value is a function returning $$10^v$$, where $$v$$ is a vector with the same length as $$means$$ whose elements are sampled from a truncated normal distribution with mean equal to the log10 of the corresponding element in $$means$$, and sd = 0.1, the minimum authorised value being the log10 of the corresponding element in $$means$$.
+- `TLunbindingrate_samplingfct`: Function from which the unbinding rate of translation regulators from target are sampled (input x is the required sample size). Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of -3 and sd of 0.2.
+- `TLfoldchange_samplingfct`: Function from which the translation fold change induced by a bound regulator are sampled (input x is the required sample size). Default value is a truncated normal distribution with a mean of 3, sd of 10 and minimum authorised value of 1.5.
+- `RD.PC.outdeg.distr`: Form of the distribution of the number of targets (out-degree) of protein regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `RD.NC.outdeg.distr`: Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the RNA decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `RD.PC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the protein regulators in the RNA decay regulation graph. Default value is 4.
+- `RD.NC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the RNA decay regulation graph. Default value is 6.
+- `RD.PC.indeg.distr`: Type of preferential attachment for the targets of protein regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `RD.NC.indeg.distr`: Type of preferential attachment for the targets of noncoding regulators in the RNA decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `RD.PC.autoregproba`: Numeric. Probability of protein regulators to perform autoregulation in the RNA decay regulation graph. Default value is 0.2.
+- `RD.NC.autoregproba`: Numeric. Probability of noncoding regulators to perform autoregulation in the RNA decay regulation graph. Default value is 0.
+- `RD.PC.twonodesloop`: Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with protein regulators? Default value is FALSE.
+- `RD.NC.twonodesloop`: Logical. Are 2-nodes loops authorised in the RNA decay regulation graph with noncoding regulators? Default value is FALSE.
+- `RDregrate_samplingfct`: Function from which the RNA decay rates of targets of RNA decay regulators are sampled (input x is the required sample size). Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of -5 and sd of 1.5.
+- `PD.PC.outdeg.distr`: Form of the distribution of the number of targets (out-degree) of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PD.NC.outdeg.distr`: Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PD.PC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein decay regulation graph. Default value is 4.
+- `PD.NC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein decay regulation graph. Default value is 6.
+- `PD.PC.indeg.distr`: Type of preferential attachment for the targets of protein regulators in the protein decay regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PD.NC.indeg.distr`: Type of preferential attachment for the targets of noncoding regulators in the protein decay graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PD.PC.autoregproba`: Numeric. Probability of protein regulators to perform autoregulation in the protein decay regulation graph. Default value is 0.2.
+- `PD.NC.autoregproba`: Numeric. Probability of noncoding regulators to perform autoregulation in the protein decay regulation graph. Default value is 0.
+- `PD.PC.twonodesloop`: Logical. Are 2-nodes loops authorised in the protein decay graph with protein regulators in the protein decay regulation graph? Default value is FALSE.
+- `PD.NC.twonodesloop`: Logical. Are 2-nodes loops authorised in the protein decay graph with noncoding regulators in the protein decay regulation graph? Default value is FALSE.
+- `PDregrate_samplingfct`: Function from which the protein decay rates of targets of protein decay regulators are sampled (input x is the required sample size).  Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of -5 and sd of 1.5.
+- `PTM.PC.outdeg.distr`: Form of the distribution of the number of targets (out-degree) of protein regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PTM.NC.outdeg.distr`: Form of the the distribution of the number of targets (out-degree) of noncoding regulators in the post-translational modification regulation graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PTM.PC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the protein regulators in the protein post-translational modification graph. Default value is 4.
+- `PTM.NC.outdeg.exp`: Numeric. Exponent of the distribution for the out-degree of the noncoding regulators in the protein post-translational modification graph. Default value is 6.
+- `PTM.PC.indeg.distr`: Type of preferential attachment for the targets of protein regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PTM.NC.indeg.distr`: Type of preferential attachment for the targets of noncoding regulators in the protein post-translational modification graph; can be either "powerlaw" or "exponential". Default value is "powerlaw".
+- `PTM.PC.autoregproba`: Numeric. Probability of protein regulators to perform autoregulation. Default value is 0.2.
+- `PTM.NC.autoregproba`: Numeric. Probability of noncoding regulators to perform autoregulation. Default value is 0.
+- `PTM.PC.twonodesloop`: Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with protein regulators? Default value is FALSE.
+- `PTM.NC.twonodesloop`: Logical. Are 2-nodes loops authorised in the protein post-translational modification graph with noncoding regulators? Default value is FALSE.
+- `PTMregrate_samplingfct`: Function from which the protein transformation rates of targets of post-translational modification regulators are sampled (input x is the required sample size). Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of -5 and sd of 1.5.
+- `regcomplexes`: Can the regulators controlling a common target form regulatory complexes in the different regulatory graphs? Can be 'none', 'prot' (only protein can form regulatory complexes) or 'both' (both regulatory RNAs and proteins can form regulatory complexes). Default value is "prot".
+- `regcomplexes.p`: Numeric. Probability that regulators controlling a common target form regulatory complexes; ignore if $$regcomplexes$$ = 'none'. Default value is 0.3.
+- `regcomplexes.size`: Integer. Number of components of a regulatory complex; ignore if $$regcomplexes$$ = 'none'. Default value is 2.
+- `complexesformationrate_samplingfct`: Function from which the formation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of -3 and sd of 0.7.
+- `complexesdissociationrate_samplingfct`: Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is a function returning $$10^v$$, with $$v$$ a vector of size x sampled from a normal distribution with mean of 3 and sd of 0.9.
 
+## Parameters for *in silico* individuals generation
 
-  time trial  Ind R5 P5 R7 R3 R1  P1 Pm1 R9 R6 R10 R4 P4 R8 P8 R2 CTL1_P8_Pm1
-1    0     1 Ind1  2 12  4  4 27 364   0  4  2   4 17 67  6 70 10           0
-2    1     1 Ind1  0 12  0  0 27   0  88  4  0   0  0  1  0 70 10           0
-3    2     1 Ind1  0 12  0  0 27   0  17  4  0   0  0  1  0 70 10           0
-4    3     1 Ind1  0 12  0  0 27   0   3  4  0   0  0  1  0 70 10           0
-5    4     1 Ind1  0 12  0  0 27   1   0  4  0   0  0  1  0 67 10           3
-6    5     1 Ind1  0 12  0  0 27   1   1  4  0   0  0  1  0 68  9           2
+This is the list of all the parameters that can be passed to the `createInSilicoPopulation` function when generating an *in silico* population, that control the different properties of the individuals.
 
+- `ploidy`: Integer. Number of alleles for each gene (ploidy of the individuals). Default value is 2.
+- `ngenevariants`: Integer. Number of alleles existing for each gene and segregating in the in silico population. Default value is 5.
+- `qtleffect_samplingfct`: Function from which is sampled the value of a QTL effect coefficient (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
+- `initvar_samplingfct`: Function from which is sampled the variation of the initial abundance of a species (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
 
-
-  time trial  Ind R5 P5 R7 R3 R1  P1 R9 R6 R10 R4 P4 R8 P8 R2 CTL1_P8_P1
-1    0     1 Ind1  2 12  4  4 27 364  4  2   4 17 67  6 70 10          0
-2    1     1 Ind1  0 12  0  0 27  88  4  0   0  0  1  0 70 10          0
-3    2     1 Ind1  0 12  0  0 27  17  4  0   0  0  1  0 70 10          0
-4    3     1 Ind1  0 12  0  0 27   3  4  0   0  0  1  0 70 10          0
-5    4     1 Ind1  0 12  0  0 27   1  4  0   0  0  1  0 67 10          3
-6    5     1 Ind1  0 12  0  0 27   2  4  0   0  0  1  0 68  9          2
-
-
-  time trial  Ind R5 P5 R7 R3 R1  P1 Pm1 R9 R6 R10 R4 P4 R8 P8 R2
-1    0     1 Ind1  2 12  4  4 27 364   0  4  2   4 17 67  6 70 10
-2    1     1 Ind1  0 12  0  0 27   0  88  4  0   0  0  1  0 70 10
-3    2     1 Ind1  0 12  0  0 27   0  17  4  0   0  0  1  0 70 10
-4    3     1 Ind1  0 12  0  0 27   0   3  4  0   0  0  1  0 70 10
-5    4     1 Ind1  0 12  0  0 27   1   3  4  0   0  0  1  0 70 10
-6    5     1 Ind1  0 12  0  0 27   1   3  4  0   0  0  1  0 70  9
-
-
-```
 
 {% include lib/mathjax.html %}

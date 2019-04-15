@@ -42,3 +42,9 @@ You can install sismonr from R or Rstudio using the following commands:
 library(devtools)
 install_github("oliviaAB/sismonr")
 ```
+
+### Citation
+
+Manuscript in preparation.
+
+Angelin-Bonnet, O., Biggs, P. J., & Vignes, M. (2018, December). The sismonr Package: Simulation of In Silico Multi-Omic Networks in R. In *2018 IEEE International Conference on Bioinformatics and Biomedicine (BIBM)* (pp. 2729-2731). IEEE. ([full text](https://ieeexplore.ieee.org/abstract/document/8621131))
