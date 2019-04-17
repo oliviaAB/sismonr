@@ -164,7 +164,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
   }
   res = bind_rows(resTable)
   message("\nSimulations finished at ", format(Sys.time(), usetz = T), "\n")
-  message("Mean running time per simulation: ", mean(runningtime),"seconds. \n")
+  message("Mean running time per simulation: ", round(mean(runningtime), 3)," seconds. \n")
   return(list("Simulation" = res, "runningtime" = runningtime, "stochmodel" = stochmodel))
 }
 
@@ -288,7 +288,7 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
   stopsim = toc(quiet = T)$toc
   res = bind_rows(resTable)
   message("\nSimulations finished at ", format(Sys.time(), usetz = T), "\n")
-  message("Running time of parallel simulations: ", stopsim - startsim, " seconds\n")
+  message("Running time of parallel simulations: ", round(stopsim - startsim, 3), " seconds\n")
 
   parallel::stopCluster(mycluster)
 
@@ -511,11 +511,13 @@ sortComponents = function(componames){
   return(sorted)
 }
 
-plotLegendComponents = function(palette, nCompPerRow = 10){
+plotLegendComponents = function(palette, nCompPerRow = 10, components){
 
   sortedComp = sortComponents(names(palette))
+  sortedComp = cbind(sortedComp, data.frame("isPC" = sapply(sortedComp$Components, function(x){
+    any(stringr::str_detect(components, paste0("^P", x, "(?=_|$)")))
+  })))
   palette = palette[sortedComp$Components]
-
 
   nrows = length(palette) %/% nCompPerRow + (length(palette) %% nCompPerRow != 0)
   plots = vector("list", length = nrows)
@@ -524,6 +526,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
     rowpalette = palette[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
     rowisComplex = sortedComp$isComplex[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
     rowisPTM = sortedComp$isPTM[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
+    rowisPC = sortedComp$isPC[((i-1)*nCompPerRow+1):min(i*nCompPerRow, length(palette))]
 
     # namesComp = names(rowpalette)
     # namesComp[is.na(namesComp)] = ""
@@ -534,10 +537,26 @@ plotLegendComponents = function(palette, nCompPerRow = 10){
 
     rowisPTM = rowisPTM[1:nbg]
 
+    compoType = data.frame("isPC" = rowisPC[1:nbg], "isPTM" = rowisPTM)
+
     if(nbg > 0){
-      legend_points = data.frame("Components" = rep(names(rowpalette)[1:nbg], sapply(rowisPTM, function(x){if(x){1}else{2}})),
-                                     "x" = rep(1:nbg, sapply(rowisPTM, function(x){if(x){1}else{2}})),
-                                     "y" = unlist(lapply(rowisPTM, function(x){if(x){2}else{1:2}})))
+      legend_points = data.frame("Components" = rep(names(rowpalette)[1:nbg], sapply(1:nbg, function(x){
+                                          if(compoType[x, "isPTM"] | !compoType[x, "isPC"]){
+                                            1
+                                          }else{2}
+                                        })),
+                                     "x" = rep(1:nbg, sapply(1:nbg, function(x){
+                                       if(compoType[x, "isPTM"] | !compoType[x, "isPC"]){
+                                         1
+                                       }else{2}
+                                     })),
+                                     "y" = unlist(lapply(1:nbg, function(x){
+                                       if(compoType[x, "isPTM"]){
+                                         2
+                                       }else if(compoType[x, "isPC"]){
+                                           1:2
+                                         }else{1}
+                                       })))
     }else{
       legend_points = data.frame("Components" = character(),
                                  "x" = numeric(),
@@ -668,7 +687,7 @@ plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf
   simuplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = min(nIndPerRow, length(inds)), common.legend = T, heights = rep(1, length(plots)), legend = "none")
 
   ## add the legend
-  legendplots = plotLegendComponents(palette, nCompPerRow)
+  legendplots = plotLegendComponents(palette, nCompPerRow, unique(toplot$ID))
   finalplot = ggpubr::ggarrange(simuplot, plotlist = legendplots, nrow = length(legendplots) + 1, ncol = 1, heights = c(7, rep(1, length(legendplots))))
 
 
