@@ -1,5 +1,5 @@
 ---
-title: "sismonr package"
+title: "sismonr tutorial"
 author: "Olivia Angelin-Bonnet"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
@@ -12,74 +12,353 @@ vignette: >
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  echo = TRUE,
+  fig.align = "center"
 )
 ```
 
-# Introduction
+This document is a tutorial demonstrating how to use the `sismonr` package.
 
-## Purposes of the `sismonr` package.
+# Getting started
 
-The `sismonr` package is a tool to simulate the expression of *in silico* **genes**, for different *in silico* **individuals** of a common population. Precisely, we define the terms:
+## Installing Julia
 
-Gene
-  : a portion of DNA encoding either a protein or a noncoding regulatory RNA. A gene is characterised by a number of kinetic parameters (e.g. its transcription rate, translation)
+To install Julia, go to [https://julialang.org/downloads/](https://julialang.org/downloads/) and follow the instructions. In brief:
 
-## Some definitions
+* **Windows**: download the `.exe` file and run it to install Julia.
+* **MacOS**: download the `.dmg` file, which contains Julia.app. Copy the later to your hard-drive or run from the disk image.
+* **Linux**: download the `.tar.gz` file, and extract it to a folder of your choice.
 
-For this package, a number of biological terms are used with a specific meanings. For clarity purpose, here is a list of definitions of the terms used throughout this document:
+## Adding Julia to the `PATH` environment variable
 
-Gene
-  : a portion of DNA encoding either a protein or a noncoding regulatory RNA.
-  
-Gene copy number (of a molecule)
-  : here this refers to the allele ID from which the molecule is issued, abbreviated as GCN. 
+For `sismonr` to be able to use Julia, the Julia executable must be in the `PATH` environment variable. You can add it as follow:
 
-# Template vignette information
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+* **Windows**: open the Control Panel and go to `System > Advanced system settings > Environment variables`. Select the `PATH` variable, click on `Edit > New` and copy-paste the path `[path_to_julia_folder]/bin`, replacing the `[path_to_julia_folder]` with the path to the Julia directory.
+* **MacOS and Linux**: in the terminal, type `sudo ln -s path_to_julia_folder/bin/julia /usr/local/bin/julia`, replacing the `[path_to_julia_folder]` with the path to the Julia directory.
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+After this step it is necessary to restart your computer.
 
-## Vignette Info
+## Installing sismonr
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
+From R, you can install the latest version of `sismonr` available on Github at
+[https://github.com/oliviaAB/sismonr](https://github.com/oliviaAB/sismonr).
 
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+```{r, eval = F}
+if(!require("devtools")) install.packages("devtools"); library(devtools)
+install_github("oliviaAB/sismonr")
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
+If Julia is not installed on your computer or the Julia executable is not in your `PATH` environment variable, you won't be able to install `sismonr`. 
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## sismonr resources
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+An online documentation is available at [https://oliviaab.github.io/sismonr/](https://oliviaab.github.io/sismonr/).
 
-## More Examples
+# sismonr
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+In order to use `sismonr` we need to load the package. You will notice that every time you load the package, `sismonr` checks that the necessary Julia modules are installed. If not, it automatically installs them for you.
 
-```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+```{r}
+library(sismonr)
 ```
 
-Also a quote using `>`:
+## 1. Creating an *in silico* system
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+The first step to simulate gene expression data is to generate an *in silico* system. The *in silico* system contains the list of genes whose expression we want to simulate along with the Gene Regulatory Network (GRN) representing the regulatory interactions among the genes. We can generate a random *in silico* system with:
+
+```{r}
+myinsilicosystem = createInSilicoSystem(G = 10, PC.p = 0.7)
+```
+
+The different parameters passed to the function allow the user to control different aspects of the generated system. For example, `G` defines the number of genes present in the system. `PC.p` gives the probability for each gene to be protein-coding (so setting `PC.p = 1` ensures that there are only protein-coding genes in the system). A list of all parameters can be seen in the [online documentation](https://oliviaab.github.io/sismonr/#parameters-for-in-silico-system-generation) of `sismonr` or by typing:
+
+```{r, eval = F}
+?insilicosystemargs
+```
+
+We'll see the effect of some of these parameters in the next sections.
+
+The function returns an object of class `insilicosystem`, which is a list containing the different attributes of the system:
+
+```{r}
+class(myinsilicosystem)
+names(myinsilicosystem)
+```
+
+The next sections allow you to explore the *in silico* system we created.
+
+### The genes
+
+The list of genes in the *in silico* system are stored in the `genes` element:
+
+```{r}
+myinsilicosystem$genes
+```
+
+You can try generating new system by changing some parameters affecting the genes:
+```{r, eval = F}
+## system with only protein-coding genes, all regulators of transcription (PC.TC.p),
+## and all regulations are activations (positive regulation - TC.pos.p)
+myinsilicosystem2 = createInSilicoSystem(G = 15, PC.p = 1, PC.TC.p = 1, TC.pos.p = 1) 
+myinsilicosystem2$genes
+
+## Changing the function used to sample transcription rates for the genes
+myinsilicosystem3 = createInSilicoSystem(G = 10,
+                                         basal_transcription_rate_samplingfct = function(x){runif(x, 0.1, 0.8)})
+myinsilicosystem3$genes
+```
+
+### The GRN
+
+The list of regulatory interactions in the system is stored in the `edg` element:
+
+```{r}
+myinsilicosystem$edg
+```
+
+### The regulatory complexes
+
+The list of regulatory complexes in the system is stored in the `complexes` element. Their kinetic parameters are stored in the `complexeskinetics` element:
+
+```{r}
+myinsilicosystem$complexes
+myinsilicosystem$complexeskinetics
+```
+
+It is likely to be empty if the number of genes is small, as regulatory complexes are generated from regulators targeting a common gene in the GRN. You can try increasing the number of genes in the system so see some complexes.
+
+The `complexesTargetReaction` object gives the biological function of each complex, with the same code than for genes (e.g. "TC" means regulator of transcription).
+```{r}
+myinsilicosystem$complexesTargetReaction
+```
+
+## Plotting the GRN
+
+You can visualise the GRN in your system with:
+
+```{r, fig.width = 6, fig.height = 6}
+plotGRN(myinsilicosystem)
+```
+
+By default all the types of regulation are drawn. You can also plot only a specific type of regulation:
+
+```{r, fig.width = 6, fig.height = 6}
+plotGRN(myinsilicosystem, edgeType = "TC")
+```
+
+### Kinetic properties of the regulatory interactions
+
+The `edg` element contains all the regulations occuring in the system. However each type of regulation is characterised by a distinct set of kinetic properties (e.g. to model a transcription regulation we need to know the binding and unbinding rates of the regulator to the target binding site, and the fold-change induced in the target transcription rate when the regulator is bound). This information is stored in a set of data-frames, one for each type of regulation. These data-frames are found in the `mosystem` element of the system:
+
+```{r}
+names(myinsilicosystem$mosystem)
+myinsilicosystem$mosystem$TCRN_edg
+```
+
+```{r}
+myinsilicosystem$mosystem$TLRN_edg
+myinsilicosystem$mosystem$RDRN_edg
+myinsilicosystem$mosystem$PDRN_edg
+myinsilicosystem$mosystem$PTMRN_edg
+```
+
+## 2. Creating an *in silico* population
+
+The second step to simulate gene expression data is to generate an *in silico* population. In a population, different variants of each gene are segregating (by default with equal frequency). Each gene variant is characterised by a set of QTL effect coefficient values that describe how genetic mutations affect the kinetic properties of the gene. Each *in silico* individual carries one or more copies of each gene (depending on the ploidy of the system), and these copies are sampled from the list of variants segregating in the population.
+
+Here we create a population of diploid individuals, with 4 variants existing for each gene. We create 3 individuals:
+```{r}
+mypop = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 4, ploidy = 2)
+```
+
+The first parameter to be passed to `createInSilicoPopulation` is the number of individuals to be created, and the second is the *in silico* system we generated in the first step. Additional arguments can be given to the function, to control the properties of the individuals. A list of these arguments are available in the [online documentation](https://oliviaab.github.io/sismonr/#parameters-for-in-silico-individuals-generation), or with:
+
+```{r, eval = F}
+?insilicoindividualargs
+```
+
+The function returns an object of class `insilicopopulation`, which is a list containing the different attributes of the system:
+
+```{r}
+class(mypop)
+names(mypop)
+```
+
+### The gene variants
+
+The list of variants segregating in the population for each gene is stored in the `GeneVariants` element of the *in silico* population.
+
+```{r}
+mypop$GenesVariants
+```
+
+You can see the effect of changing the parameters passed to the `createInSilicoPopulation` function. You can even supply your own list of segregating variants and the frequency of these variants:
+
+```{r, eval = F}
+
+mypop2 = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 2, ploidy = 2)
+mypop2$GenesVariants
+
+## Creating a smaller system with only 3 genes
+mysystem = createInSilicoSystem(G = 3, PC.p = 1)
+
+## We will create only 1 variant of gene 1, 3 variants of gene 2 and
+## 2 variants of gene 3
+nbvariants = c(1, 3, 2)
+
+qtlnames = c("qtlTCrate", "qtlRDrate",
+             "qtlTCregbind", "qtlRDregrate",
+             "qtlactivity", "qtlTLrate",
+             "qtlPDrate", "qtlTLregbind",
+             "qtlPDregrate", "qtlPTMregrate")
+
+genvariants = lapply(nbvariants, function(x){
+  matrix(1, nrow = length(qtlnames), ncol = x,
+         dimnames = list(qtlnames, 1:x))
+})
+names(genvariants) = mysystem$genes$id
+
+## the 2nd variant of gene 2 has a mutation reducing its transcription rate by 3
+genvariants$`2`["qtlTCrate", 2] = 0.33
+## and the 3rd variant has an increased translation rate
+genvariants$`2`["qtlTLrate", 2] = 1.5
+
+## The 2nd variant of gene 3 has a mutation decreasing the activity of
+## its active product
+genvariants$`3`["qtlactivity", 2] = 0.7
+
+## Allelic frequency of each variant
+genvariants.freq = list('1' = c(1),
+                        '2' = c(0.6, 0.3, 0.1),
+                        '3' = c(0.9, 0.1))
+
+mypop3 = createInSilicoPopulation(10, mysystem,
+                                 genvariants = genvariants,
+                                 genvariants.freq = genvariants.freq)
+```
+
+### The *in silico* individuals
+
+The list of *in silico* individuals created is stored in the `individualsList` element:
+
+```{r}
+names(mypop$individualsList)
+```
+
+Each individual is characterised by the variants that it carries for each gene:
+
+```{r}
+mypop$individualsList$Ind1$haplotype
+mypop$individualsList$Ind2$haplotype
+mypop$individualsList$Ind3$haplotype
+```
+
+As the individuals are diploid, they have two copies of each genes. The alleles are termed `GCN1` and `GCN2`. Each row represents a gene, and the values in the data-frame correspond to the variant numbers of the genes that the individual carries.
+
+You can try to change the ploidy of the individuals:
+
+```{r}
+mypop2 = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 2, ploidy = 4)
+mypop2$individualsList$Ind1$haplotype
+mypop2$individualsList$Ind2$haplotype
+mypop2$individualsList$Ind3$haplotype
+```
+
+You can visualise the QTL effect coefficients of each variant carried by the individuals:
+
+```{r, fig.width = 7, fig.height = 6}
+plotMutations(mypop, myinsilicosystem, nGenesPerRow = 5)
+```
+
+The function `plotMutations` takes as arguments the *in silico* population and the *in silico* system, and plot the value (colour) of each QTL effect coefficient (x-axis) for each allele (y-axis) of each gene (columns) for each individual in the population (rows). As some QTL effect coefficients do not apply to noncoding genes (i.e. mutations that would affect the translation or protein life), they are greyed in the plot.
+
+You can zoom on specific genes, individuals, alleles or sets of QTL effect coefficients:
+
+```{r, fig.width = 6, fig.height = 6}
+plotMutations(mypop, myinsilicosystem,
+              qtlEffectCoeffs = c("qtlTCrate", "qtlTLrate", "qtlRDrate", "qtlPDrate"),
+              inds = c("Ind1", "Ind2"),
+              alleles = "GCN2",
+              genes = 1:3)
+```
+
+## 3. Simulating the *in silico* system
+
+To get the expression of the different genes for each *in silico* individual, we will perform a stochastic simulation:
+
+```{r}
+sim = simulateInSilicoSystem(myinsilicosystem, mypop, simtime = 1000, ntrials = 5)
+```
+
+
+or with the parallelised version of the simulation function:
+
+```{r, eval = F}
+sim = simulateParallelInSilicoSystem(myinsilicosystem, mypop, simtime = 1000, ntrials = 5)
+```
+
+The argument `simtime` allows you to control the simulation end time in seconds (here we simulate the expression of the genes for 1000 s). `ntrials` correspond to the number of repetitions of the simulation that will be computed for each individual (here set to 5).
+
+The returned object contains the running time (in seconds) of each individual's simulation.
+
+```{r}
+sim$runningtime
+```
+
+The results of the simulation are stored as a data-frame in the `Simulation` element of the simulation output:
+
+```{r}
+head(sim$Simulation)
+```
+
+in which each row corresponding to one time-point of one run of a simulation for one *in silico* individual.
+
+You can visualise the results of your simulations in the form of a time-series of gene expression with:
+
+```{r, fig.width = 7, fig.height = 6}
+plotSimulation(sim$Simulation)
+```
+
+The abundance of the different species (separated by RNAs -bottom-, proteins -middle- and regulatory complexes -top-) are plotted over time. As the simulation has been repeated 5 times for each individual, the mean abundance of the molecules over the different repetitions or trials is plotted as a solid line, and the minimum and maximum values are represented by the coloured areas. By default the abundances are plotted on a log10 scale, but you can change that with the option `yLogScale = F` in the plotSimulation function.
+
+```{r, eval = F}
+plotSimulation(sim$Simulation, yLogScale = F)
+```
+
+The legend is presented as a table that gives for each component (columns) the different forms in which it can be found. The component names that are numbers correspond to the gene IDs. We can find the different genes either as RNAs or proteins. Gene IDs with the prefix "PTM" correspond to modified forms of proteins. Components with a name starting with a "C" correspond to regulatory complexes.
+
+You can focus the plot on certain individuals or time-period:
+
+```{r, eval = F}
+plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
+```
+
+You can also visualise the output of the simulation as a heatmap, with the same arguments as the `plotSimulation` function:
+
+```{r, fig.width = 6.5, fig.height = 6}
+plotHeatMap(sim$Simulation)
+```
+
+### Transforming the simulation results
+
+In the results of the simulation, molecules originating from different alleles of a same gene are differentiated by the suffix `GCNi`. You can merge these molecules to obtain the abundance of the corresponding molecule regardless of its allele of origin with:
+
+```{r}
+simNoAllele = mergeAlleleAbundance(sim$Simulation)
+head(simNoAllele)
+```
+
+Similarly, you can merge non-modified and post-translationally modified versions of a same protein:
+
+```{r}
+simNoPTM = mergePTMAbundance(simNoAllele)
+head(simNoPTM)
+```
+
+or the abundance of free and in-complex molecules:
+
+```{r}
+simNoComplex = mergeComplexesAbundance(simNoAllele)
+head(simNoComplex)
+```
