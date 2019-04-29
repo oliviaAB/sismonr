@@ -660,7 +660,7 @@ plotSimulation(sim$Simulation, mergePTM = F)
 ```
 ![plotSimulationPTM](images/plotSimulationPTM.png)
 
-The first component names are numbers, they correspond to the gene IDs. We can find the different genes either as RNAs or proteins. As gene 1 is targeted for post-translational modification, there exists a modified form of its protein, `PTM1`. The component `CTL1` is a regulatory complex. Its full name, `CTL1_P8_Pm1` contains the list of its constituents, here the protein of gene 8 and the modified protein of gene 1.
+The first component names are numbers, they correspond to the gene IDs. We can find the different genes either as RNAs or proteins if they are protein-coding (e.g. gene 1), or only as RNAs if the genes are noncoding (e.g. gene 2). As gene 1 is targeted for post-translational modification, there exists a modified form of its protein, `PTM1`. The component `CTL1` is a regulatory complex. Its full name, `CTL1_P8_Pm1` contains the list of its constituents, here the protein of gene 8 and the modified protein of gene 1.
 
 To help you get an idea of the general tendencies of the abundance of the different components, the function `summariseSimulation` returns a dataframe giving for each component (row) and each individual (column) the maximum and final average abundance over the different trials:
 
@@ -686,6 +686,7 @@ Time: 0 s - 2000 s
 ```
 
 The function prints on your console the individuals, trials and timespan considered for the summary. You can suppress this display with the argument `verbose = F` in the function call.
+
 If you want to focus on one *in silico* individual, and zoom on a smaller time-period, you can use:
 ```r
 plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
