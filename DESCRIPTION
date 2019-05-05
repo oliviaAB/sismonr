@@ -34,8 +34,6 @@ Imports:
     igraph,
     graphics,
     scales
-Remotes: 
-    johnmchambers/XRJulia
 SystemRequirements: Julia, v 0.7 or later
 RoxygenNote: 6.1.0
 Suggests: 
