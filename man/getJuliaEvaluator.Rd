@@ -7,7 +7,7 @@
 getJuliaEvaluator()
 }
 \value{
-A Julia evalutator from \code{XRJulia} package.
+A Julia evaluator from \code{XRJulia} package.
 }
 \description{
 Returns the current Julia evaluator; if none, starts a new one.

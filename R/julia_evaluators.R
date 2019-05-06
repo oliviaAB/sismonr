@@ -35,7 +35,7 @@ newJuliaEvaluator <- function(port = NULL) {
 #' but if no evaluator exists, creates a new one and loads \code{sismonr} Julia functions
 #' on it.
 #'
-#'@return A Julia evalutator from \code{XRJulia} package.
+#'@return A Julia evaluator from \code{XRJulia} package.
 #'@export
 getJuliaEvaluator <- function(){
   ev = RJulia() ## returns the current evaluator or creates one

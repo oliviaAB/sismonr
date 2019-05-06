@@ -3,3 +3,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^paper_code$
+^cran-comments\.md$
+^README\.md$

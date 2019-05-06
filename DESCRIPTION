@@ -34,8 +34,8 @@ Imports:
     igraph,
     graphics,
     scales
-SystemRequirements: Julia, v 0.7 or later
-RoxygenNote: 6.1.0
+SystemRequirements: Julia, v 1.0 or later
+RoxygenNote: 6.1.1
 Suggests: 
     knitr,
     rmarkdown,
