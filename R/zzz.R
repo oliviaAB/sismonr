@@ -17,6 +17,7 @@
   if (!XRJulia::findJulia(test = T)) {
    warning("Julia is not installed on the computer or not accessible by R. Check that Julia is correcly installed and/or in the PATH variable.\n")
   }else{
+    ## Test that the correct version of Julia is installed
     julia_bin = XRJulia::findJulia()
     if (.Platform$OS.type == "windows") cmd = paste(julia_bin, " ", "-E \"VERSION < v\\\"1.0.0\\\"\"") else cmd = paste(julia_bin, " ", "-E 'VERSION < v\"1.0.0\"'")
     if(base::system(cmd, intern = T, ignore.stdout = F)){
