@@ -2,30 +2,24 @@
 * local Windows 10, R 3.5.1, Julia 1.1.0
 * local (VirtualBox) Ubuntu 16.04, R 3.6.0, Julia 1.1.0
 * Ubuntu 14.04.5 (on travis-ci), R.6.0
+* Winbuilder: x86_64-w64-mingw32 (64-bit) R 3.6.0 and R-devel
+* Rhub: Windows Server 2008 R2 SP1, R-devel, 32/64 bit - Ubuntu Linux 16.04 LTS, R-release, GCC - Fedora Linux, R-devel, clang, gfortran
 
 ##R CMD check results
-There were no ERRORs, WARNINGs or NOTEs.
+There were no ERRORs or WARNINGs.
 
-## Comments
-We used Winbuilder to perform R CMD check. This returned 4 WARNINGs and 4 NOTEs, all of them due to a Julia error:
+On Winbuilder and Rhub, there was 1 NOTE:
 
-```
-RROR: LoadError: ArgumentError: Module Pkg not found in current path.
-Run `Pkg.add("Pkg")` to install the Pkg package.
-Stacktrace:
- [1] _require(::Symbol) at .\loading.jl:428
- [2] require(::Symbol) at .\loading.jl:398
- [3] include_from_node1(::String) at .\loading.jl:569
- [4] include(::String) at .\sysimg.jl:14
- [5] process_options(::Base.JLOptions) at .\client.jl:305
- [6] _start() at .\client.jl:371
-while loading d:\RCompile\CRANguest\R-devel\lib\sismonr\julia\testModules.jl, in expression starting on line 1
-```
-This is probably due to the presence of Julia 0.6.4 instead of 1.0, and was not observed when running R CMD check on a local Windows 10 machine with Julia 1.1.0.
+* checking CRAN incoming feasibility ... NOTE
 
-We used `check_rhub()`, which returned 4 WARNINGs and 5 NOTEs, all:
+New submission
+Possibly mis-spelled words in DESCRIPTION:
+  translational (11:315)
+  noncoding (11:184)
+  Maintainer: 'Olivia Angelin-Bonnet <olivia.angelinbonnet@gmail.com>'
+  silico (11:75, 11:464, 11:754, 11:789)
+  Omic (3:38)
+  Silico (3:25)
+  ploidy (11:488)
 
-```
-INFO: Could not find files for the given pattern(s).
-```
-Which is probably due to julia not being available.
+This is a new submission to CRAN + all words are biological terms and correctly spelled.

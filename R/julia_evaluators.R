@@ -1,3 +1,45 @@
+#' Find a Julia executable
+#'
+#' The function is almost identical to the \code{findJulia} function from the \code{XRJulia} package,
+#' but prevent errors arising from looking for a Julia executable with the "which"/"where" function if Julia
+#' is not present.
+#'
+#' @param test If TRUE, returns TRUE/FALSE depending on whether or not a Julia executable is found. If FALSE, returns the
+#' path to the Julia executable if it exists.
+#' @return TRUE/FALSE or the path to the Julia executable
+#' @export
+findJuliaNoError = function(test = FALSE) {
+  ## See if a location for the Julia executable has been specified
+  ## environment variables JULIA_BIN or JULIA_SRC
+  envvar <- Sys.getenv("JULIA_BIN")
+  if(!nzchar(envvar)) {
+    src <- Sys.getenv("JULIA_SRC")
+    if(nzchar(src)) {
+      ## try either the standard Julia source, or the directory above bin, etc.
+      trybin <- paste(src, "usr","bin","julia", sep=.Platform$file.sep)
+      if(file.exists(trybin))
+        envvar <- trybin
+      else {
+        trybin <- paste(src, "julia", sep=.Platform$file.sep)
+        if(file.exists(trybin))
+          envvar <- trybin
+      }
+    }
+  } # if none of these succeeds, `which julia` used to find an executable version
+  if(!nzchar(envvar)) {
+    command <-if (.Platform$OS.type == "windows") "where" else "which"
+    envvar <- tryCatch(system2(command, "julia", stdout = TRUE, stderr = TRUE), warning = function(e) "")
+    if(test)
+      Sys.setenv(JULIA_BIN = envvar) # so next call finds this immediately
+    else if(!nzchar(envvar))
+      stop("No julia executable in search path and JULIA_BIN environment variable not set")
+  }
+  if(test)
+    nzchar(envvar)
+  else
+    envvar
+}
+
 #' Creates a new ready-to-use Julia evaluator.
 #'
 #' \code{newJuliaEvaluator} opens a new Julia evaluator and loads the required functions on it.

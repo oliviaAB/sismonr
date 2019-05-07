@@ -14,7 +14,7 @@
 # }
 
 .onAttach <- function(libname, pkgname) {
-  if (!XRJulia::findJulia(test = T)) {
+  if (!findJuliaNoError(test = T)) {
    warning("Julia is not installed on the computer or not accessible by R. Check that Julia is correcly installed and/or in the PATH variable.\n")
   }else{
     ## Test that the correct version of Julia is installed
