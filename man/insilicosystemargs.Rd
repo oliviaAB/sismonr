@@ -254,3 +254,7 @@ Example: if the user sets PC.TC.p to 1 and PC.TL.p to 0.6, but does not provide 
 then PC.TC.p is set to 1/(1+0.6)=0.625, PC.TL.p to 0.6/(1+0.6)=0.375, and PC.RD.p, PC.PD.p, PC.PTM.p and PC.MR.p are all set to 0.
 Accordingly, if the user only sets NC.TC.p to 0.6, then NC.TL.p, NC.RD.p, NC.PD.p and NC.PTM.p are all set to 0.1.
 }
+\examples{
+sysargs = insilicosystemargs(G = 15, PC.p = 0.2,
+ basal_transcription_rate_samplingfct = function(x){runif(x, 0.1, 0.2)})
+}

@@ -36,3 +36,10 @@ values are vectors of gene IDs constituting each regulatory complex. Empty list.
 Creates an empty in silico system (i.e. no regulatory interactions) given a data-frame of genes (cf
 \code{\link{createMultiOmicNetwork}}).
 }
+\examples{
+\donttest{
+mysysargs = insilicosystemargs(G = 5)
+mygenes = createGenes(mysysargs)
+mynetwork = createEmptyMultiOmicNetwork(mygenes)
+}
+}

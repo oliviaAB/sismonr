@@ -18,3 +18,8 @@ The function is almost identical to the \code{findJulia} function from the \code
 but prevent errors arising from looking for a Julia executable with the "which"/"where" function if Julia
 is not present.
 }
+\examples{
+\donttest{
+finJuliaNoError(test = T)
+}
+}

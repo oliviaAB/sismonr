@@ -17,3 +17,8 @@ Returns the current Julia evaluator; if none, starts a new one.
 but if no evaluator exists, creates a new one and loads \code{sismonr} Julia functions
 on it.
 }
+\examples{
+\donttest{
+getJuliaEvaluator()
+}
+}

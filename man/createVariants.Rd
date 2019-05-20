@@ -34,3 +34,8 @@ binding sites on their targets (affects the binding to all targets of the gene).
 \description{
 Create variants that segregate in the in silico population for each gene in the system.
 }
+\examples{
+indargs = insilicoindividualargs()
+genes = createGenes(insilicosystemargs(G = 5))
+variants = createVariants(genes, indargs)
+}

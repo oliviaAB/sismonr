@@ -48,6 +48,7 @@ mysystem = createInSilicoSystem(G = 10)
 mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
 plotMutations(mypop, mysystem)
 ## Only plot the 1st allele of each genes for the genes 1 to 5 and the individuals 1 to 3
-plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5, inds = c("Ind1", "Ind2", "Ind3"))
+plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5,
+ inds = c("Ind1", "Ind2", "Ind3"))
 }
 }

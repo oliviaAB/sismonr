@@ -12,3 +12,8 @@ removeJuliaEvaluator(ev)
 \description{
 \code{removeJuliaEvaluator} closes a Julia evaluator from XRJulia package.
 }
+\examples{
+\donttest{
+removeJuliaEvaluator(getJuliaEvaluator())
+}
+}

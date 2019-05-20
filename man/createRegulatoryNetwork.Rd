@@ -38,3 +38,14 @@ A list of two elements:
 \description{
 Creates an in silico regulatory network given a list of regulators and targets.
 }
+\examples{
+\donttest{
+## We want to create a small transcription regulatory network
+## In this example, genes 1 and 2 are protein-coding regulators (say transcription factors),
+## gene 3 is a noncoding regulator (say an miRNA), and genes 4-6 are the genes to be regulated
+## (all protein-coding, e.g. all encoding enzymes)
+createRegulatoryNetwork(regsList = list("PC" = c(1:2), "NC" = c(3)),
+     tarsList = list("PC" = c(4:6), "NC" = integer(0)), reaction = "TC",
+     sysargs = insilicosystemargs(G = 6))
+}
+}

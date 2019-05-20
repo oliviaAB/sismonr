@@ -50,6 +50,8 @@ steadyStateAbundance = function(id, genes, complexes){
 #'
 #' \code{basal_protlifetime_rate_samplingfct} in \code{sysargs} (0 for noncoding genes).
 #' }
+#' @examples
+#' createGenes(insilicosystemargs(G = 5))
 #' @export
 createGenes = function(sysargs){
 
@@ -110,6 +112,16 @@ createGenes = function(sysargs){
 #' }
 #' \item \code{complexes}: a list of complexes composition (each element is named with the complex ID, the components are given as gene IDs).
 #' \item \code{complexesTargetReaction}: a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
+#' }
+#' @examples
+#' \donttest{
+#' ## We want to create a small transcription regulatory network
+#' ## In this example, genes 1 and 2 are protein-coding regulators (say transcription factors),
+#' ## gene 3 is a noncoding regulator (say an miRNA), and genes 4-6 are the genes to be regulated
+#' ## (all protein-coding, e.g. all encoding enzymes)
+#' createRegulatoryNetwork(regsList = list("PC" = c(1:2), "NC" = c(3)),
+#'      tarsList = list("PC" = c(4:6), "NC" = integer(0)), reaction = "TC",
+#'      sysargs = insilicosystemargs(G = 6))
 #' }
 #' @export
 createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = getJuliaEvaluator()){
@@ -181,6 +193,12 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #' values are vectors of gene IDs constituting each regulatory complex.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters.
 #' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
+#' }
+#' @examples
+#' \donttest{
+#' mysysargs = insilicosystemargs(G = 5)
+#' mygenes = createGenes(mysysargs)
+#' mynetwork = createMultiOmicNetwork(mygenes, mysysargs)
 #' }
 #' @export
 createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
@@ -390,6 +408,12 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 #' values are vectors of gene IDs constituting each regulatory complex. Empty list.
 #' \item \code{complexeskinetics}: a list of regulatory complexes kinetic parameters. Empty list.
 #' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
+#' }
+#' @examples
+#' \donttest{
+#' mysysargs = insilicosystemargs(G = 5)
+#' mygenes = createGenes(mysysargs)
+#' mynetwork = createEmptyMultiOmicNetwork(mygenes)
 #' }
 #' @export
 createEmptyMultiOmicNetwork = function(genes){
@@ -794,7 +818,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 
   if(!(regID %in% as.character(insilicosystem$genes$id))){ ## if the regulator is not a gene product
     if(!(regID %in% names(insilicosystem$complexes))){
-      stop("Regulator ", regID, "does not exist in the system.")
+      stop("Regulator ", regID, " does not exist in the system.")
     }else{ ## if the regulator is a regulatory complex
       targetreaction = insilicosystem$complexesTargetReaction[[regID]]
       regby = "C"
@@ -827,17 +851,20 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
     if(!(regsign %in% c("1", "-1"))){
       stop("Interation sign must be either \"1\" or \"-1\".")
     }else if(targetreaction %in% c("RD", "PD")){
-      regsign = "-1"
+      regsign = "1"
     }
   }else{
-    if(targetreaction == "PTM" & !(tarID %in% insilicosystem$mosystem$PTMRN_edg$to)){ ## force the first PTM reaction to be positive
+    if(targetreaction == "PTM" & !(tarID %in% insilicosystem$mosystem$PTMRN_edg$to)){
       regsign = "1"
-      insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "PTMform"] = 1
-      insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "ActiveForm"] = paste0("Pm", tarID)
     }else{
       regsign = sample(c("1","-1"), 1, prob = c(insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]],
                                               1 - insilicosystem$sysargs[[paste(targetreaction, "pos.p", sep = ".")]]), replace = T)
     }
+  }
+
+  if(targetreaction == "PTM" & !(tarID %in% insilicosystem$mosystem$PTMRN_edg$to)){ ## force the first PTM reaction to be positive
+    insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "PTMform"] = 1
+    insilicosystem$genes[insilicosystem$genes$id == as.integer(tarID), "ActiveForm"] = paste0("Pm", tarID)
   }
 
 
@@ -959,6 +986,13 @@ removeEdge = function(insilicosystem, regID, tarID){
 #' \item "RegComplexes": return only binding interactions, i.e. linking the regulatory complexes to their components.
 #' }
 #' @param showAllVertices Display vertices that don't have any edge? Default is FALSE.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 10)
+#' grn = getGRN(mysystem)
+#' grnTC = getGRN(mysystem, edgeType = "TC", showAllVertices = F)
+#' grnTCall = getGRN(mysystem, edgeType = "TC", showAllVertices = T)
+#' }
 #' @export
 getGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F){
 
@@ -1056,6 +1090,13 @@ plotGRNlegend = function(verticesColour, edgesColour){
 #' "2D" (default, use the function \code{\link[igraph]{plot.igraph}}), "interactive2D" (use the function
 #'  \code{\link[igraph]{tkplot}}) or "interactive3D" (use the function \code{\link[igraph]{rglplot}}).
 #' @param ... any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 10)
+#' plotGRN(mysystem)
+#' plotGRN(mysystem, edgeType = "TC")
+#' plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
+#' }
 #' @export
 plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotType = "2D", ...){
 

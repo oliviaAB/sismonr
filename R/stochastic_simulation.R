@@ -31,8 +31,16 @@ df2list = function(mydf){
 #' @param verbose If TRUE (default), print messages to signal the start and finish of the function.
 #' @param ev A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 5)
+#' indargs = insilicoindividualargs()
+#' stochsys = createStochSystem(mysystem, indargs)
+#' }
 #' @export
-createStochSystem = function(insilicosystem, indargs, writefile, filepath = getwd(), filename = "simulation", verbose = T, ev = getJuliaEvaluator()){
+createStochSystem = function(insilicosystem, indargs, writefile = F, filepath = NULL, filename = "simulation", verbose = T, ev = getJuliaEvaluator()){
+
+  if(is.null(filepath)) writefile = F; filepath = character(0)
 
   ## Creating the networks lists to be sent to Julia (converted to dictionaries in Julia)
   temp = names(insilicosystem$mosystem)
@@ -134,8 +142,9 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' plotSimulation(sim$Simulation)
 #' }
 #' @export
-simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", ev = getJuliaEvaluator()){
+simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", ev = getJuliaEvaluator()){
 
+  if(is.null(filepath)) writefile = F
   stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, verbose = T, ev = ev)
   message("\n")
 
@@ -230,7 +239,9 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' plotSimulation(sim$Simulation)
 #' }
 #' @export
-simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = getwd(), filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
+simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
+
+  if(is.null(filepath)) writefile = F
 
   stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, verbose = T, ev = ev)
   message("\n")

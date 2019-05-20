@@ -24,3 +24,11 @@ getGRN(insilicosystem, edgeType = NULL, showAllVertices = F)
 \description{
 Returns an igraph object (network) corresponding to the gene regulatory network of the insilico system, including all types of regulation of only those defined by the user.
 }
+\examples{
+\donttest{
+mysystem = createInSilicoSystem(G = 10)
+grn = getGRN(mysystem)
+grnTC = getGRN(mysystem, edgeType = "TC", showAllVertices = F)
+grnTCall = getGRN(mysystem, edgeType = "TC", showAllVertices = T)
+}
+}

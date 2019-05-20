@@ -31,3 +31,11 @@ plotGRN(insilicosystem, edgeType = NULL, showAllVertices = F,
 \description{
 Plots the gene regulatory network of the insilico system, including all types of regulation or only those defined by the user.
 }
+\examples{
+\donttest{
+mysystem = createInSilicoSystem(G = 10)
+plotGRN(mysystem)
+plotGRN(mysystem, edgeType = "TC")
+plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
+}
+}

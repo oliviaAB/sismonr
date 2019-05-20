@@ -121,6 +121,9 @@
 #' @param complexesdissociationrate_samplingfct Function from which the dissociation rate of regulatory complexes are sampled (input x is the required sample size). Default value is
 #' a function returning \code{10^v}, with \code{v} a vector of size x sampled from a normal distribution with mean of 3 and sd of 0.9.
 #' @return An object of the class \code{insilicosystemargs}, that is a named list of the different parameters.
+#' @examples
+#' sysargs = insilicosystemargs(G = 15, PC.p = 0.2,
+#'  basal_transcription_rate_samplingfct = function(x){runif(x, 0.1, 0.2)})
 #' @export
 insilicosystemargs <- function(
   G = 10,
@@ -399,6 +402,8 @@ insilicosystemargs <- function(
 #' @param qtleffect_samplingfct Function from which is sampled the value of a QTL effect coefficient (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
 #' @param initvar_samplingfct Function from which is sampled the variation of the initial abundance of a species (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
 #' @return An object of the class \code{insilicoindividualargs}, that is a named list of the different parameters.
+#' @examples
+#' indargs = insilicoindividualargs(ploidy = 4)
 #' @export
 insilicoindividualargs <- function(
   ploidy = 2,

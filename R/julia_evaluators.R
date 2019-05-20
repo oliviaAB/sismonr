@@ -7,6 +7,10 @@
 #' @param test If TRUE, returns TRUE/FALSE depending on whether or not a Julia executable is found. If FALSE, returns the
 #' path to the Julia executable if it exists.
 #' @return TRUE/FALSE or the path to the Julia executable
+#' @examples
+#' \donttest{
+#' finJuliaNoError(test = T)
+#' }
 #' @export
 findJuliaNoError = function(test = FALSE) {
   ## See if a location for the Julia executable has been specified
@@ -48,6 +52,10 @@ findJuliaNoError = function(test = FALSE) {
 #'
 #' @param port An integer specifying the port to be used. Default \code{NULL}.
 #' @return A Julia Evaluator from the XRJulia package.
+#' @examples
+#' \donttest{
+#' ev = newJuliaEvaluator()
+#' }
 #' @export
 newJuliaEvaluator <- function(port = NULL) {
   if (is.null(port)) {
@@ -77,8 +85,12 @@ newJuliaEvaluator <- function(port = NULL) {
 #' but if no evaluator exists, creates a new one and loads \code{sismonr} Julia functions
 #' on it.
 #'
-#'@return A Julia evaluator from \code{XRJulia} package.
-#'@export
+#' @return A Julia evaluator from \code{XRJulia} package.
+#' @examples
+#' \donttest{
+#' getJuliaEvaluator()
+#' }
+#' @export
 getJuliaEvaluator <- function(){
   ev = RJulia() ## returns the current evaluator or creates one
   if(!juliaEval("@isdefined juliatest")){ ## we want to know if the sismonr Julia functions are already sourced on the evaluator
@@ -95,6 +107,10 @@ getJuliaEvaluator <- function(){
 #' \code{removeJuliaEvaluator} closes a Julia evaluator from XRJulia package.
 #'
 #' @param ev A Julia evaluator from the XRJulia package.
+#' @examples
+#' \donttest{
+#' removeJuliaEvaluator(getJuliaEvaluator())
+#' }
 #' @export
 removeJuliaEvaluator <- function(ev) {
   # ev$ServerQuit()

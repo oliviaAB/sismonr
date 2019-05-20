@@ -4,8 +4,9 @@
 \alias{createStochSystem}
 \title{Creates a stochastic system from an in silico system.}
 \usage{
-createStochSystem(insilicosystem, indargs, writefile, filepath = getwd(),
-  filename = "simulation", verbose = T, ev = getJuliaEvaluator())
+createStochSystem(insilicosystem, indargs, writefile = F,
+  filepath = NULL, filename = "simulation", verbose = T,
+  ev = getJuliaEvaluator())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}
@@ -27,4 +28,11 @@ A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 }
 \description{
 Creates a list of molecules, reactions and associated propensities to represent the in silico system.
+}
+\examples{
+\donttest{
+mysystem = createInSilicoSystem(G = 5)
+indargs = insilicoindividualargs()
+stochsys = createStochSystem(mysystem, indargs)
+}
 }

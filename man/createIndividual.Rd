@@ -35,3 +35,37 @@ vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (
 \description{
 Creates a in silico individual to be simulated (object of class \code{insilicoindividual}).
 }
+\examples{
+indargs = insilicoindividualargs(ploidy = 4)
+## We will create only 1 variant of gene 1, 3 variants of gene 2 and
+## 2 variants of gene 3
+nbvariants = c(1, 3, 2)
+
+qtlnames = c("qtlTCrate", "qtlRDrate",
+             "qtlTCregbind", "qtlRDregrate",
+             "qtlactivity", "qtlTLrate",
+             "qtlPDrate", "qtlTLregbind",
+             "qtlPDregrate", "qtlPTMregrate")
+
+genvariants = lapply(nbvariants, function(x){
+  matrix(1, nrow = length(qtlnames), ncol = x,
+         dimnames = list(qtlnames, 1:x))
+})
+names(genvariants) = 1:length(nbvariants)
+
+## the 2nd variant of gene 2 has a mutation reducing its transcription rate by 3
+genvariants$`2`["qtlTCrate", 2] = 0.33
+## and the 3rd variant has an increased translation rate
+genvariants$`2`["qtlTLrate", 2] = 1.5
+
+## The 2nd variant of gene 3 has a mutation decreasing the activity of
+## its active product
+genvariants$`3`["qtlactivity", 2] = 0.7
+
+## Allelic frequency of each variant
+genvariants.freq = list('1' = c(1),
+                        '2' = c(0.6, 0.3, 0.1),
+                        '3' = c(0.9, 0.1))
+
+myind = createIndividual(genvariants, genvariants.freq, indargs)
+}

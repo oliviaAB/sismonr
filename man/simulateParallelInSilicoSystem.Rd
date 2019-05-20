@@ -6,7 +6,7 @@
 \usage{
 simulateParallelInSilicoSystem(insilicosystem, insilicopopulation, simtime,
   nepochs = -1, ntrials = 1, simalgorithm = "Direct",
-  writefile = F, filepath = getwd(), filename = "simulation",
+  writefile = F, filepath = NULL, filename = "simulation",
   no_cores = parallel::detectCores() - 1, ev = getJuliaEvaluator())
 }
 \arguments{

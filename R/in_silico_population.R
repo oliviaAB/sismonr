@@ -22,6 +22,10 @@
 #' \item \code{qtlPDregrate}: Affects the rate at which regulators of protein decay encountering the proteins of the gene trigger their degradation (affects all protein decay regulators targeting this gene);
 #' \item \code{qtlPTMregrate}: Affects the rate at which regulators of protein post-translational modification encountering the proteins of the gene trigger their modification (affects all protein post-translational modification regulators targeting this gene).
 #'}
+#' @examples
+#' indargs = insilicoindividualargs()
+#' genes = createGenes(insilicosystemargs(G = 5))
+#' variants = createVariants(genes, indargs)
 #' @export
 createVariants = function(genes, indargs){
 
@@ -73,6 +77,39 @@ createVariants = function(genes, indargs){
 #' that is the different alleles of the genes (as defined by the ploidy of the individual: a diploid will have GCN1 and GCN2); 2nd level of the list:
 #' vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
 #' }
+#' @examples
+#' indargs = insilicoindividualargs(ploidy = 4)
+#' ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
+#' ## 2 variants of gene 3
+#' nbvariants = c(1, 3, 2)
+#'
+#' qtlnames = c("qtlTCrate", "qtlRDrate",
+#'              "qtlTCregbind", "qtlRDregrate",
+#'              "qtlactivity", "qtlTLrate",
+#'              "qtlPDrate", "qtlTLregbind",
+#'              "qtlPDregrate", "qtlPTMregrate")
+#'
+#' genvariants = lapply(nbvariants, function(x){
+#'   matrix(1, nrow = length(qtlnames), ncol = x,
+#'          dimnames = list(qtlnames, 1:x))
+#' })
+#' names(genvariants) = 1:length(nbvariants)
+#'
+#' ## the 2nd variant of gene 2 has a mutation reducing its transcription rate by 3
+#' genvariants$`2`["qtlTCrate", 2] = 0.33
+#' ## and the 3rd variant has an increased translation rate
+#' genvariants$`2`["qtlTLrate", 2] = 1.5
+#'
+#' ## The 2nd variant of gene 3 has a mutation decreasing the activity of
+#' ## its active product
+#' genvariants$`3`["qtlactivity", 2] = 0.7
+#'
+#' ## Allelic frequency of each variant
+#' genvariants.freq = list('1' = c(1),
+#'                         '2' = c(0.6, 0.3, 0.1),
+#'                         '3' = c(0.9, 0.1))
+#'
+#' myind = createIndividual(genvariants, genvariants.freq, indargs)
 #' @export
 createIndividual = function(variantsList, variantsFreq, indargs, sameInit = F){
 
@@ -260,7 +297,8 @@ createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, ge
 #' mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
 #' plotMutations(mypop, mysystem)
 #' ## Only plot the 1st allele of each genes for the genes 1 to 5 and the individuals 1 to 3
-#' plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5, inds = c("Ind1", "Ind2", "Ind3"))
+#' plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5,
+#'  inds = c("Ind1", "Ind2", "Ind3"))
 #' }
 #' @export
 plotMutations = function(insilicopopulation, insilicosystem, scaleLims = NULL, qtlEffectCoeffs = insilicopopulation$indargs$qtlnames, inds = names(insilicopopulation$individualsList), alleles = insilicopopulation$indargs$gcnList, genes = 1:length(insilicopopulation$GenesVariants), nGenesPerRow = 10, ...){

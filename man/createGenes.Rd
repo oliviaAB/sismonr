@@ -36,3 +36,6 @@ regulator, "PD": protein decay regulator, "PTM": post-translational modification
 \description{
 Generates the genes in the system and their attributes, according to the user parameters.
 }
+\examples{
+createGenes(insilicosystemargs(G = 5))
+}

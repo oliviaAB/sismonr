@@ -24,3 +24,6 @@ An object of the class \code{insilicoindividualargs}, that is a named list of th
 \description{
 Constructor function for the \code{insilicoindividualargs} class, with default values for the parameters if not provided by the user.
 }
+\examples{
+indargs = insilicoindividualargs(ploidy = 4)
+}

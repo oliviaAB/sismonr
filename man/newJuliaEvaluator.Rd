@@ -18,3 +18,8 @@ A Julia Evaluator from the XRJulia package.
 \details{
 If no port number is specified, the \code{RJulia} function chooses a port to open the evaluator.
 }
+\examples{
+\donttest{
+ev = newJuliaEvaluator()
+}
+}

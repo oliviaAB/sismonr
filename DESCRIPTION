@@ -1,14 +1,14 @@
 Package: sismonr
 Type: Package
 Title: Simulation of in Silico Multi-Omic Networks
-Version: 1.1.1
+Version: 1.1.2
 Authors@R: c(
     person("Olivia", "Angelin-Bonnet", email = "olivia.angelinbonnet@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-7708-2919")),
     person("Patrick", "Biggs", role = c("aut"), comment = c(ORCID = "0000-0002-0285-4101")),
     person("Matthieu", "Vignes", role = c("aut"), comment = c(ORCID = "0000-0001-8929-2975")),
     person("John M.", "Chambers", role = c("ctb")))
 Maintainer: Olivia Angelin-Bonnet <olivia.angelinbonnet@gmail.com>
-Description: A tool for the simulation of gene expression profiles for in silico regulatory networks. The package generates gene regulatory networks, which include protein-coding and noncoding genes linked via different types of regulation: regulation of transcription, translation, RNA or protein decay, and post-translational modifications. The effect of genetic mutations on the system behaviour is accounted for via the simulation of genetically different in silico individuals. The ploidy of the system is not restricted to the usual haploid or diploid situations, but is defined by the user. A choice of stochastic simulation algorithms allow us to simulate the expression profiles (RNA and if applicable protein abundance) of the genes in the in silico system for the different in silico individuals. A tutorial explaining how to use the package is available at <https://oliviaab.github.io/sismonr/>.
+Description: A tool for the simulation of gene expression profiles for in silico regulatory networks. The package generates gene regulatory networks, which include protein-coding and noncoding genes linked via different types of regulation: regulation of transcription, translation, RNA or protein decay, and post-translational modifications. The effect of genetic mutations on the system behaviour is accounted for via the simulation of genetically different in silico individuals. The ploidy of the system is not restricted to the usual haploid or diploid situations, but is defined by the user. A choice of stochastic simulation algorithms allow us to simulate the expression profiles (RNA and if applicable protein abundance) of the genes in the in silico system for the different in silico individuals. A tutorial explaining how to use the package is available at <https://oliviaab.github.io/sismonr/>. Manuscript in preparation; see also Angelin-Bonnet O., Biggs P.J. and Vignes M. (2018) <doi:10.1109/BIBM.2018.8621131>.
 License: GPL (>= 2)
 Encoding: UTF-8
 LazyData: true
@@ -41,5 +41,6 @@ Suggests:
     knitr,
     rmarkdown,
     tcltk,
-    rgl
+    rgl,
+    testthat (>= 2.1.0)
 VignetteBuilder: knitr

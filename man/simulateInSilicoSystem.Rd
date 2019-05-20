@@ -6,7 +6,7 @@
 \usage{
 simulateInSilicoSystem(insilicosystem, insilicopopulation, simtime,
   nepochs = -1, ntrials = 1, simalgorithm = "Direct",
-  writefile = F, filepath = getwd(), filename = "simulation",
+  writefile = F, filepath = NULL, filename = "simulation",
   ev = getJuliaEvaluator())
 }
 \arguments{
