@@ -1,3 +1,6 @@
+# sismonr 1.1.3
+* .onAttach function fixed for Solaris installation.
+
 # sismonr 1.1.2
 * Added tests (with condition for skipping tests if Julia v1.0 or later is not installed)
 * Re-submission to CRAN
