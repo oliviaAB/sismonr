@@ -1,3 +1,6 @@
+# sismonr 1.1.4
+* tests fixed for Solaris installation.
+
 # sismonr 1.1.3
 * .onAttach function fixed for Solaris installation.
 
