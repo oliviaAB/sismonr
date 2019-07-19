@@ -1,6 +1,6 @@
 # sismonr - Simulation of In Silico Multi-Omic Networks R package
 
-[![Travis build status](https://travis-ci.org/oliviaAB/sismonr.svg?branch=master)](https://travis-ci.org/oliviaAB/sismonr)  [![Latest](https://img.shields.io/badge/Documentation-latest-blue.svg)](https://oliviaab.github.io/sismonr/) [![CRAN](https://img.shields.io/cran/v/sismonr.svg?color=green)](https://img.shields.io/cran/v/sismonr.svg?color=green) [![License](https://img.shields.io/cran/l/sismonr.svg)](https://img.shields.io/cran/l/sismonr.svg)
+[![Travis build status](https://travis-ci.org/oliviaAB/sismonr.svg?branch=master)](https://travis-ci.org/oliviaAB/sismonr)  [![Latest](https://img.shields.io/badge/Documentation-latest-blue.svg)](https://oliviaab.github.io/sismonr/) [![CRAN](https://img.shields.io/cran/v/sismonr.svg?color=green)](https://CRAN.R-project.org/package=sismonr) [![License](https://img.shields.io/cran/l/sismonr.svg)](hhttps://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 ## sismonr
 
 `sismonr` is a package for the simulation of gene expression profiles for *in silico* regulatory systems. Some innovative features of the model include:
