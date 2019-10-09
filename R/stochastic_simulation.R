@@ -40,7 +40,10 @@ df2list = function(mydf){
 #' @export
 createStochSystem = function(insilicosystem, indargs, writefile = F, filepath = NULL, filename = "simulation", verbose = T, ev = getJuliaEvaluator()){
 
-  if(is.null(filepath)) writefile = F; filepath = character(0)
+  if(is.null(filepath)){
+    writefile = F
+    filepath = character(0)
+  }
 
   ## Creating the networks lists to be sent to Julia (converted to dictionaries in Julia)
   temp = names(insilicosystem$mosystem)
