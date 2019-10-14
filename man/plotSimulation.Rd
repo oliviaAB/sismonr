@@ -48,9 +48,9 @@ and the min and max abundances represented as coloured areas around the mean.
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
-sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+mypop = createInSilicoPopulation(15, mysystem)
+sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 plotSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
  axis.title = element_text(color = "red"))
 }

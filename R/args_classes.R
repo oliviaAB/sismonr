@@ -16,6 +16,7 @@
 #' Accordingly, if the user only sets NC.TC.p to 0.6, then NC.TL.p, NC.RD.p, NC.PD.p and NC.PTM.p are all set to 0.1.
 #'
 #' @param G Integer. Number of genes in the system. Default value is 10.
+#' @param ploidy Numeric. The ploidy of the system, i.e. how many copies of each gene are present in the system. Default value is 2.
 #' @param PC.p Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.
 #' @param PC.TC.p Numeric. Probability of a protein-coding gene to be a regulator of transcription. Default value is 0.4 (see details).
 #' @param PC.TL.p Numeric. Probability of a protein-coding gene to be a regulator of translation. Default value is 0.3 (see details).
@@ -127,6 +128,7 @@
 #' @export
 insilicosystemargs <- function(
   G = 10,
+  ploidy = 2,
   PC.p = 0.7,
   PC.TC.p = NULL,
   PC.TL.p = NULL,
@@ -278,8 +280,6 @@ insilicosystemargs <- function(
   }
 
 
-
-
   ## There cannot be negative regulation for transcript and protein decay
   RD.pos.p = 1 ## RD.PC.pos.p: probability that the RNA decay is positively regulated by protein regulators (faster decay)
   PD.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
@@ -288,7 +288,10 @@ insilicosystemargs <- function(
   #  PD.PC.pos.p = 1 ## PD.PC.pos.p: probability that the protein decay is positively regulated by protein regulators (faster decay)
   #  PD.NC.pos.p = 1 ## PD.NC.pos.p: probability that the protein decay is positively regulated by noncoding regulators (faster decay)
 
+  gcnList = sapply(1:ploidy, function(x){paste0("GCN", x)})
+
   value = list(  "G" = G,
+                 "ploidy" = ploidy,
                  "PC.p" = PC.p,
                  "PC.TC.p" = PC.TC.p,
                  "PC.TL.p" = PC.TL.p,
@@ -384,7 +387,8 @@ insilicosystemargs <- function(
                  "regcomplexes.p" = regcomplexes.p,
                  "regcomplexes.size" = regcomplexes.size ,
                  "complexesformationrate_samplingfct" = complexesformationrate_samplingfct,
-                 "complexesdissociationrate_samplingfct" = complexesdissociationrate_samplingfct)
+                 "complexesdissociationrate_samplingfct" = complexesdissociationrate_samplingfct,
+                 "gcnList" = gcnList)
 
   attr(value, "class") = "insilicosystemargs"
   return(value)
@@ -397,28 +401,23 @@ insilicosystemargs <- function(
 #'
 #' Constructor function for the \code{insilicoindividualargs} class, with default values for the parameters if not provided by the user.
 #'
-#' @param ploidy Integer. Number of alleles for each gene (ploidy of the individuals). Default value is 2.
 #' @param ngenevariants Integer. Number of alleles existing for each gene and segregating in the in silico population. Default value is 5.
 #' @param qtleffect_samplingfct Function from which is sampled the value of a QTL effect coefficient (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
 #' @param initvar_samplingfct Function from which is sampled the variation of the initial abundance of a species (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
 #' @return An object of the class \code{insilicoindividualargs}, that is a named list of the different parameters.
 #' @examples
-#' indargs = insilicoindividualargs(ploidy = 4)
+#' indargs = insilicoindividualargs(ngenevariants = 3)
 #' @export
 insilicoindividualargs <- function(
-  ploidy = 2,
   ngenevariants = 5,
   qtleffect_samplingfct = function(x){truncnorm::rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1)},
   initvar_samplingfct = function(x){truncnorm::rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1)}
 ){
-  gcnList = sapply(1:ploidy, function(x){paste0("GCN", x)})
   ## qtlnames: names of the qtl effect coefficients
   ## The first 5 are the qtl affecting all genes, the last 5 only affect protein coding genes
   qtlnames = c("qtlTCrate", "qtlRDrate", "qtlTCregbind", "qtlRDregrate", "qtlactivity", "qtlTLrate", "qtlPDrate", "qtlTLregbind", "qtlPDregrate", "qtlPTMregrate")
 
-  value = list("ploidy" = ploidy,
-               "gcnList" = gcnList,
-               "ngenevariants" = ngenevariants,
+  value = list("ngenevariants" = ngenevariants,
                "qtleffect_samplingfct" = qtleffect_samplingfct,
                "initvar_samplingfct" = initvar_samplingfct,
                "qtlnames" = qtlnames

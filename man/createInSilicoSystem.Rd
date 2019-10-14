@@ -40,6 +40,6 @@ mysystem2$genes
 ## all noncoding and all regulators of transcription
 mysystem3 = createInSilicoSystem(G = 5, PC.p = 0, NC.TC.p = 1)
 mysystem3$edg
-mysystem3$TCRN_edg
+mysystem3$mosystem$TCRN_edg
 }
 }

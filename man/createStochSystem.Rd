@@ -4,14 +4,11 @@
 \alias{createStochSystem}
 \title{Creates a stochastic system from an in silico system.}
 \usage{
-createStochSystem(insilicosystem, indargs, writefile = F,
-  filepath = NULL, filename = "simulation", verbose = T,
-  ev = getJuliaEvaluator())
+createStochSystem(insilicosystem, writefile = F, filepath = NULL,
+  filename = "simulation", verbose = T, ev = getJuliaEvaluator())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}
-
-\item{indargs}{An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).}
 
 \item{writefile}{Does the julia function write the species and reactions lists in a text file?}
 
@@ -32,7 +29,6 @@ Creates a list of molecules, reactions and associated propensities to represent 
 \examples{
 \donttest{
 mysystem = createInSilicoSystem(G = 5)
-indargs = insilicoindividualargs()
-stochsys = createStochSystem(mysystem, indargs)
+stochsys = createStochSystem(mysystem)
 }
 }

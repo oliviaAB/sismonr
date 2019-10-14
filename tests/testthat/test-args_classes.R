@@ -8,7 +8,8 @@ test_that("creation of insilicosystemargs works", {
                                PC.TL.p = 0,
                                NC.RD.p = 0.8,
                                NC.PD.p = 0.8,
-                               basal_translation_rate_samplingfct = function(x){runif(x, 0.1, 0.2)})
+                               basal_translation_rate_samplingfct = function(x){runif(x, 0.1, 0.2)},
+                               ploidy = 4)
 
   expect_equal(sysargs$G, 3)
   expect_equal(c(sysargs$PC.p, sysargs$NC.p), c(0.4, 0.6))
@@ -18,13 +19,14 @@ test_that("creation of insilicosystemargs works", {
   expect_equal(sysargs$PD.pos.p, 1)
   expect_true(all(sysargs[["basal_translation_rate_samplingfct"]](100) <= 0.2 & sysargs[["basal_translation_rate_samplingfct"]](100) >= 0.1))
   expect_equal(length(sysargs[["basal_translation_rate_samplingfct"]](10)), 10)
+  expect_equal(sysargs$ploidy, 4)
+  expect_equal(sysargs$gcnList, c("GCN1", "GCN2","GCN3","GCN4"))
   expect_is(sysargs, "insilicosystemargs")
 })
 
 test_that("creation of insilicoindividualargs works", {
-  indargs = insilicoindividualargs(ploidy = 4)
+  indargs = insilicoindividualargs()
 
-  expect_equal(length(indargs$gcnList), indargs$ploidy)
   expect_equal(length(indargs[["qtleffect_samplingfct"]](10)), 10)
   expect_is(indargs, "insilicoindividualargs")
 })

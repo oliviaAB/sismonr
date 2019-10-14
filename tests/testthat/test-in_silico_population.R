@@ -29,13 +29,14 @@ test_that("creation of variants works",{
 })
 
 test_that("creation of in silico individuals works", {
-  indargs = insilicoindividualargs(ploidy = 4, ngenevariants = 2)
+  sysargs = insilicosystemargs(ploidy = 4)
+  indargs = insilicoindividualargs(ngenevariants = 2)
   genes = createGenes(insilicosystemargs(G = 3))
   genvariants = createVariants(genes, indargs)
   genvariants.freq = list(`1` = c(0, 1),
                           `2` = rep(0.5, 2),
                           `3` = rep(0.5, 2))
-  myind = createIndividual(genvariants, genvariants.freq, indargs)
+  myind = createIndividual(genvariants, genvariants.freq, indargs, sysargs)
   qtlvalues = sapply(rownames(genvariants[[1]]), function(x){myind$QTLeffects$GCN1[[x]][1]})
 
   expect_equal(dim(myind$haplotype), c(3, 4))
@@ -46,8 +47,8 @@ test_that("creation of in silico individuals works", {
 
 test_that("creation of in silico population works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 5)
-  mypop = createInSilicoPopulation(nInd = 3, mysystem, ploidy = 4, ngenevariants = 2, sameInit = T)
+  mysystem = createInSilicoSystem(G = 5, ploidy = 4)
+  mypop = createInSilicoPopulation(nInd = 3, mysystem, ngenevariants = 2, sameInit = T)
 
   expect_equal(length(mypop$individualsList), 3)
   expect_equal(length(mypop$GenesVariants), 5)

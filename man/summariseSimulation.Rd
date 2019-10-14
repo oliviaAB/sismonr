@@ -36,9 +36,9 @@ Returns a summary data-frame of a simulation giving the maximum average abundanc
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
-sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+mypop = createInSilicoPopulation(15, mysystem)
+sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 summariseSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"))
 }
 }

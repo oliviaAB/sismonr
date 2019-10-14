@@ -48,8 +48,8 @@ Simulates (stochastically) the behaviour of an in silico system over time using 
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+mypop = createInSilicoPopulation(15, mysystem)
 sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
 head(sim$Simulation)
 ## Visualising the result

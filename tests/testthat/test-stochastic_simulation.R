@@ -21,15 +21,14 @@ check_julia = function(){
 
 test_that("creation of stochastic system from empty system works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 5, empty = T, PC.p = 1)
-  indargs = insilicoindividualargs(ploidy = 3)
-  stochsys = createStochSystem(mysystem, indargs)
+  mysystem = createInSilicoSystem(G = 5, empty = T, PC.p = 1, ploidy = 3)
+  stochsys = createStochSystem(mysystem)
   dictkeys = juliaGet(juliaEval("collect(keys(%s))", stochsys))
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
-  mysystemNC = createInSilicoSystem(G = 5, empty = T, PC.p = 0)
-  stochsysNC = createStochSystem(mysystemNC, indargs)
+  mysystemNC = createInSilicoSystem(G = 5, empty = T, PC.p = 0, ploidy = 3)
+  stochsysNC = createStochSystem(mysystemNC)
   speciesNC = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsysNC)))
   reactionsNC = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsysNC)))
 
@@ -47,11 +46,10 @@ test_that("creation of stochastic system from empty system works", {
 
 test_that("creation of stochastic system for TC reaction works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.TC.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.TC.p = 1, ploidy = 2)
   mysystem = addEdge(mysystem, 1, 3, regsign = "1")
   mysystem = addEdge(mysystem, 2, 3, regsign = "-1")
-  indargs = insilicoindividualargs(ploidy = 2)
-  stochsys = createStochSystem(mysystem, indargs)
+  stochsys = createStochSystem(mysystem)
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -65,11 +63,10 @@ test_that("creation of stochastic system for TC reaction works", {
 
 test_that("creation of stochastic system for TL reaction works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.TL.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.TL.p = 1, ploidy = 2)
   mysystem = addEdge(mysystem, 1, 3, regsign = "1")
   mysystem = addEdge(mysystem, 2, 3, regsign = "-1")
-  indargs = insilicoindividualargs(ploidy = 2)
-  stochsys = createStochSystem(mysystem, indargs)
+  stochsys = createStochSystem(mysystem)
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -84,11 +81,10 @@ test_that("creation of stochastic system for TL reaction works", {
 
 test_that("creation of stochastic system for RD reaction works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.RD.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.RD.p = 1, ploidy = 2)
   mysystem = addEdge(mysystem, 1, 3)
   mysystem = addEdge(mysystem, 2, 3)
-  indargs = insilicoindividualargs(ploidy = 2)
-  stochsys = createStochSystem(mysystem, indargs)
+  stochsys = createStochSystem(mysystem)
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -100,11 +96,10 @@ test_that("creation of stochastic system for RD reaction works", {
 
 test_that("creation of stochastic system for PD reaction works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.PD.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.PD.p = 1, ploidy = 2)
   mysystem = addEdge(mysystem, 1, 3)
   mysystem = addEdge(mysystem, 2, 3)
-  indargs = insilicoindividualargs(ploidy = 2)
-  stochsys = createStochSystem(mysystem, indargs)
+  stochsys = createStochSystem(mysystem)
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -115,11 +110,10 @@ test_that("creation of stochastic system for PD reaction works", {
 
 test_that("creation of stochastic system for PTM reaction works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.PTM.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.PTM.p = 1, ploidy = 2)
   mysystem = addEdge(mysystem, 1, 3)
   mysystem = addEdge(mysystem, 2, 3)
-  indargs = insilicoindividualargs(ploidy = 2)
-  stochsys = createStochSystem(mysystem, indargs)
+  stochsys = createStochSystem(mysystem)
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -132,11 +126,10 @@ test_that("creation of stochastic system for PTM reaction works", {
 
 test_that("creation of stochastic system for regulatory complex works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.TC.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.TC.p = 1, ploidy = 2)
   mysystem = addComplex(mysystem, c(1, 2))
   mysystem = addEdge(mysystem, "CTC1", 3, regsign = "1")
-  indargs = insilicoindividualargs(ploidy = 2)
-  stochsys = createStochSystem(mysystem, indargs)
+  stochsys = createStochSystem(mysystem)
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -153,8 +146,8 @@ test_that("creation of stochastic system for regulatory complex works", {
 
 test_that("simulation of in silico system works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", empty = T, PC.p = 1)
-  mypop = createInSilicoPopulation(3, mysystem, ploidy = 2)
+  mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", empty = T, PC.p = 1, ploidy = 2)
+  mypop = createInSilicoPopulation(3, mysystem)
   sim = simulateInSilicoSystem(mysystem, mypop, simtime = 10, ntrials = 2, nepochs = 5)
 
   expect_equal(dim(sim$Simulation), c(2*3*6, ## 2 trials, for 3 individuals, with 5+1 time-points recorded
@@ -164,10 +157,10 @@ test_that("simulation of in silico system works", {
 
 test_that("merging functions for simulation results works", {
   check_julia()
-  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.PTM.p = 1)
+  mysystem = createInSilicoSystem(G = 3, empty = T, PC.p = 1, PC.PTM.p = 1, ploidy = 2)
   mysystem = addComplex(mysystem, c(1, 2))
   mysystem = addEdge(mysystem, "CPTM1", 3, regsign = "1")
-  mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+  mypop = createInSilicoPopulation(1, mysystem)
   sim = simulateInSilicoSystem(mysystem, mypop, simtime = 10, ntrials = 1, nepochs = 5)
   simNoAllele = mergeAlleleAbundance(sim$Simulation)
   simNoPTM = mergePTMAbundance(sim$Simulation)

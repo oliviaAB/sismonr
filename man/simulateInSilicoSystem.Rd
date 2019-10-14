@@ -45,8 +45,8 @@ Simulates (stochastically) the behaviour of an in silico system over time, i.e. 
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+mypop = createInSilicoPopulation(1, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, simtime = 1000, ntrials = 10)
 head(sim$Simulation)
 ## Visualising the result

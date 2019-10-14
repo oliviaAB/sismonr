@@ -4,7 +4,7 @@
 \alias{insilicosystemargs}
 \title{Constructor function for the \code{insilicosystemsargs} class.}
 \usage{
-insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
+insilicosystemargs(G = 10, ploidy = 2, PC.p = 0.7, PC.TC.p = NULL,
   PC.TL.p = NULL, PC.RD.p = NULL, PC.PD.p = NULL, PC.PTM.p = NULL,
   PC.MR.p = NULL, NC.TC.p = NULL, NC.TL.p = NULL, NC.RD.p = NULL,
   NC.PD.p = NULL, NC.PTM.p = NULL, TC.pos.p = 0.5, TL.pos.p = 0.5,
@@ -48,6 +48,8 @@ insilicosystemargs(G = 10, PC.p = 0.7, PC.TC.p = NULL,
 }
 \arguments{
 \item{G}{Integer. Number of genes in the system. Default value is 10.}
+
+\item{ploidy}{Numeric. The ploidy of the system, i.e. how many copies of each gene are present in the system. Default value is 2.}
 
 \item{PC.p}{Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.}
 

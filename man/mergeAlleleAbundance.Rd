@@ -18,8 +18,8 @@ Merge (i.e. sum) the abundance of the different allelic versions of each molecul
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, empty = TRUE)
-mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+mysystem = createInSilicoSystem(G = 5, empty = TRUE, ploidy = 2)
+mypop = createInSilicoPopulation(1, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)
 head(sim$Simulation)
 mergedAllelic = mergeAlleleAbundance(sim$Simulation)

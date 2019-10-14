@@ -4,14 +4,12 @@
 \alias{insilicoindividualargs}
 \title{Constructor function for the \code{insilicoindividualargs} class.}
 \usage{
-insilicoindividualargs(ploidy = 2, ngenevariants = 5,
+insilicoindividualargs(ngenevariants = 5,
   qtleffect_samplingfct = function(x) {     truncnorm::rtruncnorm(x, a =
   0, b = Inf, mean = 1, sd = 0.1) }, initvar_samplingfct = function(x) { 
      truncnorm::rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1) })
 }
 \arguments{
-\item{ploidy}{Integer. Number of alleles for each gene (ploidy of the individuals). Default value is 2.}
-
 \item{ngenevariants}{Integer. Number of alleles existing for each gene and segregating in the in silico population. Default value is 5.}
 
 \item{qtleffect_samplingfct}{Function from which is sampled the value of a QTL effect coefficient (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).}
@@ -25,5 +23,5 @@ An object of the class \code{insilicoindividualargs}, that is a named list of th
 Constructor function for the \code{insilicoindividualargs} class, with default values for the parameters if not provided by the user.
 }
 \examples{
-indargs = insilicoindividualargs(ploidy = 4)
+indargs = insilicoindividualargs(ngenevariants = 3)
 }

@@ -37,18 +37,17 @@ Creates a population of in silico individuals to be simulated.
 }
 \examples{
 \donttest{
-## Creating the in silico system (with 6 genes)
-mysystem = createInSilicoSystem(G = 6)
-
 ## Creating a first population with 3 diploid individuals,
 ## with 2 variants of each gene segregating in the population
-mypop1 = createInSilicoPopulation(nInd = 3, mysystem, ploidy = 2, ngenevariants = 2)
+mysystem = createInSilicoSystem(G = 6, ploidy = 2)
+mypop1 = createInSilicoPopulation(nInd = 3, mysystem, ngenevariants = 2)
 
 ## Creating a population with 10 tetraploid individuals
-mypop2 = createInSilicoPopulation(nInd = 10, mysystem, ploidy = 4)
+mysystem = createInSilicoSystem(G = 6, ploidy = 4)
+mypop2 = createInSilicoPopulation(nInd = 10, mysystem)
 
 ## Creating a population with a given list of gene variants
-mysystem = createInSilicoSystem(G = 3, PC.p = 1)
+mysystem = createInSilicoSystem(G = 3, PC.p = 1, ploidy = 2)
 
 ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
 ## 2 variants of gene 3

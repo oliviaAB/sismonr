@@ -4,7 +4,8 @@
 \alias{createIndividual}
 \title{Creates an in silico individual.}
 \usage{
-createIndividual(variantsList, variantsFreq, indargs, sameInit = F)
+createIndividual(variantsList, variantsFreq, indargs, sysargs,
+  sameInit = F)
 }
 \arguments{
 \item{variantsList}{A named list giving the variants segregating in the population for each gene (e.g. created by \code{\link{createVariants}}). Each element corresponds to one gene in the system (name of the element = gene ID).
@@ -15,6 +16,8 @@ Each element is a matrix, in which each column represents a variant of the gene 
 Each element is a vector, of length equal to the number of variants of the gene segregating in the population, giving the allele frequency of each of the variants.}
 
 \item{indargs}{An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).}
+
+\item{sysargs}{An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).}
 
 \item{sameInit}{Boolean. Does the individual have identical initial abundance to the rest of the population?}
 }
@@ -36,7 +39,8 @@ vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (
 Creates a in silico individual to be simulated (object of class \code{insilicoindividual}).
 }
 \examples{
-indargs = insilicoindividualargs(ploidy = 4)
+sysargs = insilicosystemargs(ploidy = 4)
+indargs = insilicoindividualargs()
 ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
 ## 2 variants of gene 3
 nbvariants = c(1, 3, 2)
@@ -67,5 +71,5 @@ genvariants.freq = list('1' = c(1),
                         '2' = c(0.6, 0.3, 0.1),
                         '3' = c(0.9, 0.1))
 
-myind = createIndividual(genvariants, genvariants.freq, indargs)
+myind = createIndividual(genvariants, genvariants.freq, indargs, sysargs)
 }

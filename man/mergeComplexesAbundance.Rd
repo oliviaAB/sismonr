@@ -18,9 +18,9 @@ Merge (i.e. sum) the abundance of the free and in-complex versions of each molec
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1)
+mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1, ploidy = 1)
 mysystem = addComplex(mysystem, c(1, 2))
-mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+mypop = createInSilicoPopulation(1, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)
 head(sim$Simulation)
 mergedComplex = mergeComplexesAbundance(sim$Simulation)

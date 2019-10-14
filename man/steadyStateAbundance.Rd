@@ -4,7 +4,7 @@
 \alias{steadyStateAbundance}
 \title{Computes the steady state abundance of a molecule.}
 \usage{
-steadyStateAbundance(id, genes, complexes)
+steadyStateAbundance(id, genes, complexes, ploidy)
 }
 \arguments{
 \item{id}{the ID of the molecule.}
@@ -12,6 +12,8 @@ steadyStateAbundance(id, genes, complexes)
 \item{genes}{the data frame of genes in the in silico system.}
 
 \item{complexes}{the list of regulatory complexes and their composition.}
+
+\item{ploidy}{the ploidy of the system.}
 }
 \value{
 The steady state abundance of the active product of the gene/regulatory complex.

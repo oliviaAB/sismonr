@@ -64,6 +64,7 @@ createVariants = function(genes, indargs){
 #' @param variantsFreq A named list giving for each gene the allelic frequency of each segregating variant. Each element corresponds to one gene in the system (name of the element = gene ID).
 #' Each element is a vector, of length equal to the number of variants of the gene segregating in the population, giving the allele frequency of each of the variants.
 #' @param indargs An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).
+#' @param sysargs An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).
 #' @param sameInit Boolean. Does the individual have identical initial abundance to the rest of the population?
 #' @return An object of class \code{insilicoindividual}, that is a list composed of:
 #' \itemize{
@@ -78,7 +79,8 @@ createVariants = function(genes, indargs){
 #' vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
 #' }
 #' @examples
-#' indargs = insilicoindividualargs(ploidy = 4)
+#' sysargs = insilicosystemargs(ploidy = 4)
+#' indargs = insilicoindividualargs()
 #' ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
 #' ## 2 variants of gene 3
 #' nbvariants = c(1, 3, 2)
@@ -109,28 +111,28 @@ createVariants = function(genes, indargs){
 #'                         '2' = c(0.6, 0.3, 0.1),
 #'                         '3' = c(0.9, 0.1))
 #'
-#' myind = createIndividual(genvariants, genvariants.freq, indargs)
+#' myind = createIndividual(genvariants, genvariants.freq, indargs, sysargs)
 #' @export
-createIndividual = function(variantsList, variantsFreq, indargs, sameInit = F){
+createIndividual = function(variantsList, variantsFreq, indargs, sysargs, sameInit = F){
 
   ## Create the QTL effect coefficients list ----
 
   G = length(variantsList)
-  QTLeffects = vector("list", indargs$ploidy)
-  names(QTLeffects) = indargs$gcnList
+  QTLeffects = vector("list", sysargs$ploidy)
+  names(QTLeffects) = sysargs$gcnList
 
   ## individualvariants: data frame where rows are genes and columns are "copy number" ids i.e. each columns represent a homolog chromosom
   ## Element i, j in the data frame corresponds to the variant of gene i present in the homolog chromosom j
-#  individualvariants = as.data.frame(matrix(sample(1:indargs$ngenevariants, G*indargs$ploidy, replace = T), nrow = G, ncol = indargs$ploidy))
+#  individualvariants = as.data.frame(matrix(sample(1:indargs$ngenevariants, G*sysargs$ploidy, replace = T), nrow = G, ncol = sysargs$ploidy))
   temp = vector("list", length = G)
   for(g in 1:G){
-  temp[[g]] = sample(1:ncol(variantsList[[paste(g)]]), indargs$ploidy, replace = T, prob = variantsFreq[[paste(g)]])
+  temp[[g]] = sample(1:ncol(variantsList[[paste(g)]]), sysargs$ploidy, replace = T, prob = variantsFreq[[paste(g)]])
   }
   individualvariants = as.data.frame(do.call(rbind, temp))
-  names(individualvariants) = indargs$gcnList
+  names(individualvariants) = sysargs$gcnList
 
   ## Work for each gene copy (here in the sense each homolog chromosome)
-  for(gcn in indargs$gcnList){
+  for(gcn in sysargs$gcnList){
     QTLeffects[[gcn]] = vector("list", length(indargs$qtlnames))
     names(QTLeffects[[gcn]]) = indargs$qtlnames
     for(q in indargs$qtlnames){
@@ -143,16 +145,16 @@ createIndividual = function(variantsList, variantsFreq, indargs, sameInit = F){
 
   ## Create the Initial abundance variation coefficients list ----
 
-  InitVar = vector("list", indargs$ploidy)
-  names(InitVar) = indargs$gcnList
+  InitVar = vector("list", sysargs$ploidy)
+  names(InitVar) = sysargs$gcnList
 
   if(sameInit){ ## if sameInit = T, we want the initial abundance of each molecule to be equal to the default value (no variation between individuals)
-    for(gcn in indargs$gcnList){
+    for(gcn in sysargs$gcnList){
       InitVar[[gcn]] = list("R" = rep(1.0, G),
                             "P" = rep(1.0, G))
     }
   }else{
-    for(gcn in indargs$gcnList){
+    for(gcn in sysargs$gcnList){
       InitVar[[gcn]] = list("R" = indargs$initvar_samplingfct(G),
                             "P" = indargs$initvar_samplingfct(G))
     }
@@ -186,18 +188,17 @@ createIndividual = function(variantsList, variantsFreq, indargs, sameInit = F){
 #' }
 #' @examples
 #' \donttest{
-#' ## Creating the in silico system (with 6 genes)
-#' mysystem = createInSilicoSystem(G = 6)
-#'
 #' ## Creating a first population with 3 diploid individuals,
 #' ## with 2 variants of each gene segregating in the population
-#' mypop1 = createInSilicoPopulation(nInd = 3, mysystem, ploidy = 2, ngenevariants = 2)
+#' mysystem = createInSilicoSystem(G = 6, ploidy = 2)
+#' mypop1 = createInSilicoPopulation(nInd = 3, mysystem, ngenevariants = 2)
 #'
 #' ## Creating a population with 10 tetraploid individuals
-#' mypop2 = createInSilicoPopulation(nInd = 10, mysystem, ploidy = 4)
+#' mysystem = createInSilicoSystem(G = 6, ploidy = 4)
+#' mypop2 = createInSilicoPopulation(nInd = 10, mysystem)
 #'
 #' ## Creating a population with a given list of gene variants
-#' mysystem = createInSilicoSystem(G = 3, PC.p = 1)
+#' mysystem = createInSilicoSystem(G = 3, PC.p = 1, ploidy = 2)
 #'
 #' ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
 #' ## 2 variants of gene 3
@@ -262,7 +263,7 @@ createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, ge
   names(individualsList) = indnames
 
   for(i in indnames){
-    individualsList[[i]] = createIndividual(genvariants, genvariants.freq, indargs, sameInit = sameInit)
+    individualsList[[i]] = createIndividual(genvariants, genvariants.freq, indargs, insilicosystem$sysargs, sameInit = sameInit)
   }
 
   value = list("GenesVariants" = genvariants, "individualsList" = individualsList, "indargs" = indargs)
@@ -293,15 +294,15 @@ createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, ge
 #' related to protein or translation) and are represented in gray as NA.
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 10)
-#' mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
+#' mysystem = createInSilicoSystem(G = 10, ploidy = 2)
+#' mypop = createInSilicoPopulation(10, mysystem)
 #' plotMutations(mypop, mysystem)
 #' ## Only plot the 1st allele of each genes for the genes 1 to 5 and the individuals 1 to 3
 #' plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5,
 #'  inds = c("Ind1", "Ind2", "Ind3"))
 #' }
 #' @export
-plotMutations = function(insilicopopulation, insilicosystem, scaleLims = NULL, qtlEffectCoeffs = insilicopopulation$indargs$qtlnames, inds = names(insilicopopulation$individualsList), alleles = insilicopopulation$indargs$gcnList, genes = 1:length(insilicopopulation$GenesVariants), nGenesPerRow = 10, ...){
+plotMutations = function(insilicopopulation, insilicosystem, scaleLims = NULL, qtlEffectCoeffs = insilicopopulation$indargs$qtlnames, inds = names(insilicopopulation$individualsList), alleles = insilicosystem$sysargs$gcnList, genes = 1:length(insilicopopulation$GenesVariants), nGenesPerRow = 10, ...){
 
   genes = as.numeric(genes)
 

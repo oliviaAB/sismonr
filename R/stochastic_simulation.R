@@ -24,7 +24,6 @@ df2list = function(mydf){
 #' Creates a list of molecules, reactions and associated propensities to represent the in silico system.
 #'
 #' @param insilicosystem The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).
-#' @param indargs An object of class \code{insilicoindividualargs} (i.e. a list with parameters for in silico individuals generation).
 #' @param writefile Does the julia function write the species and reactions lists in a text file?
 #' @param filepath If writefile = \code{TRUE}, path to the folder in which the files will be created (default: current working directory).
 #' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions (default: none).
@@ -34,11 +33,10 @@ df2list = function(mydf){
 #' @examples
 #' \donttest{
 #' mysystem = createInSilicoSystem(G = 5)
-#' indargs = insilicoindividualargs()
-#' stochsys = createStochSystem(mysystem, indargs)
+#' stochsys = createStochSystem(mysystem)
 #' }
 #' @export
-createStochSystem = function(insilicosystem, indargs, writefile = F, filepath = NULL, filename = "simulation", verbose = T, ev = getJuliaEvaluator()){
+createStochSystem = function(insilicosystem, writefile = F, filepath = NULL, filename = "simulation", verbose = T, ev = getJuliaEvaluator()){
 
   if(is.null(filepath)){
     writefile = F
@@ -63,7 +61,7 @@ createStochSystem = function(insilicosystem, indargs, writefile = F, filepath = 
   if(verbose) message("Generating the stochastic system...")
   juliastochsystem = juliaCall("juliaCreateStochasticSystem",
                           genes, get("TCRN_edg"), get("TLRN_edg"), get("RDRN_edg"), get("PDRN_edg"), get("PTMRN_edg"),
-                          complexes, complexeskinetics, indargs$gcnList,
+                          complexes, complexeskinetics, insilicosystem$sysargs$gcnList,
                           writefile, filepath, filename, evaluator = ev)
   if(verbose) message("Done.")
 
@@ -137,8 +135,8 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 #' }
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+#' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, simtime = 1000, ntrials = 10)
 #' head(sim$Simulation)
 #' ## Visualising the result
@@ -148,7 +146,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes,
 simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", ev = getJuliaEvaluator()){
 
   if(is.null(filepath)) writefile = F
-  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, verbose = T, ev = ev)
+  stochmodel = createStochSystem(insilicosystem, writefile, filepath, filename, verbose = T, ev = ev)
   message("\n")
 
   ## Store the running time of each simulation
@@ -182,9 +180,9 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
 
 
 ## function to start a Julia evaluator on a node of the cluster, given the port id (for parallel simulation)
-startJuliaEvCluster = function(portid, insilicosystem, indargs, writefile, filepath, filename){
+startJuliaEvCluster = function(portid, insilicosystem){
   myev = newJuliaEvaluator(port = portid) ## start on the node a Julia evaluator with specified port number
-  mystochmodel = createStochSystem(insilicosystem, indargs, writefile, filepath, filename, verbose = F, ev = myev)
+  mystochmodel = createStochSystem(insilicosystem, writefile = F, verbose = F, ev = myev)
   return(list("myev" = myev, "mystochmodelvar" = mystochmodel@.Data)) ## return the Julia evaluator ID and the name on the Julia process of the stochmodel object
 }
 
@@ -234,20 +232,22 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' }
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+#' mypop = createInSilicoPopulation(15, mysystem)
 #' sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
 #' head(sim$Simulation)
 #' ## Visualising the result
 #' plotSimulation(sim$Simulation)
 #' }
 #' @export
-simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
+simulateParallelInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
 
   if(is.null(filepath)) writefile = F
 
-  stochmodel = createStochSystem(insilicosystem, insilicopopulation$indargs, writefile, filepath, filename, verbose = T, ev = ev)
-  message("\n")
+  if(writefile){
+    stochmodel = createStochSystem(insilicosystem, writefile, filepath, filename, verbose = T, ev = ev)
+    message("\n")
+  }
 
   mybaseport = ev$port ## Get the port of the current Julia evaluator
   portList = sapply(1:no_cores, sum, mybaseport) ## Assign to each core a port number, starting from 1+port number of the current evaluator
@@ -264,7 +264,7 @@ simulateParallelInSilicoSystem= function(insilicosystem, insilicopopulation, sim
 
   ## Start a Julia evaluator on each cluster
   message("Starting Julia evaluators on each cluster node ... \n")
-  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster, insilicosystem, insilicopopulation$indargs, writefile, filepath, filename)
+  infocores = parallel::clusterApply(mycluster, portList, startJuliaEvCluster, insilicosystem)
   message("Done.\n")
   # parallel::clusterExport(mycluster, "infocores", envir = environment())
 
@@ -327,8 +327,8 @@ sumColAbundance = function(df, colsid){
 #' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been merged to give the abundance of the molecule (without distinction of the allele of origin).
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, empty = TRUE)
-#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 2)
+#' mysystem = createInSilicoSystem(G = 5, empty = TRUE, ploidy = 2)
+#' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
 #' head(sim$Simulation)
 #' mergedAllelic = mergeAlleleAbundance(sim$Simulation)
@@ -356,8 +356,8 @@ mergeAlleleAbundance = function(df){
 #' @return A dataframe in which the abundance of original and modified versions of a protein have been merged to give the abundance of the protein (without distinction of its post-translational modification state).
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none")
-#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none", ploidy = 1)
+#' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
 #' head(sim$Simulation)
 #' mergedPTM = mergePTMAbundance(sim$Simulation)
@@ -385,9 +385,9 @@ mergePTMAbundance = function(df){
 #' @return A dataframe in which the abundance of free and in complex versions of a molecule have been merged to give the abundance of the molecule (without distinction of whether or not it is bound in a molecular complex).
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1)
+#' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1, ploidy = 1)
 #' mysystem = addComplex(mysystem, c(1, 2))
-#' mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+#' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
 #' head(sim$Simulation)
 #' mergedComplex = mergeComplexesAbundance(sim$Simulation)
@@ -634,9 +634,9 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #' @return A plot from \code{\link[ggpubr]{ggarrange}}.
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
-#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+#' mypop = createInSilicoPopulation(15, mysystem)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 #' plotSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
 #'  axis.title = element_text(color = "red"))
 #' }
@@ -753,9 +753,9 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 #' @return A plot from \code{\link[ggpubr]{ggarrange}}.
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5)
-#' mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
-#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+#' mysystem = createInSilicoSystem(G = 5, ploidy = 2)
+#' mypop = createInSilicoPopulation(10, mysystem)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 #' plotHeatMap(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
 #'  axis.title = element_text(color = "red"))
 #' }
@@ -817,9 +817,9 @@ plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$tr
 #' @return A data-frame giving for each component (rows) and each individual (columns) the max and final average abundance over the different trials.
 #' @examples
 #' \donttest{
-#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none")
-#' mypop = createInSilicoPopulation(15, mysystem, ploidy = 2)
-#' sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
+#' mypop = createInSilicoPopulation(15, mysystem)
+#' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 #' summariseSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"))
 #' }
 #' @export

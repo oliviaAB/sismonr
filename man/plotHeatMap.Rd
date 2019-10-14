@@ -47,9 +47,9 @@ and the min and max abundances represented as coloured areas around the mean.
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5)
-mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
-sim = simulateParallelInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
+mysystem = createInSilicoSystem(G = 5, ploidy = 2)
+mypop = createInSilicoPopulation(10, mysystem)
+sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 plotHeatMap(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
  axis.title = element_text(color = "red"))
 }

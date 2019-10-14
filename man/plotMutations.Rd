@@ -7,7 +7,7 @@
 plotMutations(insilicopopulation, insilicosystem, scaleLims = NULL,
   qtlEffectCoeffs = insilicopopulation$indargs$qtlnames,
   inds = names(insilicopopulation$individualsList),
-  alleles = insilicopopulation$indargs$gcnList,
+  alleles = insilicosystem$sysargs$gcnList,
   genes = 1:length(insilicopopulation$GenesVariants),
   nGenesPerRow = 10, ...)
 }
@@ -44,8 +44,8 @@ Plots the QTL effect coefficients for all the genes of a in silico system of the
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 10)
-mypop = createInSilicoPopulation(10, mysystem, ploidy = 2)
+mysystem = createInSilicoSystem(G = 10, ploidy = 2)
+mypop = createInSilicoPopulation(10, mysystem)
 plotMutations(mypop, mysystem)
 ## Only plot the 1st allele of each genes for the genes 1 to 5 and the individuals 1 to 3
 plotMutations(mypop, mysystem, alleles = c("GCN1"), genes = 1:5,

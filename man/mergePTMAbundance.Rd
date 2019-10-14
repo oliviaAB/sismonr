@@ -18,8 +18,8 @@ Merge (i.e. sum) the abundance of the original and modified (PTM) versions of ea
 }
 \examples{
 \donttest{
-mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none")
-mypop = createInSilicoPopulation(1, mysystem, ploidy = 1)
+mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none", ploidy = 1)
+mypop = createInSilicoPopulation(1, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)
 head(sim$Simulation)
 mergedPTM = mergePTMAbundance(sim$Simulation)

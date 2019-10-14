@@ -10,14 +10,15 @@
 #' @param id the ID of the molecule.
 #' @param genes the data frame of genes in the in silico system.
 #' @param complexes the list of regulatory complexes and their composition.
+#' @param ploidy the ploidy of the system.
 #' @return The steady state abundance of the active product of the gene/regulatory complex.
-steadyStateAbundance = function(id, genes, complexes){
+steadyStateAbundance = function(id, genes, complexes, ploidy){
   if(stringr::str_detect(id, "^\\d+$")){ ## if id is a gene ID
     g = as.numeric(id)
-    RNAss = genes$TCrate[g]/genes$RDrate[g]
+    RNAss = ploidy * genes$TCrate[g]/genes$RDrate[g]
     ifelse(genes$coding[g] == "PC", RNAss * genes$TLrate[g]/genes$PDrate[g], RNAss)
   }else{ ## if id represents a regulatory complex
-    return(min(sapply(complexes[[id]], steadyStateAbundance, genes, complexes)))
+    return(min(sapply(complexes[[id]], steadyStateAbundance, genes, complexes, ploidy)))
   }
 
 }
@@ -230,7 +231,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   ##    and the fold change induced on transcription rate by a regulator bound to the promoter
 
   sampledunbindingrates = sysargs[["TCunbindingrate_samplingfct"]](nrow(TCRN_edg))
-  steadystateregs = sapply(TCRN_edg$from, steadyStateAbundance, genes, complexes)
+  steadystateregs = sapply(TCRN_edg$from, steadyStateAbundance, genes, complexes, sysargs$ploidy)
   if(nrow(TCRN_edg) > 0){
     meansbindingrates = sampledunbindingrates/steadystateregs
     sampledbindingrates = sysargs[["TCbindingrate_samplingfct"]](meansbindingrates)
@@ -265,7 +266,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
   ##    Kinetic parameters for translation regulation include the binding and unbinding rate of regulators to gene promoter,
   ##    and the fold change induced on translation rate by a regulator bound to the promoter
   sampledunbindingrates = sysargs[["TLunbindingrate_samplingfct"]](nrow(TLRN_edg))
-  steadystateregs = sapply(TLRN_edg$from, steadyStateAbundance, genes, complexes)
+  steadystateregs = sapply(TLRN_edg$from, steadyStateAbundance, genes, complexes, sysargs$ploidy)
   if(nrow(TLRN_edg) > 0){
     meansbindingrates = sampledunbindingrates/steadystateregs
     sampledbindingrates = sysargs[["TLbindingrate_samplingfct"]](meansbindingrates)
@@ -459,7 +460,7 @@ createEmptyMultiOmicNetwork = function(genes){
 #' ## all noncoding and all regulators of transcription
 #' mysystem3 = createInSilicoSystem(G = 5, PC.p = 0, NC.TC.p = 1)
 #' mysystem3$edg
-#' mysystem3$TCRN_edg
+#' mysystem3$mosystem$TCRN_edg
 #' }
 #' @export
 createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
@@ -881,7 +882,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
     if(paste0(targetreaction, "bindingrate") %in% names(kinetics)){
       sampledbindingrate = kinetics[[paste0(targetreaction, "bindingrate")]]
     }else{ ## sample binding rate according to regulator steady state abundance
-      steadystatereg = steadyStateAbundance(tarID, insilicosystem$genes, insilicosystem$complexes)
+      steadystatereg = steadyStateAbundance(tarID, insilicosystem$genes, insilicosystem$complexes, insilicosystem$sysargs$ploidy)
       sampledbindingrate = insilicosystem$sysargs[[paste0(targetreaction,"bindingrate_samplingfct")]](sampledunbindingrate/steadystatereg)
     }
 
