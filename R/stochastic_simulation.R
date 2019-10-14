@@ -74,7 +74,7 @@ createStochSystem = function(insilicosystem, writefile = F, filepath = NULL, fil
 #'
 #' @param stochmodel A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @param QTLeffects The list of QTL effects coefficients of the in silico individual to be simulated (see \code{\link{createIndividual}}).
-#' @param InitVar The list of initial abundance variation coefficients of the in silico individual to be simulated (see \code{\link{createIndividual}}).
+#' @param InitAbundance The list of initial abundances of the molecules for the in silico individual to be simulated (see \code{\link{createIndividual}}).
 #' @param genes The data-frame of genes in the system.
 #' @param simtime Numeric. The amount of time to simulate the model (in seconds).
 #' @param modelname String. The name of the model. Default value "MySimulation".
@@ -85,11 +85,11 @@ createStochSystem = function(insilicosystem, writefile = F, filepath = NULL, fil
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return The result of the simulation (a data-frame).
 #' @export
-callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitVar, genes, simtime, modelname = "MySimulation", ntrials, nepochs, simalgorithm, ev = getJuliaEvaluator()){
+callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitAbundance, genes, simtime, modelname = "MySimulation", ntrials, nepochs, simalgorithm, ev = getJuliaEvaluator()){
 
   genesdf = df2list(genes)
   evXR = XR::getInterface(getClass("JuliaInterface"))
-  expr = gettextf("%s(%s)","juliaStochasticSimulation", evXR$ServerArglist(stochmodel, QTLeffects, InitVar, genesdf,
+  expr = gettextf("%s(%s)","juliaStochasticSimulation", evXR$ServerArglist(stochmodel, QTLeffects, InitAbundance, genesdf,
                                                                            simtime, modelname = modelname, ntrials = ntrials,
                                                                            nepochs = nepochs, simalgorithm = simalgorithm))
   key = evXR$ProxyName()
@@ -163,7 +163,7 @@ simulateInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, n
   for(ind in names(insilicopopulation$individualsList)){
     tic()
     simJulia = callJuliaStochasticSimulation(stochmodel, insilicopopulation$individualsList[[ind]]$QTLeffects,
-                                             insilicopopulation$individualsList[[ind]]$InitVar,
+                                             insilicopopulation$individualsList[[ind]]$InitAbundance,
                                              insilicosystem$genes, simtime, modelname = ind, ntrials = ntrials,
                                              nepochs = nepochs, simalgorithm = simalgorithm, ev)
     temp = toc(quiet = T)
@@ -194,7 +194,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
   ind = indtosimulate[i]
   ntrialsclus = ntrialstosimulate[i]
   simJulia = callJuliaStochasticSimulation(mystochmodel, individualsList[[ind]]$QTLeffects,
-                                           individualsList[[ind]]$InitVar,
+                                           individualsList[[ind]]$InitAbundance,
                                            genes, simtime, modelname = ind, ntrials = ntrialsclus,
                                            nepochs = nepochs, simalgorithm = simalgorithm, myev)
 

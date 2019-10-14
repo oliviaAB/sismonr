@@ -58,14 +58,22 @@ createVariants = function(genes, indargs){
 #'
 #' Creates a in silico individual to be simulated (object of class \code{insilicoindividual}).
 #'
+#' initialNoise: by default, the initial abundance of a molecule is equal to its steady state abundance in  the absence of any regulation
+#' (e.g. for the RNA abundance of a gene, it is transcription rate / decay rate). If \code{initialNoise = TRUE}, instead the initial abundance of the
+#' molecule will be sampled from a truncated Normal distribution of mean \code{SSabund} and SD \code{sqrt(SSabund)}, where \code{SSabund} is its
+#' steady state abundance in the absence of any regulation, as specified above. The Normal distribution is truncated to only return positive values.
+#'
+#' @param insilicosystem An \code{insilicosystem} object. The in silico system based on which individuals are created. See \code{\link{createInSilicoSystem}}.
 #' @param variantsList A named list giving the variants segregating in the population for each gene (e.g. created by \code{\link{createVariants}}). Each element corresponds to one gene in the system (name of the element = gene ID).
 #' Each element is a matrix, in which each column represents a variant of the gene segregating in the population. The rows represent the QTL effect coefficients of each variant
 #' (i.e. the impact of each mutation the variant carries).
 #' @param variantsFreq A named list giving for each gene the allelic frequency of each segregating variant. Each element corresponds to one gene in the system (name of the element = gene ID).
 #' Each element is a vector, of length equal to the number of variants of the gene segregating in the population, giving the allele frequency of each of the variants.
 #' @param indargs An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).
-#' @param sysargs An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).
-#' @param sameInit Boolean. Does the individual have identical initial abundance to the rest of the population?
+#' @param InitVar A list of the multiplicative coefficients to be applied to the initial abundance of the different molecules: elements "R" and "P" of the list giving the coefficients for the RNA
+#' and protein form of the genes, respectively (coefficient for gene \code{i} at the \code{i}-th position in the vectors). If NULL, all coefficients set to 1.
+#' @param initialNoise Logical. Is stochastic noise applied to the initial abundance of the different molecules? Default value is \code{TRUE} (see Details).
+#'
 #' @return An object of class \code{insilicoindividual}, that is a list composed of:
 #' \itemize{
 #' \item \code{QTLeffects}: a list of the variants carried by the individual. 1st level of the list: the different "GCN" (Gene Copy Number),
@@ -73,13 +81,13 @@ createVariants = function(genes, indargs){
 #' in this 2nd-level list are vectors of QTL effect coefficients for the different genes (coefficient for gene \code{i} at the \code{i}-th position
 #' in the vector).
 #' \item \code{haplotype}: data-frame (rows = genes, columns = Gene copy number) giving the ID of the gene variant carried by the individual for each gene copy number (allele).
-#' \item \code{InitVar}: a list of the multiplicative coefficients to compute the initial abundance of the different molecules
-#' (to be applied to the population mean initial abundance for the corresponding molecule). 1st level of the list: the different "GCN" (Gene Copy Number),
+#' \item \code{InitAbundance}: A list of the initial abundance of the different molecules. 1st level of the list: the different "GCN" (Gene Copy Number),
 #' that is the different alleles of the genes (as defined by the ploidy of the individual: a diploid will have GCN1 and GCN2); 2nd level of the list:
-#' vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
+#' initial abundance of the protein ("P") and RNA ("R") form of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
 #' }
 #' @examples
-#' sysargs = insilicosystemargs(ploidy = 4)
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 3, ploidy = 4)
 #' indargs = insilicoindividualargs()
 #' ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
 #' ## 2 variants of gene 3
@@ -111,28 +119,33 @@ createVariants = function(genes, indargs){
 #'                         '2' = c(0.6, 0.3, 0.1),
 #'                         '3' = c(0.9, 0.1))
 #'
-#' myind = createIndividual(genvariants, genvariants.freq, indargs, sysargs)
+#' ## The third gene is not expressed at the beginning of the simulation
+#' ## (its initial abundance is 0)
+#' InitVar = list("R" = c(1, 1, 0), "P" = c(1, 1, 0))
+#'
+#' myind = createIndividual(mysystem, genvariants, genvariants.freq, indargs, InitVar = InitVar)
+#' }
 #' @export
-createIndividual = function(variantsList, variantsFreq, indargs, sysargs, sameInit = F){
+createIndividual = function(insilicosystem, variantsList, variantsFreq, indargs, InitVar = NULL, initialNoise = TRUE){
 
   ## Create the QTL effect coefficients list ----
 
   G = length(variantsList)
-  QTLeffects = vector("list", sysargs$ploidy)
-  names(QTLeffects) = sysargs$gcnList
+  QTLeffects = vector("list", insilicosystem$sysargs$ploidy)
+  names(QTLeffects) = insilicosystem$sysargs$gcnList
 
   ## individualvariants: data frame where rows are genes and columns are "copy number" ids i.e. each columns represent a homolog chromosom
   ## Element i, j in the data frame corresponds to the variant of gene i present in the homolog chromosom j
-#  individualvariants = as.data.frame(matrix(sample(1:indargs$ngenevariants, G*sysargs$ploidy, replace = T), nrow = G, ncol = sysargs$ploidy))
+#  individualvariants = as.data.frame(matrix(sample(1:indargs$ngenevariants, G*insilicosystem$sysargs$ploidy, replace = T), nrow = G, ncol = insilicosystem$sysargs$ploidy))
   temp = vector("list", length = G)
   for(g in 1:G){
-  temp[[g]] = sample(1:ncol(variantsList[[paste(g)]]), sysargs$ploidy, replace = T, prob = variantsFreq[[paste(g)]])
+  temp[[g]] = sample(1:ncol(variantsList[[paste(g)]]), insilicosystem$sysargs$ploidy, replace = T, prob = variantsFreq[[paste(g)]])
   }
   individualvariants = as.data.frame(do.call(rbind, temp))
-  names(individualvariants) = sysargs$gcnList
+  names(individualvariants) = insilicosystem$sysargs$gcnList
 
   ## Work for each gene copy (here in the sense each homolog chromosome)
-  for(gcn in sysargs$gcnList){
+  for(gcn in insilicosystem$sysargs$gcnList){
     QTLeffects[[gcn]] = vector("list", length(indargs$qtlnames))
     names(QTLeffects[[gcn]]) = indargs$qtlnames
     for(q in indargs$qtlnames){
@@ -143,24 +156,56 @@ createIndividual = function(variantsList, variantsFreq, indargs, sysargs, sameIn
   }
 
 
-  ## Create the Initial abundance variation coefficients list ----
+  ## Create the initial abundance list ----
 
-  InitVar = vector("list", sysargs$ploidy)
-  names(InitVar) = sysargs$gcnList
-
-  if(sameInit){ ## if sameInit = T, we want the initial abundance of each molecule to be equal to the default value (no variation between individuals)
-    for(gcn in sysargs$gcnList){
-      InitVar[[gcn]] = list("R" = rep(1.0, G),
-                            "P" = rep(1.0, G))
-    }
+  if(is.null(InitVar)){
+    InitVar = list("R" = rep(1, G),
+                   "P" = rep(1, G))
   }else{
-    for(gcn in sysargs$gcnList){
-      InitVar[[gcn]] = list("R" = indargs$initvar_samplingfct(G),
-                            "P" = indargs$initvar_samplingfct(G))
+      if(!all(names(InitVar) == c("R", "P"))){
+        stop("Variable InitVar must be a list with elements \"R\" and \"P\".")
+      }
+      if(!all(sapply(InitVar, function(x){length(x) == G}))){
+        stop("Each vector in InitVar must have a length equal to the number of genes in the system.")
+      }
     }
+
+  InitAbundance = vector("list", insilicosystem$sysargs$ploidy)
+  names(InitAbundance) = insilicosystem$sysargs$gcnList
+
+  for(gcn in insilicosystem$sysargs$gcnList){
+    InitAbundance[[gcn]] = list("R" = rep(0, G),
+                                "P" = rep(0, G))
+
+    InitAbundance[[gcn]]$R = (insilicosystem$genes$TCrate * QTLeffects[[gcn]]$qtlTCrate) / (insilicosystem$genes$RDrate  * QTLeffects[[gcn]]$qtlRDrate)
+    InitAbundance[[gcn]]$P = InitAbundance[[gcn]]$R * (insilicosystem$genes$TLrate * QTLeffects[[gcn]]$qtlTLrate) / (insilicosystem$genes$PDrate  * QTLeffects[[gcn]]$qtlPDrate)
+    InitAbundance[[gcn]]$P[is.na(InitAbundance[[gcn]]$P)] = 0 ## true for non-coding genes, they don't have a protein form
+
+    ## Apply the InitVar coefficients
+    InitAbundance[[gcn]]$R = InitAbundance[[gcn]]$R * InitVar$R
+    InitAbundance[[gcn]]$P = InitAbundance[[gcn]]$P * InitVar$P
+
+    if(initialNoise){
+      ## Applying initial noise: sample the actual initial abundance from a normal distribution
+      ## with SD = sqrt(MEAN) so that there is not a lot of variation for molecules with small
+      ## expected initial abundance - distribution truncated to 0 to only values (that can later be
+      ## rounded to 0)
+      InitAbundance[[gcn]]$R = sapply(InitAbundance[[gcn]]$R, function(x){
+        if(x == 0) return(0)
+        truncnorm::rtruncnorm(1, a = 0, b = Inf, mean = x, sd = sqrt(x))
+      })
+      InitAbundance[[gcn]]$P = sapply(InitAbundance[[gcn]]$P, function(x){
+        if(x == 0) return(0)
+        truncnorm::rtruncnorm(1, a = 0, b = Inf, mean = x, sd = sqrt(x))
+      })
+    }
+
+    ## Round values because the initial abundances are discrete values
+    InitAbundance[[gcn]]$R = round(InitAbundance[[gcn]]$R)
+    InitAbundance[[gcn]]$P = round(InitAbundance[[gcn]]$P)
   }
 
-  value = list("QTLeffects" = QTLeffects, "haplotype" = individualvariants, "InitVar" = InitVar)
+  value = list("QTLeffects" = QTLeffects, "haplotype" = individualvariants, "InitAbundance" = InitAbundance)
   attr(value, "class") = "insilicoindividual"
 
   return(value)
@@ -170,6 +215,11 @@ createIndividual = function(variantsList, variantsFreq, indargs, sysargs, sameIn
 #'
 #' Creates a population of in silico individuals to be simulated.
 #'
+#' initialNoise: by default, the initial abundance of a molecule is equal to its steady state abundance in  the absence of any regulation
+#' (e.g. for the RNA abundance of a gene, it is transcription rate / decay rate). If \code{initialNoise = TRUE}, instead the initial abundance of the
+#' molecule will be sampled from a truncated Normal distribution of mean \code{SSabund} and SD \code{sqrt(SSabund)}, where \code{SSabund} is its
+#' steady state abundance in the absence of any regulation, as specified above. The Normal distribution is truncated to only return positive values.
+#'
 #' @param nInd Integer. The number of in silico individuals to create.
 #' @param insilicosystem An \code{insilicosystem} object. The in silico system based on which individuals are created. See \code{\link{createInSilicoSystem}}.
 #' @param genvariants A named list giving the variants segregating in the population for each gene. Each element corresponds to one gene in the system (name of the element = gene ID).
@@ -178,7 +228,9 @@ createIndividual = function(variantsList, variantsFreq, indargs, sysargs, sameIn
 #' @param genvariants.freq A named list giving for each gene the allelic frequency of each segregating variant. Each element corresponds to one gene in the system (name of the element = gene ID).
 #' Each element is a vector, of length equal to the number of variants of the gene segregating in the population, giving the allele frequency of each of the variants.
 #' If none provided, it is assumed that all variants of a given gene have the same allelic frequency.
-#' @param sameInit Logical. Is the initial abundance of the different molecules the same for all individuals in the population? Default value is \code{FALSE}.
+#' @param InitVar A list of the multiplicative coefficients to be applied to the initial abundance of the different molecules: elements "R" and "P" of the list giving the coefficients for the RNA
+#' and protein form of the genes, respectively (coefficient for gene \code{i} at the \code{i}-th position in the vectors). If NULL, all coefficients set to 1.
+#' @param initialNoise Logical. Is stochastic noise applied to the initial abundance of the different molecules? Default value is \code{TRUE} (see Details).
 #' @param ... Other arguments to be passed to the function \code{\link{insilicoindividualargs}} (i.e. parameters for the generation of the in silico individuals).
 #' @return An object of class \code{insilicopopulation}, that is a list composed of:
 #' \itemize{
@@ -230,12 +282,17 @@ createIndividual = function(variantsList, variantsFreq, indargs, sysargs, sameIn
 #'                         '2' = c(0.6, 0.3, 0.1),
 #'                         '3' = c(0.9, 0.1))
 #'
+#' ## The third gene is not expressed at the beginning of the simulation
+#' ## (its initial abundance is 0)
+#' InitVar = list("R" = c(1, 1, 0), "P" = c(1, 1, 0))
+#'
 #' mypop = createInSilicoPopulation(10, mysystem,
 #'                                  genvariants = genvariants,
-#'                                  genvariants.freq = genvariants.freq)
+#'                                  genvariants.freq = genvariants.freq,
+#'                                  InitVar = InitVar)
 #' }
 #' @export
-createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, genvariants.freq = NULL, sameInit = F, ...){
+createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, genvariants.freq = NULL, InitVar = NULL, initialNoise = TRUE, ...){
 
   if(class(insilicosystem) != "insilicosystem") stop("Argument insilicosystem must be of class \"insilicosystem\".")
 
@@ -263,7 +320,7 @@ createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, ge
   names(individualsList) = indnames
 
   for(i in indnames){
-    individualsList[[i]] = createIndividual(genvariants, genvariants.freq, indargs, insilicosystem$sysargs, sameInit = sameInit)
+    individualsList[[i]] = createIndividual(insilicosystem, genvariants, genvariants.freq, indargs, InitVar = InitVar, initialNoise = initialNoise)
   }
 
   value = list("GenesVariants" = genvariants, "individualsList" = individualsList, "indargs" = indargs)

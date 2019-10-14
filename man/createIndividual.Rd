@@ -4,10 +4,12 @@
 \alias{createIndividual}
 \title{Creates an in silico individual.}
 \usage{
-createIndividual(variantsList, variantsFreq, indargs, sysargs,
-  sameInit = F)
+createIndividual(insilicosystem, variantsList, variantsFreq, indargs,
+  InitVar = NULL, initialNoise = TRUE)
 }
 \arguments{
+\item{insilicosystem}{An \code{insilicosystem} object. The in silico system based on which individuals are created. See \code{\link{createInSilicoSystem}}.}
+
 \item{variantsList}{A named list giving the variants segregating in the population for each gene (e.g. created by \code{\link{createVariants}}). Each element corresponds to one gene in the system (name of the element = gene ID).
 Each element is a matrix, in which each column represents a variant of the gene segregating in the population. The rows represent the QTL effect coefficients of each variant
 (i.e. the impact of each mutation the variant carries).}
@@ -17,9 +19,10 @@ Each element is a vector, of length equal to the number of variants of the gene 
 
 \item{indargs}{An object of class \code{\link{insilicoindividualargs}} (i.e. a list with parameters for in silico individuals generation).}
 
-\item{sysargs}{An object of class \code{\link{insilicosystemargs}} (i.e. a list with parameters for in silico system generation).}
+\item{InitVar}{A list of the multiplicative coefficients to be applied to the initial abundance of the different molecules: elements "R" and "P" of the list giving the coefficients for the RNA
+and protein form of the genes, respectively (coefficient for gene \code{i} at the \code{i}-th position in the vectors). If NULL, all coefficients set to 1.}
 
-\item{sameInit}{Boolean. Does the individual have identical initial abundance to the rest of the population?}
+\item{initialNoise}{Logical. Is stochastic noise applied to the initial abundance of the different molecules? Default value is \code{TRUE} (see Details).}
 }
 \value{
 An object of class \code{insilicoindividual}, that is a list composed of:
@@ -29,17 +32,23 @@ that is the different alleles of the genes (as defined by the ploidy of the indi
 in this 2nd-level list are vectors of QTL effect coefficients for the different genes (coefficient for gene \code{i} at the \code{i}-th position
 in the vector).
 \item \code{haplotype}: data-frame (rows = genes, columns = Gene copy number) giving the ID of the gene variant carried by the individual for each gene copy number (allele).
-\item \code{InitVar}: a list of the multiplicative coefficients to compute the initial abundance of the different molecules
-(to be applied to the population mean initial abundance for the corresponding molecule). 1st level of the list: the different "GCN" (Gene Copy Number),
+\item \code{InitAbundance}: A list of the initial abundance of the different molecules. 1st level of the list: the different "GCN" (Gene Copy Number),
 that is the different alleles of the genes (as defined by the ploidy of the individual: a diploid will have GCN1 and GCN2); 2nd level of the list:
-vectors of the coefficients for the proteins ("P") and RNAs ("R") of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
+initial abundance of the protein ("P") and RNA ("R") form of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
 }
 }
 \description{
 Creates a in silico individual to be simulated (object of class \code{insilicoindividual}).
 }
+\details{
+initialNoise: by default, the initial abundance of a molecule is equal to its steady state abundance in  the absence of any regulation
+(e.g. for the RNA abundance of a gene, it is transcription rate / decay rate). If \code{initialNoise = TRUE}, instead the initial abundance of the
+molecule will be sampled from a truncated Normal distribution of mean \code{SSabund} and SD \code{sqrt(SSabund)}, where \code{SSabund} is its
+steady state abundance in the absence of any regulation, as specified above. The Normal distribution is truncated to only return positive values.
+}
 \examples{
-sysargs = insilicosystemargs(ploidy = 4)
+\donttest{
+mysystem = createInSilicoSystem(G = 3, ploidy = 4)
 indargs = insilicoindividualargs()
 ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
 ## 2 variants of gene 3
@@ -71,5 +80,10 @@ genvariants.freq = list('1' = c(1),
                         '2' = c(0.6, 0.3, 0.1),
                         '3' = c(0.9, 0.1))
 
-myind = createIndividual(genvariants, genvariants.freq, indargs, sysargs)
+## The third gene is not expressed at the beginning of the simulation
+## (its initial abundance is 0)
+InitVar = list("R" = c(1, 1, 0), "P" = c(1, 1, 0))
+
+myind = createIndividual(mysystem, genvariants, genvariants.freq, indargs, InitVar = InitVar)
+}
 }

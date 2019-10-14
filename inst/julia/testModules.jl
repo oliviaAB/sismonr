@@ -9,9 +9,9 @@ using Pkg
 # 	Pkg.add("ClobberingReload")
 # end
 
-importExprDF = Meta.parse("import JSON");
+importExprJS = Meta.parse("import JSON");
 try
-	eval(importExprDF)
+	eval(importExprJS)
 	print("Module JSON installed.\n")
 catch err
 	print("Installing Julia module JSON. This can take a few minutes.\n")

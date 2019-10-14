@@ -7,14 +7,14 @@ using DataFrames
 ##                       FUNCTIONS FOR SIMULATING THE STOCHASTIC SYSTEM                           ##
 # ------------------------------------------------------------------------------------------------ #
 
-function createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
+function createBioSimModel(stochmodel, QTLeffects, InitAbundance, modelname)
        
   model = BioSimulator.Network(modelname)
 
   ## Add the species in the model, with their initial abundance
   for i in 1:length(stochmodel["species"])
     i0 = replace(stochmodel["initialconditions"][i], "QTLeffects" => "$QTLeffects")
-    i0 = replace(i0, "InitVar" => "$InitVar")
+    i0 = replace(i0, "InitAbundance" => "$InitAbundance")
     i0 = eval(Meta.parse(i0))
     #println(stochmodel["species"][i]* "\t"*string(i0))
 
@@ -129,7 +129,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
 end
 
 
-function juliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes, simtime;  modelname = "MySimulation", ntrials = 1, nepochs = -1, simalgorithm = "Direct")
+function juliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes, simtime; modelname = "MySimulation", ntrials = 1, nepochs = -1, simalgorithm = "Direct")
 
   try
 
@@ -145,7 +145,7 @@ function juliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes, simti
       error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"FirstReaction\", \"NextReaction\", \"OptimizedDirect\", \"TauLeaping\" or \"StepAnticipation\".")
     end
 
-    model = createBioSimModel(stochmodel, QTLeffects, InitVar, modelname)
+    model = createBioSimModel(stochmodel, QTLeffects, InitAbundance, modelname)
 
 
     #println("JULIA> Running simulation ...")

@@ -4,7 +4,7 @@
 \alias{callJuliaStochasticSimulation}
 \title{Calls the Julia simulation function.}
 \usage{
-callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
+callJuliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes,
   simtime, modelname = "MySimulation", ntrials, nepochs, simalgorithm,
   ev = getJuliaEvaluator())
 }
@@ -13,7 +13,7 @@ callJuliaStochasticSimulation(stochmodel, QTLeffects, InitVar, genes,
 
 \item{QTLeffects}{The list of QTL effects coefficients of the in silico individual to be simulated (see \code{\link{createIndividual}}).}
 
-\item{InitVar}{The list of initial abundance variation coefficients of the in silico individual to be simulated (see \code{\link{createIndividual}}).}
+\item{InitAbundance}{The list of initial abundances of the molecules for the in silico individual to be simulated (see \code{\link{createIndividual}}).}
 
 \item{genes}{The data-frame of genes in the system.}
 

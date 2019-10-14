@@ -330,7 +330,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
     ## Add the free form of the binding site to the list of species (the bound form is specific to the bound molecule)
     push!(spec, prom*"F")
     ## Add the initial abundance of the free form of the binding site to the list of initial conditions.
-    push!(initcond, """$(genes["TCrate"][tarid]/genes["RDrate"][tarid])*InitVar["$(gcn)"]["R"][$(tarid)]""")
+    push!(initcond, """InitAbundance["$(gcn)"]["R"][$(tarid)]""")
 
     for gcnreg in gcnList ## loop over all possible gene copies of the regulator
       prombound = prom*gcnreg*"B"
@@ -345,7 +345,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
       ## Add the binding reaction of the regulator to the binding site
       push!(reac, reactBioSim([prom*"F", activeform[reg]*gcnreg], [prombound])) ## promF + reg -> promregB
       push!(reacnames, "binding"*prom*gcnreg)
-      push!(prop, """$(edg["TLbindingrate"][r])*QTLeffects["$(gcn)"]["$("qtlTLregbind")"][$(tarid)]*QTLeffects["$(gcnreg)"]["qtlactivity"][$(parse(Int64, reg))]""")
+      push!(prop, """$(edg["TLbindingrate"][r])*QTLeffects["$(gcn)"]["qtlTLregbind"][$(tarid)]*QTLeffects["$(gcnreg)"]["qtlactivity"][$(parse(Int64, reg))]""")
       
       ## Add the unbinding reaction of the regulator from the binding site
       push!(reac, reactBioSim([prombound], [prom*"F", activeform[reg]*gcnreg])) ## promregB -> promF + reg
@@ -376,7 +376,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
     ## Add the free and bound forms of the binding site to the list of species
     push!(spec, prom*"F")
     ## Add the initial abundance of the free form of the binding site to the list of initial conditions.
-    push!(initcond, """$(genes["TCrate"][tarid]/genes["RDrate"][tarid])*InitVar["$(gcn)"]["R"][$(tarid)]""")
+    push!(initcond, """InitAbundance["$(gcn)"]["R"][$(tarid)]""")
 
     for complvar in complexesvariants[compl]
         
@@ -428,7 +428,7 @@ function createTranscriptionReactions(genes, promactiveTC, promallTL, gcnList)
     if length(TLallproms) == 0 ## R[gene] if the gene is not controlled at the translation level
       RNAform = ["R"*gname] 
       push!(spec, "R"*gname)
-      push!(initcond, """$(genes["TCrate"][g]/genes["RDrate"][g])*InitVar["$(gcn)"]["R"][$(g)]""")
+      push!(initcond, """InitAbundance["$(gcn)"]["R"][$(g)]""")
     else ## otherwise transcription produces the free (unbound) form of each binding site present on the RNA (1 site per TL regulator)
       RNAform = [t[1] for t in TLallproms] ## The TLallproms dictionary is constructed such that each free binding site name is at the position 1
     end
@@ -524,7 +524,7 @@ function createTranslationReactions(genes, promactiveTL, gcnList)
     TLactiveproms = promactiveTL[gname]
 
     push!(spec, "P"*gname)
-    push!(initcond, """($(genes["TCrate"][g]*genes["TLrate"][g]/(genes["RDrate"][g]*genes["PDrate"][g])))*InitVar["$(gcn)"]["P"][$(g)]""")
+    push!(initcond, """InitAbundance["$(gcn)"]["P"][$(g)]""")
 
     if length(TLactiveproms) == 0
       ## create translation of the gene

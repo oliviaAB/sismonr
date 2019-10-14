@@ -5,7 +5,7 @@
 \title{Creates a population of in silico individuals.}
 \usage{
 createInSilicoPopulation(nInd, insilicosystem, genvariants = NULL,
-  genvariants.freq = NULL, sameInit = F, ...)
+  genvariants.freq = NULL, InitVar = NULL, initialNoise = TRUE, ...)
 }
 \arguments{
 \item{nInd}{Integer. The number of in silico individuals to create.}
@@ -20,7 +20,10 @@ Each element is a matrix, in which each column represents a variant of the gene 
 Each element is a vector, of length equal to the number of variants of the gene segregating in the population, giving the allele frequency of each of the variants.
 If none provided, it is assumed that all variants of a given gene have the same allelic frequency.}
 
-\item{sameInit}{Logical. Is the initial abundance of the different molecules the same for all individuals in the population? Default value is \code{FALSE}.}
+\item{InitVar}{A list of the multiplicative coefficients to be applied to the initial abundance of the different molecules: elements "R" and "P" of the list giving the coefficients for the RNA
+and protein form of the genes, respectively (coefficient for gene \code{i} at the \code{i}-th position in the vectors). If NULL, all coefficients set to 1.}
+
+\item{initialNoise}{Logical. Is stochastic noise applied to the initial abundance of the different molecules? Default value is \code{TRUE} (see Details).}
 
 \item{...}{Other arguments to be passed to the function \code{\link{insilicoindividualargs}} (i.e. parameters for the generation of the in silico individuals).}
 }
@@ -34,6 +37,12 @@ An object of class \code{insilicopopulation}, that is a list composed of:
 }
 \description{
 Creates a population of in silico individuals to be simulated.
+}
+\details{
+initialNoise: by default, the initial abundance of a molecule is equal to its steady state abundance in  the absence of any regulation
+(e.g. for the RNA abundance of a gene, it is transcription rate / decay rate). If \code{initialNoise = TRUE}, instead the initial abundance of the
+molecule will be sampled from a truncated Normal distribution of mean \code{SSabund} and SD \code{sqrt(SSabund)}, where \code{SSabund} is its
+steady state abundance in the absence of any regulation, as specified above. The Normal distribution is truncated to only return positive values.
 }
 \examples{
 \donttest{
@@ -79,8 +88,13 @@ genvariants.freq = list('1' = c(1),
                         '2' = c(0.6, 0.3, 0.1),
                         '3' = c(0.9, 0.1))
 
+## The third gene is not expressed at the beginning of the simulation
+## (its initial abundance is 0)
+InitVar = list("R" = c(1, 1, 0), "P" = c(1, 1, 0))
+
 mypop = createInSilicoPopulation(10, mysystem,
                                  genvariants = genvariants,
-                                 genvariants.freq = genvariants.freq)
+                                 genvariants.freq = genvariants.freq,
+                                 InitVar = InitVar)
 }
 }
