@@ -244,10 +244,9 @@ simulateParallelInSilicoSystem = function(insilicosystem, insilicopopulation, si
 
   if(is.null(filepath)) writefile = F
 
-  if(writefile){
-    stochmodel = createStochSystem(insilicosystem, writefile, filepath, filename, verbose = T, ev = ev)
-    message("\n")
-  }
+  stochmodel = createStochSystem(insilicosystem, writefile, filepath, filename, verbose = T, ev = ev)
+  message("\n")
+
 
   mybaseport = ev$port ## Get the port of the current Julia evaluator
   portList = sapply(1:no_cores, sum, mybaseport) ## Assign to each core a port number, starting from 1+port number of the current evaluator
