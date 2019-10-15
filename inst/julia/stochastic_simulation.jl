@@ -100,29 +100,29 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
       end
 
       ## Add to abundancedf a column corresponding to the abundance of the RNA associated with g
-      abundancedf[Symbol("R"*g)] = rbsabundance[:,1]
-      #abundancedf["R"*g] = rbsabundance[:,1]
+      #abundancedf[Symbol("R"*g)] = rbsabundance[:,1] ## Julia 1.1.0 syntax
+      abundancedf[!, Symbol("R"*g)] = rbsabundance[:,1] ## Julia 1.2.0 syntax
     else
-      abundancedf[Symbol("R"*g)] = resultdf[:, Symbol("R"*g)]
-      #abundancedf["R"*g] = resultdf[:, Symbol("R"*g)]
+      #abundancedf[Symbol("R"*g)] = resultdf[:, Symbol("R"*g)] ## Julia 1.1.0 syntax
+      abundancedf[!, Symbol("R"*g)] = resultdf[:, Symbol("R"*g)] ## Julia 1.2.0 syntax
     end
 
     ## MAYBE to change if we don't make the disctinction between original and modified protein
     if genes["coding"][gid] == "PC"
-      abundancedf[Symbol("P"*g)] = resultdf[:, Symbol("P"*g)]
-      #abundancedf["P"*g] = resultdf[:, Symbol("P"*g)]
+      #abundancedf[Symbol("P"*g)] = resultdf[:, Symbol("P"*g)] ## Julia 1.1.0 syntax
+      abundancedf[!, Symbol("P"*g)] = resultdf[:, Symbol("P"*g)] ## Julia 1.2.0 syntax
 
       if genes["PTMform"][gid] == "1"
-        abundancedf[Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)]
-        #abundancedf["Pm"*g] = resultdf[:, Symbol("Pm"*g)]
+        #abundancedf[Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)] ## Julia 1.1.0 syntax
+        abundancedf[!, Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)] ## Julia 1.2.0 syntax
       end
     end
   end
 
   ## Include the abundance of the different regulatory complexes
   for comp in names(resultdf)[findall(x -> occursin(r"^C", x), map(String, names(resultdf)))]
-    abundancedf[comp] = resultdf[:, comp]
-    #abundancedf[string(comp)] = resultdf[:, comp]
+    #abundancedf[comp] = resultdf[:, comp] ## Julia 1.1.0 syntax
+    abundancedf[!, comp] = resultdf[:, comp] ## Julia 1.2.0 syntax
   end
 
   return abundancedf
