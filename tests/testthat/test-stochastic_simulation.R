@@ -178,3 +178,46 @@ test_that("merging functions for simulation results works", {
   expect_equal(simNoPTM[,"P3GCN1"], sim$Simulation[,"P3GCN1"]+sim$Simulation[,"Pm3GCN1"])
   expect_equal(simNoComplex[,"P1GCN1"], rowSums(sim$Simulation[,grep("^CPTM1_P1GCN1", names(sim$Simulation))]) + sim$Simulation[,"P1GCN1"])
 })
+
+test_that("sampling expected library sizes works", {
+  samples_list = sapply(1:100, function(x){paste0("Ind", x)})
+  libsizes = sampleLibrarySize(samples_list)
+  libsizes_2lanes = sampleLibrarySize(samples_list, laneEffect = T, nLanes = 2)
+  libsizes_4lanes = sampleLibrarySize(samples_list, laneEffect = T, nLanes = 4)
+
+  expect_equal(unname(libsizes$lane), rep(1, 100))
+  expect_equal(length(libsizes$expected_library_size), 100)
+  expect_equal(length(libsizes$lane_mean_library_size), 1)
+
+  expect_equal(sort(unique(libsizes_2lanes$lane)), 1:2)
+  expect_equal(length(libsizes_2lanes$lane_mean_library_size), 2)
+  expect_equal(sort(unique(libsizes_4lanes$lane)), 1:4)
+  expect_equal(length(libsizes_4lanes$lane_mean_library_size), 4)
+})
+
+test_that("creating RNA-seq data works",{
+  check_julia()
+  mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2, PC.p = 0.7)
+  mypop = createInSilicoPopulation(3, mysystem)
+  sim = simulateInSilicoSystem(mysystem, mypop, simtime = 500, ntrials = 10, nepochs = 5)
+
+  rnaSeq = getRNAseqMatrix(sim$Simulation, mysystem, laneEffect = F)
+  rnaSeq_allgenes = getRNAseqMatrix(sim$Simulation, mysystem, laneEffect = T, mrnasOnly = F)
+
+  n_pc = sum(mysystem$genes$coding == "PC")
+
+  libsize = rnorm(3, 1e5, 1e3)
+  gene_length = sample(10:200, n_pc)
+  rnaSeq_libsize = getRNAseqMatrix(sim$Simulation, mysystem, samplesLibSize = libsize, genesLength = gene_length)
+
+  expect_equal(length(rnaSeq$samplesLibSize), 3)
+  expect_equal(unname(rnaSeq$genesLength), rep(1, n_pc))
+  expect_equal(nrow(rnaSeq$rnaSeqMatrix), n_pc)
+  expect_equal(ncol(rnaSeq$rnaSeqMatrix), 3 + 1)
+
+  expect_equal(unname(rnaSeq_allgenes$genesLength), rep(1, nrow(mysystem$genes)))
+  expect_equal(nrow(rnaSeq_allgenes$rnaSeqMatrix), nrow(mysystem$genes))
+
+  expect_equal(unname(rnaSeq_libsize$samplesLibSize$expected_library_size), libsize)
+  expect_equal(unname(rnaSeq_libsize$genesLength), gene_length)
+})

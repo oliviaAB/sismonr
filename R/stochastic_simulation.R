@@ -866,3 +866,229 @@ summariseSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(
   }
   return(sumtable)
 }
+
+
+#' Samples the expected library size of individuals/samples
+#'
+#' Samples the expected library size of each individual/sample, accounting for potential lane size effects
+#' (i.e. the impact of samples being processed on different lanes).
+#'
+#' The expected library size of each individual is sampled from a log-normal distribution. The mean of this distribution
+#' depends on the lane on which the individual/sample is processed. By default, when \code{laneEffect = FALSE}, all samples
+#' are assumed to be processed in a single batch. Thus their library size is sampled from a log-normal distribution with
+#' identical mean (equal to \code{meanLogLibSize_lane}) and sd \code{sdLogLibSize_samples}. If \code{laneEffect = TRUE}, the
+#' samples are assumed to be processed in \code{nLanes} batches, that each have a different mean log-library size. In this
+#' case, the mean of the log-normal distribution for each lane is sampled from a normal distribution with mean
+#' \code{meanLogLibSize_lane} and sd \code{sdLogLibSize_lane}. In turn, the expected library size of each individual/sample
+#' is sampled form a log-normal distribution with the corresponding lane-dependent mean, and sd \code{sdLogLibSize_samples}.
+#'
+#' @param samples_list List of sample/individual names.
+#' @param meanLogLibSize_lane Numeric. The mean of the log10 mean library size normal distribution (see Details). Default value of 7.
+#' @param sdLogLibSize_lane Numeric. The sd of the log10 mean library size normal distribution (see Details). Default value of 0.5.
+#' @param sdLogLibSize_samples Numeric. The sd of the log10 samples library size normal distribution (see Details). Default value of 0.2.
+#' @param laneEffect Boolean. Are the samples processed on different lanes/batches? Default value is FALSE.
+#' @param nLanes Numeric. How many lanes are there in the experiment? Automatically set to 1 if \code{laneEffect = F}. Default value is 2.
+#' @return A list:
+#' \itemize{
+#' \item \code{lane}: the lane on which each sample is processed.
+#' \item \code{expected_library_size}: the expected library size of each sample.
+#' \item \code{lane_mean_library_size}: the mean library size of each lane.
+#' }
+#' @examples
+#' samples_list = sapply(1:10, function(x){paste0("Ind", x)})
+#' libsize = sampleLibrarySize(samples_list)
+#' libsize = sampleLibrarySize(samples_list, laneEffect = TRUE, nLanes = 3)
+#' @export
+sampleLibrarySize = function(samples_list, meanLogLibSize_lane = 7, sdLogLibSize_lane = 0.5, sdLogLibSize_samples = 0.2, laneEffect = F, nLanes = 2){
+
+  if(!laneEffect) nLanes = 1
+
+  N = length(samples_list)
+
+  ## Creating lane mean log-library size
+  if(laneEffect){
+    samplesLane = sample(1:nLanes, N, replace = T) ## to which lane belongs each sample
+    lanesMean = rnorm(nLanes, meanLogLibSize_lane, sdLogLibSize_lane) ## what is the mean log-library size of each lane
+    samplesMean = lanesMean[samplesLane] ## what is the mean log-library size for each sample
+  }else{
+    samplesLane = rep(1, N)
+    lanesMean = c(meanLogLibSize_lane)
+    samplesMean = rep(lanesMean, N)
+  }
+
+  ## Sampling the log10 of library size
+  logLibSize = sapply(1:N, function(x){rnorm(1, mean = samplesMean[x], sd = sdLogLibSize_samples)})
+
+  libSize = 10^logLibSize
+  names(samplesLane) = samples_list
+  names(libSize) = samples_list
+  names(lanesMean) = 1:nLanes
+
+  return(list("lane" = samplesLane, "expected_library_size" = libSize, "lane_mean_library_size" = 10^lanesMean))
+}
+
+
+#' Transforms a simulation time-point into RNA-seq-like data.
+#'
+#' Transforms a time-point of a simulation into RNA-seq-like data, i.e. simulates a read count for each RNA molecule per
+#' individual (each individual is considered as a sample).
+#'
+#' The abundance of the RNA form of each gene at time \code{samplingTime} is extracted from the result of the simulation. If \code{mrnasOnly = TRUE}, non-coding RNAs are discarded. If the simulation contains
+#' several trials per individual (see \code{\link{simulateInSilicoSystem}}), the abundance of each RNA is summed over the different trials for each individual. The abundance of
+#' the RNAs in each individual are then transformed into "noisy proportions": for each individual, \code{tot_RNAs} times \code{propRnasSampled} RNAs molecules are sampled from the
+#' total RNA molecules in the individual (where \code{tot_RNAs} is the total number of RNA molecules of a given individual). If \code{propRnasSampled} is 1, this step simply
+#' corresponds to dividing the abundance of each RNA by the total number of RNAs for the individual. Otherwise, if \code{propRnasSampled} is less than 1, it introduces some
+#' stochasticity in the "measurement" of RNAs as some low-expressed RNAs might not be represented. The noisy proportion of for each RNA is multiplied by the gene length (by default
+#' set to 1 for all genes), to reproduce the bias of RNA-seq experiments in which longer genes get more reads. The proportions are re-scaled such that their sum over all RNAs for
+#' each individual equals 1. The expected count of each RNA in each individual is then computed as the product of the corresponding noisy proportion and the library size of the individual.
+#' The latter can be provided by the user (parameter \code{samplesLibSize}); otherwise it is sampled using the function \code{\link{sampleLibrarySize}}. Finally, the actual read count of each RNA for
+#' each individual is sampled from a Poisson distribution with parameter lambda equal to the corresponding expected count.
+#'
+#' @param simdf The data-frame with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).
+#' @param insilicosystem The simulated in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param samplingTime Numeric. Time-point of the simulation to be transformed. By default, the maximum time of the simulation is used.
+#' @param laneEffect Boolean. Are the samples processed on different lanes/batches (see \code{\link{sampleLibrarySize}})? Ignored if \code{samplesLibSize} is provided. Default value is FALSE.
+#' @param nLanes Numeric. How many lanes are there in the experiment (see \code{\link{sampleLibrarySize}})? Automatically set to 1 if \code{laneEffect = F}. Ignored if \code{samplesLibSize} is provided. Default value is 2.
+#' @param propRnasSampled Numeric. The proportion of molecules of RNAs that are sampled in each individual. Must be between 0 and 1. Default value is 0.9.
+#' @param samplesLibSize Vector of expected library size for each individual/sample. If named, the names of the vector must correspond to the names of the individuals as specified
+#' in the result of the simulation. If none provided, will be sampled from a log-normal distribution (see \code{\link{sampleLibrarySize}}). Default value is NULL.
+#' @param genesLength Vector of gene length for each gene in the system. Its length must be equal to the number of protein-coding genes in the system (if \code{mrnasOnly} is TRUE)
+#' or of genes in the system (if \code{mrnasOnly} is FALSE). If named, the names must correspond to the ID of the (protein-coding) genes in the system. If none provided, all genes
+#' are assumed to be of length 1.
+#' @param mrnasOnly Boolean. Are the noncoding RNAs to be discarded before the transformation? If TRUE, read counts will be returned only for protein-coding RNAs. Default value is TRUE.
+#' @param mergeComplexes Boolean. Are the RNAs in complex accounted for in the read counts (i.e. are they detected by the RNA-seq experiment)? Default value is FALSE. See also \code{\link{mergeComplexesAbundance}}.
+#' @param meanLogLibSize_lane Numeric. The mean of the log10 mean library size normal distribution (see \code{\link{sampleLibrarySize}}). Ignored if \code{samplesLibSize} is provided. Default value of 7.
+#' @param sdLogLibSize_lane Numeric. The sd of the log10 mean library size normal distribution (see \code{\link{sampleLibrarySize}}). Ignored if \code{samplesLibSize} is provided. Default value of 0.5.
+#' @param sdLogLibSize_samples Numeric. The sd of the log10 samples library size normal distribution (see \code{\link{sampleLibrarySize}}). Ignored if \code{samplesLibSize} is provided. Default value of 0.2.
+#' @return A list:
+#' \itemize{
+#' \item \code{rnaSeqMatrix} A tibble giving for each RNA (column "Molecule") the observed read count in each individual (other columns, one per individual).
+#' \item \code{samplesLibSize} The expected library size of each individual. May not be equal to the total read counts for the individual, as the actual counts are sampled from a Poisson distribution.
+#' \item \code{genesLength} The length of each gene.
+#' }
+#' @examples
+#' \donttest{
+#' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none",
+#'                                 ploidy = 2, PC.p = 1)
+#' mypop = createInSilicoPopulation(10, mysystem)
+#' sim = simulateInSilicoSystem(mysystem, mypop, simtime = 1000,
+#'                              ntrials = 10, nepochs = 5)
+#' rnaSeq = getRNAseqMatrix(sim$Simulation, mysystem, laneEffect = F)
+#'
+#' ## With a batch/lane effect on the library size of the samples
+#' rnaSeq = getRNAseqMatrix(sim$Simulation, mysystem, laneEffect = T)
+#'
+#' ## Providing the library size of each sample/individual
+#' libsize = rnorm(length(unique(sim$Simulation$Ind)), 1e7, 1e5)
+#' names(libsize) = unique(sim$Simulation$Ind)
+#' rnaSeq = getRNAseqMatrix(sim$Simulation, mysystem, samplesLibSize = libsize)
+#'
+#' ## Accounting for different gene lengths
+#' genes_length = sample(1:200, nrow(mysystem$genes))
+#' names(genes_length) = as.character(1:nrow(mysystem$genes))
+#' rnaSeq = getRNAseqMatrix(sim$Simulation, mysystem,
+#'                          samplesLibSize = libsize, genesLength = genes_length)
+#' }
+#' @export
+getRNAseqMatrix = function(simdf, insilicosystem, samplingTime = max(simdf$time), laneEffect = F, nLanes = 2, propRnasSampled = 0.9, samplesLibSize = NULL, genesLength = NULL, mrnasOnly = T, mergeComplexes = F, meanLogLibSize_lane = 7, sdLogLibSize_lane = 0.5, sdLogLibSize_samples = 0.2){
+
+  samples_list = unique(simdf$Ind)
+
+  if(propRnasSampled <= 0 | propRnasSampled > 1) stop("propRnasSampled must be between 0 and 1.")
+
+  ## Compute the library size of each sample/individual
+  if(!is.null(samplesLibSize)){
+    if(length(samplesLibSize) != length(samples_list)){
+      stop("Vector samplesLibSize length must be equal to the number of simulated individuals.")
+    }
+    if(is.null(names(samplesLibSize))){
+      names(samplesLibSize) = samples_list
+    }else if(length(setdiff(samples_list, names(samplesLibSize))) > 0){
+      stop("The names of the samplesLibSize vector must correspond to the names of the individuals in the simulation.")
+    }
+    samplesLibSize_list = list("expected_library_size" = samplesLibSize)
+  }else{
+    samplesLibSize_list = sampleLibrarySize(samples_list,
+                                            meanLogLibSize_lane = meanLogLibSize_lane,
+                                            sdLogLibSize_lane = sdLogLibSize_lane,
+                                            sdLogLibSize_samples = sdLogLibSize_samples,
+                                            laneEffect = laneEffect,
+                                            nLanes = nLanes)
+    samplesLibSize = samplesLibSize_list$expected_library_size
+  }
+
+  ## Get the molecules to retain (all RNAs if mrnasOnly = F, otherwise only keep protein-coding RNAs)
+  molstokeep = sapply(insilicosystem$genes$id, function(x){paste0("R", x)})
+  if(mrnasOnly) molstokeep = molstokeep[insilicosystem$genes$coding == "PC"]
+
+  if(length(molstokeep) == 0) stop("No gene applicable for the transformation; try with mrnasOnly = F?")
+
+  ## Get the length of each gene/RNA
+  if(!is.null(genesLength)){
+    if(length(genesLength) != length(molstokeep)){
+      stop("Vector genesLength length must be equal to the number of protein-coding genes in the system (if mrnasOnly is TRUE) or of genes in the system (if mrnasOnly is FALSE).")
+    }
+    if(is.null(names(genesLength))){
+      names(genesLength) = stringr::str_replace(molstokeep, "R", "")
+    }else if(length(setdiff(stringr::str_replace(molstokeep, "R", ""), names(genesLength))) > 0){
+      stop("The names of the genesLength vector must correspond to the IDs of the genes in the system.")
+    }
+  }else{
+    genesLength = rep(1, length(molstokeep))
+    names(genesLength) = stringr::str_replace(molstokeep, "R", "")
+  }
+
+  ## Merge RNAs abundance from RNAs in complexes if necessary
+  if(mergeComplexes) simdf = mergeComplexesAbundance(simdf)
+
+  ## Get the absolute abundance of the RNAs
+  df = mergeAlleleAbundance(simdf) %>%
+    dplyr::filter(time == samplingTime) %>% ## get the RNA abundance at the sampling time
+    dplyr::select(-!!sym("time")) %>%
+    tidyr::gather(key = !!sym("Molecule"), value = !!sym("Abundance"), -!!sym("trial"), -!!sym("Ind")) %>%
+    dplyr::filter(!!sym("Molecule") %in% molstokeep) %>%
+    dplyr::group_by(!!sym("Ind"), !!sym("Molecule")) %>%
+    dplyr::summarise(abundance = sum(!!sym("Abundance")))
+
+  ## Transform absolute abundance of RNAs into noisy proportions
+  totRNAperInd = df %>%
+    dplyr::summarise(tot_rna = sum(!!sym("abundance")))
+
+  noisy_prop = Reduce(dplyr::bind_rows, lapply(unique(df$Ind), function(x){
+    df_ind = dplyr::filter(df, !!sym("Ind") == x)
+    sampledRNAs = sample(rep(df_ind$Molecule, times = df_ind$abundance),
+                         size = dplyr::filter(totRNAperInd, !!sym("Ind") == x)$tot_rna * propRnasSampled,
+                         replace = F)
+    dplyr::tibble(Ind = x,
+           Molecule = df_ind$Molecule,
+           noisy_prop = sapply(!!sym("Molecule"), function(i){sum(sampledRNAs == i) / length(sampledRNAs)}))
+  })) %>%
+    dplyr::mutate(gene_length = unname(genesLength[stringr::str_replace(!!sym("Molecule"), "R", "")]),
+                  noisy_prop = !!sym("noisy_prop") * !!sym("gene_length"))
+
+  tot_prop = noisy_prop %>%
+    dplyr::group_by(!!sym("Ind")) %>%
+    dplyr::summarise(tot = sum(!!sym("noisy_prop")))
+
+  temp = tot_prop$tot
+  names(temp) = tot_prop$Ind
+
+  noisy_prop$noisy_prop = noisy_prop$noisy_prop / temp[noisy_prop$Ind]
+
+  ## Compute the expected count of each molecule for each individual/sample
+  expected_counts = noisy_prop %>%
+    dplyr::mutate(library_size = unname(samplesLibSize[!!sym("Ind")]),
+                  expected_counts = !!sym("noisy_prop") * !!sym("library_size"))
+
+  ## Sample the actual counts per molecule per individual/sample
+  rnaseq_counts = sapply(expected_counts$expected_counts, function(x){stats::rpois(1, x)})
+
+  res = dplyr::tibble(Ind = expected_counts$Ind,
+                      Molecule = expected_counts$Molecule,
+                      read_counts = rnaseq_counts) %>%
+    tidyr::spread(key = !!sym("Ind"), value = !!sym("read_counts"))
+
+  return(list("rnaSeqMatrix" = res,
+              "samplesLibSize" = samplesLibSize_list,
+              "genesLength" = genesLength))
+}
