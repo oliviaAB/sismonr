@@ -1,5 +1,6 @@
 context("Creating in silico populations")
 library(sismonr)
+library(XRJulia)
 
 check_julia = function(){
   if (!findJuliaNoError(test = T)) {
@@ -19,6 +20,7 @@ check_julia = function(){
 }
 
 test_that("creation of variants works",{
+  check_julia()
   indargs = insilicoindividualargs()
   genes = createGenes(insilicosystemargs(G = 5, PC.p = 0))
   variants = createVariants(genes, indargs)
@@ -29,6 +31,7 @@ test_that("creation of variants works",{
 })
 
 test_that("creation of in silico individuals works", {
+  check_julia()
   mysystem = createInSilicoSystem(G = 3, ploidy = 4)
   indargs = insilicoindividualargs(ngenevariants = 2)
   genvariants = createVariants(mysystem$genes, indargs)
@@ -45,6 +48,7 @@ test_that("creation of in silico individuals works", {
 })
 
 test_that("creation of in silico individuals works - Initial abundance", {
+  check_julia()
   mysystem = createInSilicoSystem(G = 3, ploidy = 2)
   indargs = insilicoindividualargs(ngenevariants = 1)
   genvariants = createVariants(mysystem$genes, indargs)
