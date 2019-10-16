@@ -23,8 +23,8 @@ plotGRN(insilicosystem, edgeType = NULL, showAllVertices = F,
 \item{showAllVertices}{Display vertices that don't have any edge? Default is FALSE}
 
 \item{plotType}{The type of plot function to use for the network: can be either
-"2D" (default, use the function \code{\link[igraph]{plot.igraph}}), "interactive2D" (use the function
- \code{\link[igraph]{tkplot}}) or "interactive3D" (use the function \code{\link[igraph]{rglplot}}).}
+"2D" (default, use the function \code{\link[igraph]{plot.igraph}}) or "interactive2D" (use the function
+ \code{\link[igraph]{tkplot}}).}
 
 \item{...}{any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.}
 }

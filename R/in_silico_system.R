@@ -1088,8 +1088,8 @@ plotGRNlegend = function(verticesColour, edgesColour){
 #' }
 #' @param showAllVertices Display vertices that don't have any edge? Default is FALSE
 #' @param plotType The type of plot function to use for the network: can be either
-#' "2D" (default, use the function \code{\link[igraph]{plot.igraph}}), "interactive2D" (use the function
-#'  \code{\link[igraph]{tkplot}}) or "interactive3D" (use the function \code{\link[igraph]{rglplot}}).
+#' "2D" (default, use the function \code{\link[igraph]{plot.igraph}}) or "interactive2D" (use the function
+#'  \code{\link[igraph]{tkplot}}).
 #' @param ... any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.
 #' @examples
 #' \donttest{
@@ -1140,17 +1140,18 @@ plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotTyp
       # requireNamespace("tcltk", quietly = TRUE)
       if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
       igraph::tkplot(network, edge.curved = T, vertex.label.color = "black", ...)
-    }else if(plotType == "interactive3D"){
-      # requireNamespace("rgl", quietly = TRUE)
-      if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
-      igraph::rglplot(network, edge.curved = T, vertex.label.color = "black", ...)
     }else{
-      stop("Parameter plotType must be one of \"2D\", \"interactive2D\" or \"interactive3D\".")
+      stop("Parameter plotType must be one of \"2D\" or \"interactive2D\".")
     }
   }else{
     graphics::plot.new()
     return(cat("No edges to plot."))
   }
+  # else if(plotType == "interactive3D"){
+  #   # requireNamespace("rgl", quietly = TRUE)
+  #   if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
+  #   igraph::rglplot(network, edge.curved = T, vertex.label.color = "black", ...)
+  # }
 }
 
 
