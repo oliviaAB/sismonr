@@ -9,6 +9,10 @@ The sismonr package aims at simulating random *in silico* biological systems, co
 
 Here we describe how to use the sismonr package. The code used throughout this documentation as well as the created variables saved as `.RData` objects are available [here](https://github.com/oliviaAB/sismonr/tree/master/docs/example).
 
+## A first note
+
+The sismonr package uses the programming language Julia to speed up computations for some of the functions. Note that the user doesn't need to have any knowledge of Julia to use sismonr, all calls to Julia are handled internally. When starting a new R session, the first call to any sismonr function using Julia will therefore take a few seconds longer than usual (and print a blank line), as sismonr is starting a new Julia process to run the underlying Julia commands.
+
 ## Abbreviations
 
 Here are the notations used throughout the sismonr package:
@@ -36,9 +40,9 @@ Here are the notations used throughout the sismonr package:
 
 The first step is to generate an *in silico* system. An *in silico* system is composed of a set of genes, and a gene regulatory network or GRN describing the different regulatory interactions occuring between the genes. The system is created by a call to the function `createInSilicoSystem`. The user can control different aspects of the system with the arguments passed to the function. For example:
 ```r
-mysystem = createInSilicoSystem(G = 10, PC.p = 0.7)
+mysystem = createInSilicoSystem(G = 10, PC.p = 0.7, ploidy = 2)
 ```
-generates an *in silico* system with 10 genes, and during the generation process each gene has a probability of 0.7 to be a protein-coding gene (as opposed to noncoding gene). The system returned by the function is an object of class `insilicosystem`, i.e. a list whose different attributes are presented below.
+generates an *in silico* system with 10 genes, and during the generation process each gene has a probability of 0.7 to be a protein-coding gene (as opposed to noncoding gene). The `ploidy` arguments controls how many copies of each gene will be present in the system. Here `ploidy = 2` generates a diploid system. If not specified, the `ploidy` parameter will automatically be set to 2. The system returned by the function is an object of class `insilicosystem`, i.e. a list whose different attributes are presented below.
 
 ## The list of genes
 
@@ -46,17 +50,17 @@ The different genes constituting the system are stored in a data-frame, and can 
 ```r
 > mysystem$genes
 
-   id coding TargetReaction PTMform ActiveForm       TCrate      TLrate       RDrate       PDrate
-1   1     PC             TL       1        Pm1 0.0102159120 0.004676446 0.0007152649 0.0003305674
-2   2     NC             RD       0         R2 0.0031143833 0.000000000 0.0006921874 0.0000000000
-3   3     NC             TC       0         R3 0.0025507259 0.000000000 0.0010819792 0.0000000000
-4   4     PC             PD       0         P4 0.0066864265 0.002069481 0.0008937198 0.0005002953
-5   5     PC             RD       0         P5 0.0007279451 0.001170024 0.0009666276 0.0001403540
-6   6     NC             RD       0         R6 0.0026713041 0.000000000 0.0025745269 0.0000000000
-7   7     NC             RD       0         R7 0.0007240740 0.000000000 0.0004825935 0.0000000000
-8   8     PC             TL       0         P8 0.0018790099 0.003752991 0.0006427814 0.0003395985
-9   9     NC            PTM       0         R9 0.0020533039 0.000000000 0.0008391371 0.0000000000
-10 10     NC             TL       0        R10 0.0026228109 0.000000000 0.0015883781 0.0000000000
+   id coding TargetReaction PTMform ActiveForm       TCrate     TLrate       RDrate       PDrate
+1   1     NC            PTM       0         R1 0.0022650092 0.00000000 0.0006022248 0.000000e+00
+2   2     PC             RD       0         P2 0.0011610575 1.45493135 0.0012704290 5.241792e-04
+3   3     PC             TL       0         P3 0.0008440692 0.07610997 0.0005346026 4.659461e-04
+4   4     PC             MR       0         P4 0.0018660167 0.02094220 0.0005450206 9.495481e-05
+5   5     PC             TC       0         P5 0.0013195158 0.08482105 0.0015738163 3.724944e-04
+6   6     NC             TL       0         R6 0.0017867835 0.00000000 0.0009361317 0.000000e+00
+7   7     PC             TC       1        Pm7 0.0050424625 0.08673830 0.0003888850 9.668181e-04
+8   8     PC             TC       0         P8 0.0040488925 0.52078680 0.0008828149 2.566280e-04
+9   9     NC             TL       0         R9 0.0008180618 0.00000000 0.0007097201 0.000000e+00
+10 10     NC             TC       0        R10 0.0034226576 0.00000000 0.0003839845 0.000000e+00
 ```
 
 Each gene is labeled with an ID (column `id`) and possesses the following parameters:
@@ -80,35 +84,20 @@ The regulatory network describing the regulatory interactions between the genes 
 > mysystem$edg
 
    from to TargetReaction RegSign RegBy
-1     3  1             TC       1    NC
-2     3  2             TC       1    NC
-3     3  5             TC      -1    NC
-4     3  6             TC       1    NC
-5     3  7             TC       1    NC
-6     3  8             TC      -1    NC
-7     3  9             TC      -1    NC
-8    10  1             TL       1    NC
-9  CTL1  5             TL       1     C
-10   10  8             TL      -1    NC
-11    5 10             RD       1    PC
-12    2 10             RD       1    NC
-13    6 10             RD       1    NC
-14    2  3             RD       1    NC
-15    7  3             RD       1    NC
-16    2  4             RD       1    NC
-17    5  5             RD       1    PC
-18    2  5             RD       1    NC
-19    2  6             RD       1    NC
-20    2  7             RD       1    NC
-21    2  8             RD       1    NC
-22    6  8             RD       1    NC
-23    4  1             PD       1    PC
-24    4  4             PD       1    PC
-25    9  1            PTM       1    NC
+1     5 10             TC      -1    PC
+2     7  5             TC       1    PC
+3     8  5             TC       1    PC
+4  CTC1  5             TC       1     C
+5    10  6             TC       1    NC
+6     6  3             TL      -1    NC
+7     9  4             TL       1    NC
+8     3  8             TL      -1    PC
+9     2  7             RD       1    PC
+10    1  7            PTM       1    NC
 ```
 Each edge in the network is characterised by the following parameters:
 
-- `from`: ID of the regulator gene. Note that for the edge at row 9, the regulator is not a gene but a regulatory complex (identifiable by its ID starting with `'C'`);
+- `from`: ID of the regulator gene. Note that for the edge at row 4, the regulator is not a gene but a regulatory complex (identifiable by its ID starting with `'C'`);
 - `RegBy`: type of regulator (`"PC"` for a protein-coding regulator, `"NC"` for a noncoding regulator and `"C"` for a regulatory complex);
 - `to`: ID of the target gene;
 - `TargetReaction`: type of the regulation, i.e. which expression step of the target is controlled. For example an edge for which `TargetReaction = "TC"` represents a regulation of transcription, etc. (see the [Abbreviations](#abbreviations) section);
@@ -122,7 +111,7 @@ plotGRN(mysystem)
 
 ![plotGRN](images/GRN.png)
 
-For small networks, you can try to use `plotGRN(mysystem, plotType = "interactive2D")` or `plotGRN(mysystem, plotType = "interactive3D")` to get dynamic 2D or 3D plots (the latter command requires the package `rgl`). Note that you can pass additional arguments to `plotGRN` that will be used by the `plot.igraph` function from the `igraph` package to plot the network (see [https://igraph.org/r/doc/plot.common.html](https://igraph.org/r/doc/plot.common.html) for the list of available arguments). This can be useful for example if your network is large, because the arrows will look too big and you won't be able to see much. To correct that you can use `plotGRN(mysystem, edge.arrow.size = 0.5)`.
+For small networks, you can try to use `plotGRN(mysystem, plotType = "interactive2D")` to get dynamic 2D plots. Note that you can pass additional arguments to `plotGRN` that will be used by the `plot.igraph` function from the `igraph` package to plot the network (see [https://igraph.org/r/doc/plot.common.html](https://igraph.org/r/doc/plot.common.html) for the list of available arguments). This can be useful for example if your network is large, because the arrows will look too big and you won't be able to see much. To correct that you can use `plotGRN(mysystem, edge.arrow.size = 0.5)`.
 
 The `edge` dataframe shows the global GRN, with all the different types of regulations. The element `mosystem` of the `insilicosystem` object contains the same edges but grouped by type of regulation:
 ```r
@@ -133,20 +122,18 @@ The `edge` dataframe shows the global GRN, with all the different types of regul
 > mysystem$mosystem$TCRN_edg
 
   from to TargetReaction RegSign RegBy TCbindingrate TCunbindingrate TCfoldchange
-1    3  1             TC       1    NC  0.0003862598    0.0008570129     8.253416
-2    3  2             TC       1    NC  0.0007598128    0.0009744623     2.006766
-3    3  5             TC      -1    NC  0.0005289158    0.0009172183     0.000000
-4    3  6             TC       1    NC  0.0005482350    0.0010538415     6.516568
-5    3  7             TC       1    NC  0.0004349759    0.0008655843    17.957680
-6    3  8             TC      -1    NC  0.0002987188    0.0006479341     0.000000
-7    3  9             TC      -1    NC  0.0006267855    0.0011831648     0.000000
+1    5 10             TC      -1    PC  1.261302e-06    0.0004756718     0.000000
+2    7  5             TC       1    PC  5.004492e-07    0.0011372389     7.133808
+3    8  5             TC       1    PC  1.035420e-07    0.0012070782    10.859677
+4 CTC1  5             TC       1     C  4.001311e-06    0.0014327934     5.809262
+5   10  6             TC       1    NC  1.436779e-04    0.0018526967    12.131921
 ```
-Here you can only see the edges of the GRN corresponding to the regulation of transcription. Each of the sub-GRNs stored in the `mosystem` element contains additional information about the kinetic parameters associated with each edge. For example, we can see that each edge corresponding to a regulatory interaction targeting the transcription is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (notice that for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, `TCfoldchange = 0`). The kinetic parameters associated with each edge depend on the type of regulation:
+Here you can only see the edges of the GRN corresponding to the regulation of transcription. Each of the sub-GRNs stored in the `mosystem` element contains additional information about the kinetic parameters associated with each edge. For example, we can see that each edge corresponding to a regulatory interaction targeting the transcription is assigned a binding rate (`TCbindingrate`) and an unbinding rate (`TCunbindingrate`) of the regulator to and from the binding site on the target gene's promoter. The parameter `TCfoldchange` corresponds to the coefficient by which is multiplied the basal transcription rate of the target when the regulator is bound to its binding site (for edges for which `RegSign = "-1"`, i.e. corresponding to a repression, the fold change `TCfoldchange` is automatically set to `0`, e.g. row 1). The kinetic parameters associated with each edge depend on the type of regulation:
 
 ```r
 > lapply(mysystem$mosystem, function(x){colnames(x)[-(1:5)]})
 
-$`TCRN_edg`
+$TCRN_edg
 [1] "TCbindingrate"   "TCunbindingrate" "TCfoldchange"   
 
 $TLRN_edg
@@ -177,28 +164,28 @@ In the GRN, some regulations can be performed by regulatory complexes. The compo
 ```r
 > mysystem$complexes
 
-$`CTL1`
-[1] "8" "1"
+$CTC1
+[1] "5" "5"
 ```
-This means that the products of genes 8 and 1 assemble in the system to form a regulatory complex labelled "CTL1". The kinetic parameters associated with these complexes (i.e. association and dissociation rates of the components) are available with:
+This means that 2 of the products of gene 5 assemble in the system to form a regulatory complex labelled "CTC1". Note that the complex does not have to be formed by the products of a single gene, but can be composed of the products of different genes. The kinetic parameters associated with these complexes (i.e. association and dissociation rates of the components) are available with:
 
 ```r
 > mysystem$complexeskinetics
 
-$`CTL1`
-$`CTL1`$`formationrate`
-[1] 8.411722e-05
+$CTC1
+$CTC1$formationrate
+[1] 0.001583534
 
-$`CTL1`$dissociationrate
-[1] 11906.19
+$CTC1$dissociationrate
+[1] 87.55631
 ```
-The element `complexesTargetReaction` of the `insilicosystem` object simply gives the type of regulation that the complexes accomplish, here regulation of translation:
+The element `complexesTargetReaction` of the `insilicosystem` object simply gives the type of regulation that the complexes accomplish, here regulation of transcription:
 
 ```r
 > mysystem$complexesTargetReaction
 
-$`CTL1`
-[1] "TL"
+$CTC1
+[1] "TC"
 ```
 
 ## The `sysargs` element
@@ -216,18 +203,18 @@ It is possible to modify your system. In particular, you can:
 > mysystem2 = addGene(mysystem)
 > mysystem2$genes
 
-   id coding TargetReaction PTMform ActiveForm       TCrate      TLrate       RDrate       PDrate
-1   1     PC             TL       1        Pm1 0.0102159120 0.004676446 0.0007152649 0.0003305674
-2   2     NC             RD       0         R2 0.0031143833 0.000000000 0.0006921874 0.0000000000
-3   3     NC             TC       0         R3 0.0025507259 0.000000000 0.0010819792 0.0000000000
-4   4     PC             PD       0         P4 0.0066864265 0.002069481 0.0008937198 0.0005002953
-5   5     PC             RD       0         P5 0.0007279451 0.001170024 0.0009666276 0.0001403540
-6   6     NC             RD       0         R6 0.0026713041 0.000000000 0.0025745269 0.0000000000
-7   7     NC             RD       0         R7 0.0007240740 0.000000000 0.0004825935 0.0000000000
-8   8     PC             TL       0         P8 0.0018790099 0.003752991 0.0006427814 0.0003395985
-9   9     NC            PTM       0         R9 0.0020533039 0.000000000 0.0008391371 0.0000000000
-10 10     NC             TL       0        R10 0.0026228109 0.000000000 0.0015883781 0.0000000000
-11 11     PC             RD       0        P11 0.0010224777 0.000803211 0.0008434117 0.0001761171
+   id coding TargetReaction PTMform ActiveForm       TCrate     TLrate       RDrate       PDrate
+1   1     NC            PTM       0         R1 0.0022650092 0.00000000 0.0006022248 0.000000e+00
+2   2     PC             RD       0         P2 0.0011610575 1.45493135 0.0012704290 5.241792e-04
+3   3     PC             TL       0         P3 0.0008440692 0.07610997 0.0005346026 4.659461e-04
+4   4     PC             MR       0         P4 0.0018660167 0.02094220 0.0005450206 9.495481e-05
+5   5     PC             TC       0         P5 0.0013195158 0.08482105 0.0015738163 3.724944e-04
+6   6     NC             TL       0         R6 0.0017867835 0.00000000 0.0009361317 0.000000e+00
+7   7     PC             TC       1        Pm7 0.0050424625 0.08673830 0.0003888850 9.668181e-04
+8   8     PC             TC       0         P8 0.0040488925 0.52078680 0.0008828149 2.566280e-04
+9   9     NC             TL       0         R9 0.0008180618 0.00000000 0.0007097201 0.000000e+00
+10 10     NC             TC       0        R10 0.0034226576 0.00000000 0.0003839845 0.000000e+00
+11 11     PC             TL       0        P11 0.0010205586 0.06387881 0.0014847265 6.886111e-04
 ```
 
 Notice that the function does not modify the `mysystem` system but creates a new *insilicosystem* object. Here we simply asked for a new gene to be created, and the function chooses whether it is protein-coding or noncoding and samples its kinetic parameters. Alternatively we can specify these different arguments:
@@ -236,48 +223,66 @@ Notice that the function does not modify the `mysystem` system but creates a new
 > mysystem2 = addGene(mysystem, coding = "PC", TargetReaction = "TL", TCrate = 0.005, PDrate = 0.0007)
 > mysystem2$genes
 
-   id coding TargetReaction PTMform ActiveForm       TCrate      TLrate       RDrate       PDrate
-1   1     PC             TL       1        Pm1 0.0102159120 0.004676446 0.0007152649 0.0003305674
-2   2     NC             RD       0         R2 0.0031143833 0.000000000 0.0006921874 0.0000000000
-3   3     NC             TC       0         R3 0.0025507259 0.000000000 0.0010819792 0.0000000000
-4   4     PC             PD       0         P4 0.0066864265 0.002069481 0.0008937198 0.0005002953
-5   5     PC             RD       0         P5 0.0007279451 0.001170024 0.0009666276 0.0001403540
-6   6     NC             RD       0         R6 0.0026713041 0.000000000 0.0025745269 0.0000000000
-7   7     NC             RD       0         R7 0.0007240740 0.000000000 0.0004825935 0.0000000000
-8   8     PC             TL       0         P8 0.0018790099 0.003752991 0.0006427814 0.0003395985
-9   9     NC            PTM       0         R9 0.0020533039 0.000000000 0.0008391371 0.0000000000
-10 10     NC             TL       0        R10 0.0026228109 0.000000000 0.0015883781 0.0000000000
-11 11     PC             TL       0        P11 0.0050000000 0.021366090 0.0002946139 0.0007000000
+   id coding TargetReaction PTMform ActiveForm       TCrate     TLrate       RDrate       PDrate
+1   1     NC            PTM       0         R1 0.0022650092 0.00000000 0.0006022248 0.000000e+00
+2   2     PC             RD       0         P2 0.0011610575 1.45493135 0.0012704290 5.241792e-04
+3   3     PC             TL       0         P3 0.0008440692 0.07610997 0.0005346026 4.659461e-04
+4   4     PC             MR       0         P4 0.0018660167 0.02094220 0.0005450206 9.495481e-05
+5   5     PC             TC       0         P5 0.0013195158 0.08482105 0.0015738163 3.724944e-04
+6   6     NC             TL       0         R6 0.0017867835 0.00000000 0.0009361317 0.000000e+00
+7   7     PC             TC       1        Pm7 0.0050424625 0.08673830 0.0003888850 9.668181e-04
+8   8     PC             TC       0         P8 0.0040488925 0.52078680 0.0008828149 2.566280e-04
+9   9     NC             TL       0         R9 0.0008180618 0.00000000 0.0007097201 0.000000e+00
+10 10     NC             TC       0        R10 0.0034226576 0.00000000 0.0003839845 0.000000e+00
+11 11     PC             TL       0        P11 0.0050000000 0.02279752 0.0008311582 7.000000e-04
 ```
 
 There is for now no way to remove a gene from an existing *in silico* system (for computational reasons).
 
 * **Add or remove an edge in the GRN**:
 
-If we want gene 1, a regulator of translation, to repress the expression of gene 5, we can use:
+If we want gene 3, a regulator of translation, to activate the expression (translation) of gene 5, we can use:
 
 ```r
-> mysystem2 = addEdge(mysystem, regID = 1, tarID = 5, regsign = "-1",
-                       kinetics = list("TLbindingrate" = 0.01,
-                                       "TLunbindingrate" = 0.1,
-                                       "TLfoldchange" = 10))
-> tail(mysystem2$edg)
+> mysystem2 = addEdge(mysystem, regID = 1, tarID = 5, regsign = "1",
+                       kinetics = list("TCbindingrate" = 0.01,
+                                       "TCunbindingrate" = 0.1,
+                                       "TCfoldchange" = 10))
+
+> tail(mysystem$edg) ## Original system
 
    from to TargetReaction RegSign RegBy
-21    2  8             RD       1    NC
-22    6  8             RD       1    NC
-23    4  1             PD       1    PC
-24    4  4             PD       1    PC
-25    9  1            PTM       1    NC
-26    1  5             TL      -1    PC
+5    10  6             TC       1    NC
+6     6  3             TL      -1    NC
+7     9  4             TL       1    NC
+8     3  8             TL      -1    PC
+9     2  7             RD       1    PC
+10    1  7            PTM       1    NC
 
-> mysystem2$mosystem$TLRN_edg
+> tail(mysystem2$edg) ## System with the new edge
+
+   from to TargetReaction RegSign RegBy
+6     6  3             TL      -1    NC
+7     9  4             TL       1    NC
+8     3  8             TL      -1    PC
+9     2  7             RD       1    PC
+10    1  7            PTM       1    NC
+11    3  5             TL       1    PC
+
+> mysystem$mosystem$TLRN_edg ## Original system
 
   from to TargetReaction RegSign RegBy TLbindingrate TLunbindingrate TLfoldchange
-1   10  1             TL       1    NC  0.0005639764    0.0007482334     18.73965
-2 CTL1  5             TL       1     C  0.0000361988    0.0010216521     15.73957
-3   10  8             TL      -1    NC  0.0003346685    0.0004777650      0.00000
-4    1  5             TL      -1    PC  0.0100000000    0.1000000000      0.00000
+1    6  3             TL      -1    NC  1.666402e-04    0.0006129013     0.000000
+2    9  4             TL       1    NC  9.458748e-04    0.0015561749     7.171744
+3    3  8             TL      -1    PC  1.784989e-06    0.0008773741     0.000000
+
+> mysystem2$mosystem$TCRN_edg ## System with the new edge
+
+  from to TargetReaction RegSign RegBy TLbindingrate TLunbindingrate TLfoldchange
+1    6  3             TL      -1    NC  1.666402e-04    0.0006129013     0.000000
+2    9  4             TL       1    NC  9.458748e-04    0.0015561749     7.171744
+3    3  8             TL      -1    PC  1.784989e-06    0.0008773741     0.000000
+4    3  5             TL       1    PC  1.000000e-02    0.1000000000    10.000000
 ```
 
 Note that the kinetic parameters of the regulatory interaction are passed in a named list. If the names of the parameters provided are wrong, the function won't stop with an error but will instead sample values for the parameters, as it would do if the parameters weren't provided at all. You cannot choose which expression step of the target is regulated, as it depends on the biological function of the regulator. It must be noted that the regulator can be either a gene or a regulatory complex.
@@ -285,13 +290,13 @@ Note that the kinetic parameters of the regulatory interaction are passed in a n
 Similarly we can remove the edge, with:
 
 ```r
-> mysystem2 = removeEdge(mysystem2, regID = 1, tarID = 5)
+> mysystem2 = removeEdge(mysystem2, regID = 3, tarID = 5)
 > mysystem2$mosystem$TLRN_edg
 
   from to TargetReaction RegSign RegBy TLbindingrate TLunbindingrate TLfoldchange
-1   10  1             TL       1    NC  0.0005639764    0.0007482334     18.73965
-2 CTL1  5             TL       1     C  0.0000361988    0.0010216521     15.73957
-3   10  8             TL      -1    NC  0.0003346685    0.0004777650      0.00000
+1    6  3             TL      -1    NC  1.666402e-04    0.0006129013     0.000000
+2    9  4             TL       1    NC  9.458748e-04    0.0015561749     7.171744
+3    3  8             TL      -1    PC  1.784989e-06    0.0008773741     0.000000
 ```
 
 * **Add or remove a regulatory complex**:
@@ -299,38 +304,50 @@ Similarly we can remove the edge, with:
 We can create new regulatory complexes, by choosing the genes whose products will associate:
 
 ```r
-> mysystem2 = addComplex(mysystem, compo = c(6, 7))
+> mysystem2 = addComplex(mysystem, compo = c(6, 9))
 > mysystem2$complexes
 
-$`CTL1`
-[1] "8" "1"
+$CTC1
+[1] "5" "5"
 
-$CRD1
-[1] "6" "7"
+$CTL1
+[1] "6" "9"
+
 ```
 
-The created complex is named `CRD1`. Again, you can specify the association and dissociation rate of the complex by passing the arguments `formationrate` and `dissociationrate` to the function. The components of the new complex must have the same biological function:
+The created complex is named `CTL1`. Again, you can specify the association and dissociation rate of the complex by passing the arguments `formationrate` and `dissociationrate` to the function. The components of the new complex must have the same biological function:
 
 ```r
-> mysystem2 = addComplex(mysystem, c(6, 9))
+> mysystem2 = addComplex(mysystem, compo = c(6, 7))
 
-Error in addComplex(mysystem, c(6, 9)) : 
+Error in addComplex(mysystem, compo = c(6, 7)) : 
   The different components do not all have the same biological function.
 ```
 
 We can remove a regulatory complex from a system. By doing so, all edges coming from the complex will be removed from the system:
 
 ```r
-> mysystem2 = removeComplex(mysystem, "CTL1")
+> mysystem2 = removeComplex(mysystem, "CTC1")
 > mysystem2$complexes
 
 named list()
 
-> mysystem2$mosystem$TLRN_edg
+> mysystem$mosystem$TCRN_edg ## Original system
 
-  from to TargetReaction RegSign RegBy TLbindingrate TLunbindingrate TLfoldchange
-1   10  1             TL       1    NC  0.0005639764    0.0007482334     18.73965
-2   10  8             TL      -1    NC  0.0003346685    0.0004777650      0.00000
+  from to TargetReaction RegSign RegBy TCbindingrate TCunbindingrate TCfoldchange
+1    5 10             TC      -1    PC  1.261302e-06    0.0004756718     0.000000
+2    7  5             TC       1    PC  5.004492e-07    0.0011372389     7.133808
+3    8  5             TC       1    PC  1.035420e-07    0.0012070782    10.859677
+4 CTC1  5             TC       1     C  4.001311e-06    0.0014327934     5.809262
+5   10  6             TC       1    NC  1.436779e-04    0.0018526967    12.131921
+
+> mysystem2$mosystem$TCRN_edg ## System without the complex
+
+  from to TargetReaction RegSign RegBy TCbindingrate TCunbindingrate TCfoldchange
+1    5 10             TC      -1    PC  1.261302e-06    0.0004756718     0.000000
+2    7  5             TC       1    PC  5.004492e-07    0.0011372389     7.133808
+3    8  5             TC       1    PC  1.035420e-07    0.0012070782    10.859677
+4   10  6             TC       1    NC  1.436779e-04    0.0018526967    12.131921
 ```
 
 ## Empty *in silico* system
@@ -347,12 +364,12 @@ The argument `"empty"` of the `generateInSilicoSystem` function allows you to ge
 
 # Creating an *in silico* population
 
-We will next create a population of *in silico* individuals. Each individual possesses different copies of the genes specified in the *in silico* system (generated in the previous step). You can decide the ploidy of the individuals (i.e. the number of copies of each gene that they will carry), the number of different alleles of each gene that exist in this *in silico* population, etc. For example:
+We will next create a population of *in silico* individuals. Each individual possesses one or more copies of the genes specified in the *in silico* system (generated in the previous step), as specified by the ploidy of the system. You can decide the number of different alleles of each gene that exist in this *in silico* population, etc. For example:
 ```r
-mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 4, ploidy = 2)
+mypop = createInSilicoPopulation(3, mysystem, ngenevariants = 4)
 ```
 
-creates a population of 3 *in silico* diploid individuals (ploidy = 2), assuming that there exist 4 different (genetically speaking) alleles of each gene.  The population returned by the function is an object of class `insilicopopulation`, i.e. a list whose different attributes are presented below.
+creates a population of 3 *in silico* diploid individuals (ploidy = 2 specified in the previous section), assuming that there exist 4 different (genetically speaking) alleles of each gene.  The population returned by the function is an object of class `insilicopopulation`, i.e. a list whose different attributes are presented below.
 
 ## The gene alleles
 A gene allele is represented as a vector containing the quantitative effects of its mutations on different kinetic properties of the gene, termed **QTL effect coefficients**. The alleles existing in this population are stored in the element `GenesVariants` of the `insilicopopulation` object returned by the function.
@@ -360,34 +377,34 @@ A gene allele is represented as a vector containing the quantitative effects of 
 > mypop$GenesVariants[1:2]
 
 $`1`
-              1         2         3         4
-qtlTCrate     1 1.1497101 1.0871565 1.0000000
-qtlRDrate     1 1.0716807 1.0752007 0.9873641
-qtlTCregbind  1 0.9877724 0.9743120 0.9672106
-qtlRDregrate  1 1.0739386 0.9994665 1.1057441
-qtlactivity   1 1.1695181 0.8913247 1.0991139
-qtlTLrate     1 0.9720808 0.9867989 1.0000000
-qtlPDrate     1 1.0000000 1.0961864 1.0000000
-qtlTLregbind  1 1.0000000 1.1803645 0.8590823
-qtlPDregrate  1 1.0801725 1.2379977 1.0178397
-qtlPTMregrate 1 1.0000000 0.8058120 1.0000000
+              1         2         3        4
+qtlTCrate     1 1.0000000 1.0000000 1.000000
+qtlRDrate     1 0.9522776 1.0000000 1.000000
+qtlTCregbind  1 1.0000000 0.9762780 1.007287
+qtlRDregrate  1 1.0000000 0.9910411 1.000000
+qtlactivity   1 1.0374314 1.0000000 1.000000
+qtlTLrate     0 0.0000000 0.0000000 0.000000
+qtlPDrate     0 0.0000000 0.0000000 0.000000
+qtlTLregbind  0 0.0000000 0.0000000 0.000000
+qtlPDregrate  0 0.0000000 0.0000000 0.000000
+qtlPTMregrate 0 0.0000000 0.0000000 0.000000
 
 $`2`
               1         2         3         4
-qtlTCrate     1 0.9410823 1.0000000 1.0000000
-qtlRDrate     1 1.0000000 1.0000000 1.1279309
-qtlTCregbind  1 0.9002090 1.0000000 1.0000000
-qtlRDregrate  1 0.9264547 0.9548372 1.0000000
-qtlactivity   1 0.9892373 1.0410671 0.9348366
-qtlTLrate     0 0.0000000 0.0000000 0.0000000
-qtlPDrate     0 0.0000000 0.0000000 0.0000000
-qtlTLregbind  0 0.0000000 0.0000000 0.0000000
-qtlPDregrate  0 0.0000000 0.0000000 0.0000000
-qtlPTMregrate 0 0.0000000 0.0000000 0.0000000
+qtlTCrate     1 1.0000000 0.9400730 1.0000000
+qtlRDrate     1 1.0000000 1.0375015 1.0073818
+qtlTCregbind  1 1.0000000 1.0000000 1.1013731
+qtlRDregrate  1 1.0000000 0.8505525 0.8238966
+qtlactivity   1 1.0000000 1.2285846 1.0303434
+qtlTLrate     1 0.9419998 1.1578962 0.9689810
+qtlPDrate     1 1.0000000 0.9321794 0.9710529
+qtlTLregbind  1 1.0000000 1.0481206 1.2379087
+qtlPDregrate  1 1.0000000 0.7584668 1.2236113
+qtlPTMregrate 1 1.0000000 0.8749443 1.1218343
 ```
-This shows the alleles (columns of the dataframe) of genes 1 and 2 that have been generated by the function. The first allele of each gene corresponds to the "original" version of the gene, i.e. all QTL effect coefficients are set to 1. A QTL effect coefficient is a multiplicative coefficient that will be applied to the corresponding kinetic parameter of the gene during the construction of the stochastic model to simulate the expression profiles for the different individuals. As some of the QTL effect coefficients apply to translation- or protein-related steps of the gene expression, they are set to 0 for noncoding genes (see gene 2).
+This shows the alleles (columns of the dataframe) of genes 1 and 2 that have been generated by the function. The first allele of each gene corresponds to the "original" version of the gene, i.e. all QTL effect coefficients are set to 1. A QTL effect coefficient is a multiplicative coefficient that will be applied to the corresponding kinetic parameter of the gene during the construction of the stochastic model to simulate the expression profiles for the different individuals. As some of the QTL effect coefficients apply to translation- or protein-related steps of the gene expression, they are set to 0 for noncoding genes (see gene 1).
 
-Here, the 4th allele of gene 2 carries two mutations (two QTL effect coefficient different from 1). The first mutation increases the RNA decay of the gene (`qtlRDrate` > 1). The second mutation decreases the activity of the gene's active product (`qtlactivity` < 1). Gene 2 being a noncoding gene (`coding = "NC"`) encoding a regulatory RNA triggering the degradation of its targets (`TargetReaction = "RD"`), it means that the RNAs of this variant will trigger the decay of their targets with a reduced rate compared to the original version of the gene.
+Here, the 4th allele of gene 1 carries two mutations (two QTL effect coefficient different from 1). The first mutation decreases the RNA decay rate of the gene (`qtlRDrate` < 1). The second mutation increases the activity of the gene's active product (`qtlactivity` > 1). Gene 1 being a noncoding gene (`coding = "NC"`) encoding a regulatory RNA controlling the post-transcriptional modification of its targets (`TargetReaction = "PTM"`), it means that the RNAs of this variant will modify its target proteins with an increased rate compared to the original version of the gene.
 
 QTL effect coefficient name | Effect
 --------------------------- | ------
@@ -406,85 +423,87 @@ QTL effect coefficient name | Effect
 
 The different generated *in silico* individuals are stored in the element `individualsList` of the `insilicopopulation` object. Each individual is represented by a list with the following elements: 
 
-- `haplotype`: gives for each gene (rows) the alleles that the individual carries (columns). The different copies of the genes are denoted "GCNi", (with `i` ranging from 1 to P - the ploidy of the organism). In this example we defined the ploidy of the individuals to be 2, so each individual carries 2 copies of each gene.
+- `haplotype`: gives for each gene (rows) the alleles that the individual carries (columns). The different copies of the genes are denoted "GCNi", (with `i` ranging from 1 to P - the ploidy of the organism). In this example we defined the ploidy of the system to be 2, so each individual carries 2 copies of each gene.
 ```r
 > mypop$individualsList$Ind1$haplotype
 
    GCN1 GCN2
-1     4    4
-2     3    3
-3     1    1
-4     1    3
-5     2    1
-6     4    2
-7     4    3
-8     2    2
-9     2    2
-10    4    2
+1     3    2
+2     1    1
+3     2    2
+4     3    2
+5     3    3
+6     1    1
+7     3    1
+8     2    3
+9     1    4
+10    1    4
 ```
-Here the first individual (`Ind1`) carries two copies of allele 4 of gene 1, and the alleles 2 and 1 of gene 5.
+Here the first individual (`Ind1`) carries two copies of allele 3 of gene 5, and the alleles 2 and 3 of gene 1.
 
-- `QTLeffects`: gives for each gene copy (i.e. "GCN1", "GCN2", etc) the value of each QTL effect coefficient for the genes (value for gene `i` at the `i`-st position in the vector of QTL effect coefficients).
+- `QTLeffects`: gives for each gene copy (i.e. "GCN1", "GCN2", etc) the value of each QTL effect coefficient for the genes (value for gene `i` at the `i`-th position in the vector of QTL effect coefficients).
 
 ```r
 > mypop$individualsList$Ind1$QTLeffects$GCN1
 
-$`qtlTCrate`
- [1] 1.0000000 1.0000000 1.0000000 1.0000000 1.0902418 1.0348311 0.9109661 0.9967290 1.0000000 1.0000000
+$qtlTCrate
+ [1] 1.0000000 1.0000000 0.9672539 0.9383817 1.0000000 1.0000000 1.0000000 1.0812009 1.0000000 1.0000000
 
 $qtlRDrate
- [1] 0.9873641 1.0000000 1.0000000 1.0000000 0.9040544 1.0383621 0.9564495 0.8241807 1.0000000 1.0000000
+ [1] 1.0000000 1.0000000 1.0000000 0.9346013 0.9554500 1.0000000 0.9614498 1.0000000 1.0000000 1.0000000
 
 $qtlTCregbind
- [1] 0.9672106 1.0000000 1.0000000 1.0000000 1.1097009 1.0450436 1.1030181 0.9696297 1.0000000 0.9534590
+ [1] 0.9762780 1.0000000 0.9209159 1.0512399 1.0000000 1.0000000 0.9259654 1.0000000 1.0000000 1.0000000
 
 $qtlRDregrate
- [1] 1.1057441 0.9548372 1.0000000 1.0000000 1.0757253 1.0000000 1.0000000 1.0204342 1.0000000 1.0000000
+ [1] 0.9910411 1.0000000 0.9275185 1.0000000 1.1410932 1.0000000 1.0000000 1.0706625 1.0000000 1.0000000
 
 $qtlactivity
- [1] 1.0991139 1.0410671 1.0000000 1.0000000 0.9867205 1.0123621 1.0000000 1.0088508 0.9603851 1.0979157
+ [1] 1.0000000 1.0000000 1.0000000 1.1118578 1.0620914 1.0000000 0.9806165 1.0000000 1.0000000 1.0000000
 
 $qtlTLrate
- [1] 1.000000 0.000000 0.000000 1.000000 1.000000 0.000000 0.000000 1.147115 0.000000 0.000000
+ [1] 0.0000000 1.0000000 1.0498663 1.0000000 0.9686472 0.0000000 1.0000000 1.0000000 0.0000000 0.0000000
 
 $qtlPDrate
- [1] 1.000000 0.000000 0.000000 1.000000 1.000000 0.000000 0.000000 0.933369 0.000000 0.000000
+ [1] 0.0000000 1.0000000 1.1117630 1.0000000 1.0144363 0.0000000 0.7340314 1.0850892 0.0000000 0.0000000
 
 $qtlTLregbind
- [1] 0.8590823 0.0000000 0.0000000 1.0000000 0.9265245 0.0000000 0.0000000 1.0000000 0.0000000 0.0000000
+ [1] 0.0000000 1.0000000 1.1650171 0.9199958 1.1522007 0.0000000 0.9378752 0.9753078 0.0000000 0.0000000
 
 $qtlPDregrate
- [1] 1.017840 0.000000 0.000000 1.000000 1.087038 0.000000 0.000000 1.081716 0.000000 0.000000
+ [1] 0.0000000 1.0000000 0.8805382 1.0000000 1.0000000 0.0000000 1.0000000 1.0000000 0.0000000 0.0000000
 
 $qtlPTMregrate
- [1] 1.0000000 0.0000000 0.0000000 1.0000000 0.9092469 0.0000000 0.0000000 0.8711770 0.0000000 0.0000000
-
+ [1] 0.0000000 1.0000000 0.9818818 1.0799951 1.0000000 0.0000000 1.0000000 1.0811174 0.0000000 0.0000000
+ 
 ```
 
-As individual `Ind1`'s first copy ("GCN1") of gene 4 is gene 4's allele 1 (see `mypop$GenesVariants[[4]][,1]`), the first element of each QTL effect coefficient vector for `GCN1` is `1.0`. Similarly, the 8th element of the different QTL effect coefficients vectors for `GCN1` correspond to the values in `mypop$GenesVariants[[8]][,2]` (as the first gene 8 copy of `Ind1` is gene 8's allele 2).
+As individual `Ind1`'s first copy ("GCN1") of gene 2 is gene 2's allele 1 (see `mypop$GenesVariants[[2]][,1]`), the 2nd element of each QTL effect coefficient vector for `GCN1` is `1.0`. Similarly, the 3rd element of the different QTL effect coefficients vectors for `GCN1` correspond to the values in `mypop$GenesVariants[[3]][,2]` (as the first `Ind1`'s copy of gene 3 is gene 3's allele 2).
 
-- `InitVar`: the list of **initial abundance variation coefficients** for the RNAs and proteins of the genes. During the simulation of the individuals gene profiles, a stochastic system is generated and an initial abundance is automatically computed for each product (RNA and protein) of the different genes. When constructing the *in silico* population, the parameter `sameInit` controls whether or not these initial abundances are the same for all individuals in the population. If not (default behaviour of the `createInSilicoPopulation` function), each gene product is assigned an initial abundance variation coefficient that will be multiplied with the automatically computed initial abundance of the molecule, to give its initial abundance for the corresponding individual.
+- `InitAbundance`: the list of initial abundance for the RNAs and proteins of the genes. During the simulation of the individuals gene profiles, a stochastic system is generated and an initial abundance is required for each product (RNA and protein) of the different genes. This initial abundance is automatically computed during the construction of each *in silico* individual, and corresponds to the steady-state abundance of the molecule in absence of any regulation (i.e. production rate / decay rate) accounting for the effects of the genetic mutations. When constructing the *in silico* population, the parameter `initialNoise` controls whether or not these initial abundances are exactly equal to their no-regulation steady state abundance. If not (default behaviour of the `createInSilicoPopulation` function), the initial abundance of a given molecule is instead sampled from a normal distribution with a mean equal to this no-regulation steady state abundance, and a standard deviation equal to the square root of the aforementioned steady-state abundance. Note that the square root of the mean is used as standard deviation to reduce the variation for molecules with low abundance. The initial abundances of an individual are stored in a list that separates the different copies of each gene (here `GCN1` and `GCN2`), and the RNA and protein forms of the genes (`R` and `P`). The initial abundance for gene `i` is given at the `i`-th position of the vectors:
 
 ```r
-> mypop$individualsList$Ind1$InitVar
+> mypop$individualsList$Ind1$InitAbundance
 
-$`GCN1`
-$`GCN1`$`R`
- [1] 0.9159181 1.0797215 1.0250958 1.0926766 0.9672803 1.0383965 1.0443941 0.9758813 0.8667291 0.9664162
+$GCN1
+$GCN1$R
+ [1]  1  1  1  5  1  1 17  3  1  8
 
-$`GCN1`$P
- [1] 0.9193823 0.8984148 1.0276593 1.0991399 0.9424809 0.8814257 0.9479369 1.1454875 1.0238319 1.0267769
+$GCN1$P
+ [1]    0 2489  217  732  174    0 1708 9393    0    0
 
 
 $GCN2
-$GCN2$`R`
- [1] 0.9628920 1.0887911 0.9259260 1.2625593 1.0129414 1.0409691 1.0568975 0.9901333 0.9697836 1.1285031
+$GCN2$R
+ [1]  2  1  2  3  3  3 15  3  2  5
 
 $GCN2$P
- [1] 0.8807743 1.0066237 1.1421837 1.0610054 0.9788814 0.9476440 0.8846319 1.0193880 0.9871884 0.8924939
+ [1]    0 2561  257  761  199    0 1174 9527    0    0
+
+
 ```
 
-For example, if \[RNA1<sup>GCN1</sup>\]<sub>0</sub> corresponds to the automatically computed initial abundance of the RNAs produced by the 1st copy of gene 1, then the initial abundance of the RNAs produced by gene 1's first copy is $$\sim$$ 0.92 * \[RNA1<sup>GCN1</sup>\]<sub>0</sub> for individual `Ind1`.
+For example for `Ind1`, there are initially 1 molecule of the RNA form of gene 1's first copy (`GCN1`) in the system, while there are 2 molecules of gene 1's second copy (`GCN2`). The proteins of both copies of gene 10 are initially not present in the system (initial abundance both at 0), which is logical since gene 10 is noncoding, and thus does not produce proteins.
 
 It is possible to visualise the QTL effect coefficients of all the genes in the system for each *in silico* individual in the population, with:
 
@@ -495,17 +514,17 @@ plotMutations(mypop, mysystem, nGenesPerRow = 5)
 ![plotMutations](images/plotMutations.png)
 
 
-The function `plotMutations` takes as arguments the *in silico* population and the *in silico* system, and plot the value (colour) of each QTL effect coefficient (x-axis) for each copy (y-axis) of each gene (columns) for each individual in the population (rows). (The argument `nGenesPerRow` simply indicates how many genes to plot per row in the final plot, useful when the number of genes is large to avoid too wide plots). 
+The function `plotMutations` takes as arguments the *in silico* population and the *in silico* system, and plot the value (colour) of each QTL effect coefficient (x-axis) for each copy (y-axis) of each gene (columns) for each individual in the population (rows). (The argument `nGenesPerRow` simply indicates how many genes to plot per row in the final plot, useful when the number of genes is large to avoid plots that are too wide). 
 
-As we saw with the `haplotype` element, we can see that the first individual `Ind1` carries two identical copies of gene 1, because the values of the QTL effect coefficients are identical in each copies. However individual `Ind2` carries two different alleles of gene 1 (the values of the QTL effect coefficients are different for the two copies GCN1 and GCN2). 
+As we saw with the `haplotype` element, we can see that the first individual `Ind1` carries two identical copies of gene 5, because the values of the QTL effect coefficients are identical in both copies. However individual `Ind3` carries two different alleles of gene 3 (the values of the QTL effect coefficients are different for the two copies `GCN1` and `GCN2`). 
 
-The first copy (GCN1) of gene 4 for individual `Ind4`  is the original version of the gene, i.e. the QTL effect coefficients all have a value of 1 (white) meaning that this version does not have any mutation. Notice that genes 2, 3, 6, 7, 9 and 10 are nocoding genes. Consequently, the QTL effect coefficients related to protein or translation are not applicable, and they are represented in gray.
+The second copy (`GCN2`) of gene 3 for individual `Ind2`  is the original version of the gene, i.e. the QTL effect coefficients all have a value of 1 (white) meaning that this version does not have any mutation. Notice that genes 1, 6, 9 and 10 are nocoding genes. Consequently, the QTL effect coefficients related to protein or translation are not applicable, and they are represented in gray.
 
 You can of course focus the plot on only some individuals, genes, gene copy, QTL effect coefficients or even values, with the arguments passed to `plotMutations`, as in: 
 
 ```r
 plotMutations(mypop, mysystem,
-              scaleLims = c(0.95, 1.05), 
+              scaleLims = c(0.85, 1.15),
               qtlEffectCoeffs = c("qtlTCrate", "qtlTLrate", "qtlRDrate", "qtlPDrate"),
               inds = c("Ind1", "Ind2"),
               alleles = "GCN2",
@@ -514,7 +533,12 @@ plotMutations(mypop, mysystem,
 
 ![plotMutations2](images/plotMutations2.png)
 
-Here we restricted the plot to the second allele of genes 1, 2, and 3 for the first two individuals. We only represented the QTL effect coefficients affecting the basal kinetic properties of the gene (transcription, translation, RNA decay and protein decay rate). We also restricted the plot to QTL effect coefficients whose values were between 0.95 and 1.05. This is why `qtlTCrate` and `qtlRDrate` of genes 1 and 3 for `Ind2` are in gray: not because they are not applicable but because their values range outside these limits.   
+Here we restricted the plot to the second allele of genes 1, 2, and 3 for the first two individuals. We only represented the QTL effect coefficients affecting the basal kinetic properties of the gene (transcription, translation, RNA decay and protein decay rate). We also restricted the plot to QTL effect coefficients whose values were between 0.85 and 1.15. This is why the `qtlTLrate` value of gene 2 for `Ind2` is in gray: not because it is are not applicable but because its values range outside these limits:
+
+```r
+> mypop$individualsList$Ind2$QTLeffects$GCN2$qtlTLrate[2]
+[1] 1.157896
+```
 
 ## The `indargs` element
 
@@ -538,7 +562,7 @@ The output of the simulation is a list of 3 elements. The element `runningtime` 
 ```r
 > sim$runningtime
 
-[1] 7.81 8.03 7.99
+[1] 71.754 42.657 63.007
 ```
 
 If you used the parallelised function `simulateParallelInSilicoSystem`, then `sim$runningtime` only gives the running time of the entire set of simulations (i.e. for all repetitions of all individuals).
@@ -550,27 +574,27 @@ The result of the simulation, that is the abundance of the different species in 
 ```r
 > head(sim$Simulation)
 
-  time trial R5GCN2 P5GCN2 R7GCN2 R3GCN1 R1GCN2 P1GCN2 Pm1GCN2 R9GCN1 R6GCN2 R10GCN2 R1GCN1 P1GCN1 Pm1GCN1 R4GCN2 P4GCN2
-1    0     1      1      6      2      2     14    178       0      2      1       2     13    186       0      9     33
-2    1     1      0      6      0      0     14      0      48      2      0       0     13      0      40      0      0
-3    2     1      0      6      0      0     14      0      14      2      0       0     13      0       3      0      0
-4    3     1      0      6      0      0     14      0       2      2      0       0     13      0       1      0      0
-5    4     1      0      6      0      0     14      1       0      2      0       0     13      0       0      0      0
-6    5     1      0      6      0      0     14      1       1      2      0       0     13      0       0      0      0
-  R8GCN1 P8GCN1 R6GCN1 R10GCN1 R2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 R2GCN1 R9GCN2 R7GCN1
-1      3     37      1       2      5      3     33      1      6      8     34      2      5      2      2
-2      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-3      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-4      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-5      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0
-6      0     37      0       0      5      0     33      0      6      0      1      0      4      2      0
-  CTL1_P8GCN1_Pm1GCN2 CTL1_P8GCN1_Pm1GCN1 CTL1_P8GCN2_Pm1GCN1 CTL1_P8GCN2_Pm1GCN2  Ind
-1                   0                   0                   0                   0 Ind1
-2                   0                   0                   0                   0 Ind1
-3                   0                   0                   0                   0 Ind1
-4                   0                   0                   0                   0 Ind1
-5                   0                   0                   0                   0 Ind1
-6                   0                   0                   0                   0 Ind1
+  time trial R5GCN2 P5GCN2 R7GCN2 P7GCN2 Pm7GCN2 R3GCN1 P3GCN1 R1GCN2 R9GCN1 R6GCN2 R10GCN2 R1GCN1 R4GCN2 P4GCN2 R8GCN1 P8GCN1 R6GCN1
+1    0     1      3    199     15   1174       0      1    217      2      1      3       5      1      3    761      3   9393      1
+2    1     1      3    194     15   1172       0      1    217      2      1      3       5      1      3    761      3   9389      1
+3    2     1      3    196     15   1173       0      1    216      2      1      3       5      1      3    761      3   9386      1
+4    3     1      3    199     15   1175       0      1    216      2      1      3       5      1      3    762      3   9378      1
+5    4     1      3    198     15   1174       0      1    216      2      1      3       5      1      3    763      3   9376      1
+6    5     1      3    198     15   1173       0      1    217      2      1      3       5      1      3    764      3   9379      1
+  R10GCN1 R2GCN2 P2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 P3GCN2 R2GCN1 P2GCN1 R9GCN2 R7GCN1 P7GCN1 Pm7GCN1
+1       8      1   2561      3   9527      1    174      5    732      2    257      1   2489      2     17   1708       0
+2       8      1   2560      3   9525      1    171      5    732      2    257      1   2494      2     17   1711       0
+3       8      1   2559      3   9522      1    173      5    732      2    257      1   2495      2     17   1711       0
+4       8      1   2559      3   9523      1    172      5    732      2    258      1   2496      2     15   1715       0
+5       8      1   2560      3   9522      1    173      5    731      2    258      1   2497      2     15   1716       0
+6       8      1   2564      3   9519      1    171      5    731      2    258      1   2496      2     14   1718       0
+  CTC1_P5GCN1_P5GCN1 CTC1_P5GCN2_P5GCN2 CTC1_P5GCN1_P5GCN2 CTC1_P5GCN2_P5GCN1  Ind
+1                  0                  0                  0                  0 Ind1
+2                  0                  1                  1                  2 Ind1
+3                  0                  1                  0                  1 Ind1
+4                  1                  0                  0                  0 Ind1
+5                  0                  0                  1                  0 Ind1
+6                  1                  0                  0                  1 Ind1
 ```
 
 By default, the simulation distinguishes the different gene products (RNAs, proteins and regulatory complexes) according to their copy of origin (e.g. the RNAs arising from the first and second copy of gene 1 will be separately counted in the columns `R1GCN1` and `R1GCN2`, respectively). To obtain results that ignore the copy of origin, you can use:
@@ -579,35 +603,35 @@ By default, the simulation distinguishes the different gene products (RNAs, prot
 > simNoAllele = mergeAlleleAbundance(sim$Simulation)
 > head(simNoAllele)
 
-  time trial  Ind R5 P5 R7 R3 R1  P1 Pm1 R9 R6 R10 R4 P4 R8 P8 R2 CTL1_P8_Pm1
-1    0     1 Ind1  2 12  4  4 27 364   0  4  2   4 17 67  6 70 10           0
-2    1     1 Ind1  0 12  0  0 27   0  88  4  0   0  0  1  0 70 10           0
-3    2     1 Ind1  0 12  0  0 27   0  17  4  0   0  0  1  0 70 10           0
-4    3     1 Ind1  0 12  0  0 27   0   3  4  0   0  0  1  0 70 10           0
-5    4     1 Ind1  0 12  0  0 27   1   0  4  0   0  0  1  0 70 10           0
-6    5     1 Ind1  0 12  0  0 27   1   1  4  0   0  0  1  0 70  9           0
+  time trial  Ind R5  P5 R7   P7 Pm7 R3  P3 R1 R9 R6 R10 R4   P4 R8    P8 R2   P2 CTC1_P5_P5
+1    0     1 Ind1  4 373 32 2882   0  3 474  3  3  4  13  8 1493  6 18920  2 5050          0
+2    1     1 Ind1  4 365 32 2883   0  3 474  3  3  4  13  8 1493  6 18914  2 5054          4
+3    2     1 Ind1  4 369 32 2884   0  3 473  3  3  4  13  8 1493  6 18908  2 5054          2
+4    3     1 Ind1  4 371 30 2890   0  3 474  3  3  4  13  8 1494  6 18901  2 5055          1
+5    4     1 Ind1  4 371 30 2890   0  3 474  3  3  4  13  8 1494  6 18898  2 5057          1
+6    5     1 Ind1  4 369 29 2891   0  3 475  3  3  4  13  8 1495  6 18898  2 5060          2
 ```
 
-A gene product bound into a regulatory complex is not accounted for when computing the abundance for this species (e.g. if all existing proteins of gene 1 are in a regulatory complex then the abundance for `P1` will be 0). It is possible to ignore the regulatory complexes and compute the abundance of a species by counting each molecule whether it is in a free form or bound into a complex: 
+A gene product bound into a regulatory complex is not accounted for when computing the abundance for this species (e.g. if all existing proteins of gene 5 are in a regulatory complex then the abundance for `P5` will be 0). It is possible to ignore the regulatory complexes and compute the abundance of a species by counting each molecule whether it is in a free form or bound into a complex: 
 
 ```r
 > simNoComplex = mergeComplexesAbundance(sim$Simulation)
 > head(simNoComplex)
 
-  time trial R5GCN2 P5GCN2 R7GCN2 R3GCN1 R1GCN2 P1GCN2 Pm1GCN2 R9GCN1 R6GCN2 R10GCN2 R1GCN1 P1GCN1 Pm1GCN1 R4GCN2 P4GCN2
-1    0     1      1      6      2      2     14    178       0      2      1       2     13    186       0      9     33
-2    1     1      0      6      0      0     14      0      48      2      0       0     13      0      40      0      0
-3    2     1      0      6      0      0     14      0      14      2      0       0     13      0       3      0      0
-4    3     1      0      6      0      0     14      0       2      2      0       0     13      0       1      0      0
-5    4     1      0      6      0      0     14      1       0      2      0       0     13      0       0      0      0
-6    5     1      0      6      0      0     14      1       1      2      0       0     13      0       0      0      0
-  R8GCN1 P8GCN1 R6GCN1 R10GCN1 R2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 R2GCN1 R9GCN2 R7GCN1  Ind
-1      3     37      1       2      5      3     33      1      6      8     34      2      5      2      2 Ind1
-2      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0 Ind1
-3      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0 Ind1
-4      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0 Ind1
-5      0     37      0       0      5      0     33      0      6      0      1      0      5      2      0 Ind1
-6      0     37      0       0      5      0     33      0      6      0      1      0      4      2      0 Ind1
+  time trial R5GCN2 P5GCN2 R7GCN2 P7GCN2 Pm7GCN2 R3GCN1 P3GCN1 R1GCN2 R9GCN1 R6GCN2 R10GCN2 R1GCN1 R4GCN2 P4GCN2 R8GCN1 P8GCN1 R6GCN1
+1    0     1      3    199     15   1174       0      1    217      2      1      3       5      1      3    761      3   9393      1
+2    1     1      3    199     15   1172       0      1    217      2      1      3       5      1      3    761      3   9389      1
+3    2     1      3    199     15   1173       0      1    216      2      1      3       5      1      3    761      3   9386      1
+4    3     1      3    199     15   1175       0      1    216      2      1      3       5      1      3    762      3   9378      1
+5    4     1      3    199     15   1174       0      1    216      2      1      3       5      1      3    763      3   9376      1
+6    5     1      3    199     15   1173       0      1    217      2      1      3       5      1      3    764      3   9379      1
+  R10GCN1 R2GCN2 P2GCN2 R8GCN2 P8GCN2 R5GCN1 P5GCN1 R4GCN1 P4GCN1 R3GCN2 P3GCN2 R2GCN1 P2GCN1 R9GCN2 R7GCN1 P7GCN1 Pm7GCN1  Ind
+1       8      1   2561      3   9527      1    174      5    732      2    257      1   2489      2     17   1708       0 Ind1
+2       8      1   2560      3   9525      1    174      5    732      2    257      1   2494      2     17   1711       0 Ind1
+3       8      1   2559      3   9522      1    174      5    732      2    257      1   2495      2     17   1711       0 Ind1
+4       8      1   2559      3   9523      1    174      5    732      2    258      1   2496      2     15   1715       0 Ind1
+5       8      1   2560      3   9522      1    174      5    731      2    258      1   2497      2     15   1716       0 Ind1
+6       8      1   2564      3   9519      1    174      5    731      2    258      1   2496      2     14   1718       0 Ind1
 
 ```
 
@@ -616,13 +640,13 @@ Lastly, non-modified and (post-translationally) modified forms of proteins are c
 > simNoPTM = mergePTMAbundance(simNoAllele)
 > head(simNoPTM)
 
-  time trial  Ind R5 P5 R7 R3 R1  P1 R9 R6 R10 R4 P4 R8 P8 R2 CTL1_P8_P1
-1    0     1 Ind1  2 12  4  4 27 364  4  2   4 17 67  6 70 10          0
-2    1     1 Ind1  0 12  0  0 27  88  4  0   0  0  1  0 70 10          0
-3    2     1 Ind1  0 12  0  0 27  17  4  0   0  0  1  0 70 10          0
-4    3     1 Ind1  0 12  0  0 27   3  4  0   0  0  1  0 70 10          0
-5    4     1 Ind1  0 12  0  0 27   1  4  0   0  0  1  0 70 10          0
-6    5     1 Ind1  0 12  0  0 27   2  4  0   0  0  1  0 70  9          0
+  time trial  Ind R5  P5 R7   P7 R3  P3 R1 R9 R6 R10 R4   P4 R8    P8 R2   P2 CTC1_P5_P5
+1    0     1 Ind1  4 373 32 2882  3 474  3  3  4  13  8 1493  6 18920  2 5050          0
+2    1     1 Ind1  4 365 32 2883  3 474  3  3  4  13  8 1493  6 18914  2 5054          4
+3    2     1 Ind1  4 369 32 2884  3 473  3  3  4  13  8 1493  6 18908  2 5054          2
+4    3     1 Ind1  4 371 30 2890  3 474  3  3  4  13  8 1494  6 18901  2 5055          1
+5    4     1 Ind1  4 371 30 2890  3 474  3  3  4  13  8 1494  6 18898  2 5057          1
+6    5     1 Ind1  4 369 29 2891  3 475  3  3  4  13  8 1495  6 18898  2 5060          2
 ```
 
 All merging functions presented above require a dataframe as imput. They can be used one after the other or independently, e.g.:
@@ -631,13 +655,13 @@ All merging functions presented above require a dataframe as imput. They can be 
 > simNothing = mergeComplexesAbundance(simNoAllele)
 > head(simNothing)
 
-  time trial  Ind R5 P5 R7 R3 R1  P1 Pm1 R9 R6 R10 R4 P4 R8 P8 R2
-1    0     1 Ind1  2 12  4  4 27 364   0  4  2   4 17 67  6 70 10
-2    1     1 Ind1  0 12  0  0 27   0  88  4  0   0  0  1  0 70 10
-3    2     1 Ind1  0 12  0  0 27   0  17  4  0   0  0  1  0 70 10
-4    3     1 Ind1  0 12  0  0 27   0   3  4  0   0  0  1  0 70 10
-5    4     1 Ind1  0 12  0  0 27   1   0  4  0   0  0  1  0 70 10
-6    5     1 Ind1  0 12  0  0 27   1   1  4  0   0  0  1  0 70  9
+  time trial  Ind R5  P5 R7   P7 Pm7 R3  P3 R1 R9 R6 R10 R4   P4 R8    P8 R2   P2
+1    0     1 Ind1  4 373 32 2882   0  3 474  3  3  4  13  8 1493  6 18920  2 5050
+2    1     1 Ind1  4 373 32 2883   0  3 474  3  3  4  13  8 1493  6 18914  2 5054
+3    2     1 Ind1  4 373 32 2884   0  3 473  3  3  4  13  8 1493  6 18908  2 5054
+4    3     1 Ind1  4 373 30 2890   0  3 474  3  3  4  13  8 1494  6 18901  2 5055
+5    4     1 Ind1  4 373 30 2890   0  3 474  3  3  4  13  8 1494  6 18898  2 5057
+6    5     1 Ind1  4 373 29 2891   0  3 475  3  3  4  13  8 1495  6 18898  2 5060
 ```
 
 ## Plotting the simulation
@@ -660,7 +684,7 @@ plotSimulation(sim$Simulation, mergePTM = F)
 ```
 ![plotSimulationPTM](images/plotSimulationPTM.png)
 
-The first component names are numbers, they correspond to the gene IDs. We can find the different genes either as RNAs or proteins if they are protein-coding (e.g. gene 1), or only as RNAs if the genes are noncoding (e.g. gene 2). As gene 1 is targeted for post-translational modification, there exists a modified form of its protein, `PTM1`. The component `CTL1` is a regulatory complex. Its full name, `CTL1_P8_Pm1` contains the list of its constituents, here the protein of gene 8 and the modified protein of gene 1.
+The first component names are numbers, they correspond to the gene IDs. We can find the different genes either as RNAs or proteins if they are protein-coding (e.g. gene 1), or only as RNAs if the genes are noncoding (e.g. gene 2). As gene 7 is targeted for post-translational modification, there exists a modified form of its protein, `PTM7`. The component `CTC1` is a regulatory complex. Its full name, `CTL1_P5_P5` contains the list of its constituents, here two proteins of gene 5.
 
 To help you get an idea of the general tendencies of the abundance of the different components, the function `summariseSimulation` returns a dataframe giving for each component (row) and each individual (column) the maximum and final average abundance over the different trials:
 
@@ -676,13 +700,13 @@ Time: 0 s - 2000 s
 
 > head(sumtable)
 
-  Components Abundance  Ind1  Ind2  Ind3
-1         R1       Max  31.2  32.0  29.2
-2         R1     Final  29.0  31.6  27.4
-3         P1       Max 364.0 430.0 379.0
-4         P1     Final  82.8  99.0 149.0
-5         R2       Max  10.6  10.0  10.6
-6         R2     Final   9.8   8.6  10.6
+  Components Abundance   Ind1   Ind2   Ind3
+1         R1       Max    7.6    6.4    8.2
+2         R1     Final    6.2    5.6    7.6
+3         R2       Max    3.2    3.4    2.4
+4         R2     Final    2.4    2.4    1.2
+5         P2       Max 6129.8 5767.0 5578.6
+6         P2     Final 6127.6 5767.0 5063.2
 ```
 
 The function prints on your console the individuals, trials and timespan considered for the summary. You can suppress this display with the argument `verbose = F` in the function call.
@@ -707,13 +731,13 @@ Time: 200 s - 300 s
 
 > head(sumtable)
 
-  Components Abundance Ind1
-1         R1       Max 28.4
-2         R1     Final 27.2
-3         P1       Max  1.0
-4         P1     Final  0.4
-5         R2       Max 10.2
-6         R2     Final  9.6
+  Components Abundance   Ind1
+1         R1       Max    4.2
+2         R1     Final    4.2
+3         R2       Max    2.8
+4         R2     Final    2.6
+5         P2       Max 5322.0
+6         P2     Final 5322.0
 ```
 
 Alernatively, you can plot the abundance of the different components as a heatmap:
@@ -733,8 +757,8 @@ Note that both `plotSimulation` and `plotHeatMap` can take as input additional p
 
 ## The stochastic model
 
- If you want to see the list of species and reactions (i.e. the stochastic model) of the system, you can use the option `writefile = T`
-of the `simulate(Parallel)inSilicoSystem` functions. This generates two text files: one listing the different species in the system, each line giving the name of a species and its initial abundance, and one listing the biochemical reactions and associated rates. The initial abundances and reaction rates are written in a general form (i.e. giving the QTL effect coefficients/initial abundance variation coefficients to be used to compute numerical values for each individual). The species and reactions files for this *in silico* system are available (here)[https://github.com/oliviaAB/sismonr/tree/master/docs/example/].
+ If you want to see the list of species and reactions (i.e. the stochastic model) of the system, you can use the option `writefile = T` and specify the directory in which the files text files will be saved (argument `filepath`)
+of the `simulate(Parallel)inSilicoSystem` functions. Note that if you omit to specify the output directory (`filepath`), the `writefile` argument will be ignored. This generates two text files: one listing the different species in the system, each line giving the name of a species and its initial abundance, and one listing the biochemical reactions and associated rates. The initial abundances and reaction rates are written in a general form (i.e. giving the QTL effect coefficients/initial abundance variation coefficients to be used to compute numerical values for each individual). The species and reactions files for this *in silico* system are available (here)[https://github.com/oliviaAB/sismonr/tree/master/docs/example/].
 
 ### The species
 
@@ -746,57 +770,57 @@ As the individuals are diploid, there exist two versions of each gene (and gene 
 
 
 
-The DNA sequence of genes is not explicitely modelled, except if the gene is regulated at the transcription level. In this case, the gene's DNA form is modelled as the sum of its binding sites for its different regulators. These binding sites can exist in a free or bound state. Morevoer, the binding site of a specific regulator can be occupied by the regulator's product arising from either of the regulator copies. For example, gene 2 transcription is regulated by gene 9, so the DNA form of gene 2's first allele is:
+The DNA sequence of genes is not explicitely modelled, except if the gene is regulated at the transcription level. In this case, the gene's DNA form is modelled as the sum of its binding sites for its different regulators. These binding sites can exist in a free or bound state. Morevoer, the binding site of a specific regulator can be occupied by the regulator's product arising from either of the regulator copies. For example, gene 10 transcription is regulated by gene 5, so the DNA form of gene 10's first allele is:
 
-> Pr2GCN1reg9F	1 ## free binding site for regulator 9 on gene 2's first copy 
+> Pr10GCN1reg5F	1   ## free binding site for regulator 5 on gene 10's first copy 
 > 
-> Pr2GCN1reg9GCN1B	0 ## binding site occupied by one of regulator 9's products originating from the first copy of gene 9
+> Pr10GCN1reg5GCN1B	0   ## binding site occupied by one of regulator 5's products originating from the first copy of the gene
 > 
-> Pr2GCN1reg9GCN2B	0 ## binding site occupied by one of regulator 9's products originating from the second copy of gene 9
+> Pr10GCN1reg5GCN2B	0   ## binding site occupied by one of regulator 5's products originating from the second copy of the gene
 
-The same scheme is repeated for the second copy of gene 2:
+The same scheme is repeated for the second copy of gene 10:
 
-> Pr2GCN2reg9F	1
+> Pr10GCN2reg5F	1
 > 
-> Pr2GCN2reg9GCN1B	0
+> Pr10GCN2reg5GCN1B	0
 > 
-> Pr2GCN2reg9GCN2B	0
+> Pr10GCN2reg5GCN2B	0
 
 At the beginning of the simulation, all binding sites are in a free state (initial abundance 1 for the free form of the binding sites, 0 for the occupied forms).
 
 The same modelling applies to the RNA form of genes. If the gene is not targeted by regulators of translation (e.g. gene 1), we simply have:
 
-> R1GCN1	51.19330725498743\*InitVar\["GCN1"\]\["R"\]\[1\]
+> R1GCN1	InitAbundance\["GCN1"\]\["R"\]\[1\]
 > 
-> R1GCN2	51.19330725498743\*InitVar\["GCN2"\]\["R"\]\[1\]
+> R1GCN2	InitAbundance\["GCN2"\]\["R"\]\[1\]
 
-The initial abundance of gene 1's RNAs is $$\sim 51 \times$$ the initial abundance variation coefficient for the corresponding copy of the considered individual. If on the contrary the gene is targeted by regulators of translation, the RNA form of the gene is modelled as the sum of the RNA binding sites for the different translation regulators. One example is gene 10 whose translation is regulated by gene 1:
+The initial abundance of gene 1's RNAs is specified in the `InitAbundance` element of each individual. If on the contrary the gene is targeted by regulators of translation, the RNA form of the gene is modelled as the sum of the RNA binding sites for the different translation regulators. One example is gene 3 whose translation is regulated by gene 6:
 
-> RBS10GCN1reg1F	9.385223382716024\*InitVar\["GCN1"\]\["R"\]\[10\]
-> 
-> RBS10GCN1reg1GCN1B	0
-> 
-> RBS10GCN1reg1GCN2B	0
+> RBS3GCN1reg6F	InitAbundance\["GCN1"\]\["R"\]\[3\]
 >
-> RBS10GCN2reg1F	9.385223382716024\*InitVar\["GCN2"\]\["R"\]\[10\]
-> 
-> RBS10GCN2reg1GCN1B	0
-> 
-> RBS10GCN2reg1GCN2B	0
+> RBS3GCN1reg6GCN1B	0
+>
+> RBS3GCN1reg6GCN2B	0
+>
+> RBS3GCN2reg6F	InitAbundance\["GCN2"\]\["R"\]\[3\]
+>
+> RBS3GCN2reg6GCN1B	0
+>
+> RBS3GCN2reg6GCN2B	0
 
-Again, at the beginning of the simulation, all RNA binding sites are in a free state, and the initial abundance of the RNAs must account for the initial abundance variation coefficient for the corresponding copy of the considered individual.
+Again, at the beginning of the simulation, all RNA binding sites are in a free state.
 
 The proteins are modelled as follow:
 
-> P2GCN1	(89578.69434518841)\*InitVar\["GCN1"\]\["P"\]\[2\]
-> 
-> P2GCN2	(89578.69434518841)\*InitVar\["GCN2"\]\["P"\]\[2\]
+> P2GCN1	InitAbundance\["GCN1"\]\["P"\]\[2\]
+>
+> P2GCN2	InitAbundance\["GCN2"\]\["P"\]\[2\]
 
 If a gene is targeted in the GRN by post-translational modification, there also exists a modified form of the protein, e.g. for gene 7:
 
-> P7GCN1	(1358.0048533970976)\*InitVar\["GCN1"\]\["P"\]\[7\]
+> P7GCN1	InitAbundance\["GCN1"\]\["P"\]\[7\]
 > 
-> P7GCN2	(1358.0048533970976)\*InitVar\["GCN2"\]\["P"\]\[7\]
+> P7GCN2	InitAbundance\["GCN2"\]\["P"\]\[7\]
 > 
 > Pm7GCN1	0
 > 
@@ -805,37 +829,36 @@ If a gene is targeted in the GRN by post-translational modification, there also 
 
 At the beginning of the simulation all proteins are in their original (non-modified) form.
 
-Recall that in our system, the products of genes 4 and 7 assemble into a regulatory complex named `CTL1`. As there exist two versions of the proteins of these genes (arising either from the first or the second copy of the genes), there exist 4 versions of the complex, including all possible combinations of the different protein versions. Initially no regulatory complex is formed in the system.
+Recall that in our system, two molecules of gene 5's product assemble into a regulatory complex named `CTC1`. As there exist two versions of the proteins of this gene (arising either from the first or the second copy of the gene), there exist 4 versions of the complex, including all possible combinations of the different protein versions (here we could reduce it to 2 versions as the complex is a homodimer, but that would not be possible if the complex was formed by the products of two different genes). Initially no regulatory complex is formed in the system.
 
-> CTL1_P4GCN1_Pm7GCN1	0
+> CTC1_P5GCN1_P5GCN1	0
 > 
-> CTL1_P4GCN1_Pm7GCN2	0
+> CTC1_P5GCN1_P5GCN2	0
 > 
-> CTL1_P4GCN2_Pm7GCN1	0
+> CTC1_P5GCN2_P5GCN1	0
 > 
-> CTL1_P4GCN2_Pm7GCN2	0
+> CTC1_P5GCN2_P5GCN2	0
 
 
 ### The reactions
 
 Each reaction is characterised by a name, a biochemical formula in the form "$$\sum$$ reactants $$\rightarrow$$ $$\sum$$ products", and a rate. For example the formation and dissociation of the regulatory complex CTL1 are (from the section above we know that there are 4 versions of the complex, hence 8 formation/dissociation reactions):
 
-> formationCTL1_P4GCN1_Pm7GCN1	P4GCN1 + Pm7GCN1 --> CTL1_P4GCN1_Pm7GCN1	0.00999534945189953
+> formationCTC1_P5GCN1_P5GCN1	P5GCN1 + P5GCN1 --> CTC1_P5GCN1_P5GCN1	0.00158353441270883
 > 
-> dissociationCTL1_P4GCN1_Pm7GCN1	CTL1_P4GCN1_Pm7GCN1 --> P4GCN1 + Pm7GCN1	0.00177397170383483
+> dissociationCTC1_P5GCN1_P5GCN1	CTC1_P5GCN1_P5GCN1 --> P5GCN1 + P5GCN1	87.5563075786515
 > 
-> formationCTL1_P4GCN1_Pm7GCN2	P4GCN1 + Pm7GCN2 --> CTL1_P4GCN1_Pm7GCN2	0.00999534945189953
+> formationCTC1_P5GCN1_P5GCN2	P5GCN1 + P5GCN2 --> CTC1_P5GCN1_P5GCN2	0.00158353441270883
 > 
-> dissociationCTL1_P4GCN1_Pm7GCN2	CTL1_P4GCN1_Pm7GCN2 --> P4GCN1 + Pm7GCN2	0.00177397170383483
+> dissociationCTC1_P5GCN1_P5GCN2	CTC1_P5GCN1_P5GCN2 --> P5GCN1 + P5GCN2	87.5563075786515
 > 
-> formationCTL1_P4GCN2_Pm7GCN1	P4GCN2 + Pm7GCN1 --> CTL1_P4GCN2_Pm7GCN1	0.00999534945189953
+> formationCTC1_P5GCN2_P5GCN1	P5GCN2 + P5GCN1 --> CTC1_P5GCN2_P5GCN1	0.00158353441270883
 > 
-> dissociationCTL1_P4GCN2_Pm7GCN1	CTL1_P4GCN2_Pm7GCN1 --> P4GCN2 + Pm7GCN1	0.00177397170383483
+> dissociationCTC1_P5GCN2_P5GCN1	CTC1_P5GCN2_P5GCN1 --> P5GCN2 + P5GCN1	87.5563075786515
 > 
-> formationCTL1_P4GCN2_Pm7GCN2	P4GCN2 + Pm7GCN2 --> CTL1_P4GCN2_Pm7GCN2	0.00999534945189953
+> formationCTC1_P5GCN2_P5GCN2	P5GCN2 + P5GCN2 --> CTC1_P5GCN2_P5GCN2	0.00158353441270883
 > 
-> dissociationCTL1_P4GCN2_Pm7GCN2	CTL1_P4GCN2_Pm7GCN2 --> P4GCN2 + Pm7GCN2	0.00177397170383483
-
+> dissociationCTC1_P5GCN2_P5GCN2	CTC1_P5GCN2_P5GCN2 --> P5GCN2 + P5GCN2	87.5563075786515
 
 # Appendix
 
@@ -844,6 +867,7 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 This is the list of all the parameters that can be passed to the `createInSilicoSystem` function when generating an *in silico* system, that control the different properties of the system.
 
 - `G`: Integer. Number of genes in the system. Default value is 10.
+- `ploidy`: Integer. Number of copy for each gene that the *in silico* individuals carry (ploidy of the system). Default value is 2.
 - `PC.p`: Numeric. Probability of each gene to be a protein-coding gene. Default value is 0.7.
 - `PC.TC.p`: Numeric. Probability of a protein-coding gene to be a regulator of transcription. Default value is 0.4.
 - `PC.TL.p`: Numeric. Probability of a protein-coding gene to be a regulator of translation. Default value is 0.3.
@@ -932,7 +956,6 @@ This is the list of all the parameters that can be passed to the `createInSilico
 
 This is the list of all the parameters that can be passed to the `createInSilicoPopulation` function when generating an *in silico* population, that control the different properties of the individuals.
 
-- `ploidy`: Integer. Number of copy for each gene that the *in silico* individuals carry (ploidy of the individuals). Default value is 2.
 - `ngenevariants`: Integer. Number of alleles existing for each gene in the *in silico* population. Default value is 5.
 - `qtleffect_samplingfct`: Function from which is sampled the value of a QTL effect coefficient (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
 - `initvar_samplingfct`: Function from which is sampled the variation of the initial abundance of a species (input x is the required sample size). Default value is a truncated normal distribution with mean 1 and sd 0.1 (only gives positive values).
