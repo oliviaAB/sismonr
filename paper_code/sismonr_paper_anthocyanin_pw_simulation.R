@@ -41,7 +41,31 @@ names(id2names) = c(genes.name2id$ID, complexes.name2id$ID)
 ## ----------------------------- ## ----
 
 ## We create a system with 7 genes, and no regulatory interactions (they will be added manually later)
-colsystem = createInSilicoSystem(empty = T, G = 7, PC.p = 1, PC.TC.p = 1, PC.TL.p = 0, PC.RD.p = 0, PC.PD.p = 0, PC.PTM.p = 0, PC.MR.p = 0)
+
+if(packageVersion("sismonr") < "2.0.0"){
+  ## With sismonr v1.1.4
+  colsystem = createInSilicoSystem(empty = T,
+                                   G = 7,
+                                   PC.p = 1,
+                                   PC.TC.p = 1,
+                                   PC.TL.p = 0,
+                                   PC.RD.p = 0,
+                                   PC.PD.p = 0,
+                                   PC.PTM.p = 0,
+                                   PC.MR.p = 0)
+}else{
+  ## With sismonr v2.0.0
+  colsystem = createInSilicoSystem(empty = T,
+                                   G = 7,
+                                   PC.p = 1,
+                                   PC.TC.p = 1,
+                                   PC.TL.p = 0,
+                                   PC.RD.p = 0,
+                                   PC.PD.p = 0,
+                                   PC.PTM.p = 0,
+                                   PC.MR.p = 0,
+                                   ploidy = 2)
+}
 
 ## Changing the kinetic parameters of the genes
 kineticgenes = data.frame("id" = 1:7,
@@ -91,7 +115,13 @@ for(inter in interactions){
 ## One is a wild-type plant (no mutation in any of its genes)
 ## The second is a mutant, in which gene 5 (the MYBrep gene) is overexpressed (here we increase its transcription rate by 5)
 
-plants = createInSilicoPopulation(3, colsystem, sameInit = T, ngenevariants = 1)
+if(packageVersion("sismonr") < "2.0.0"){
+  ## With sismonr v1.1.4
+  plants = createInSilicoPopulation(3, colsystem, sameInit = T, ngenevariants = 1, ploidy = 2)
+}else{
+  ## With sismonr v2.0.0
+  plants = createInSilicoPopulation(3, colsystem, initialNoise = F, ngenevariants = 1)
+}
 
 ## We add the QTL effect coefficient for the second individual such that the transcription rate of gene 5 is increased
 plants$individualsList$Ind2$QTLeffects$GCN1$qtlTCrate[5] = 50
@@ -103,13 +133,22 @@ plants$individualsList$Ind3$QTLeffects$GCN1$qtlRDrate[5] = 6
 plants$individualsList$Ind3$QTLeffects$GCN2$qtlRDrate[5] = 6
 ## Changing the initial conditions
 ## As specified in Albert et al., 2014, only gene 2 and 3 (bHLH1 and WDR) are constitutively expressed (see Fig. 8).
-for(g in names(plants$individualsList$Ind1$InitVar)){
-  plants$individualsList$Ind1$InitVar[[g]] = list("R" = c(0, 1, 1, 0, 0, 0, 0),
-                                                  "P" = c(0, 1, 1, 0, 0, 0, 0))
-  plants$individualsList$Ind2$InitVar[[g]] = list("R" = c(0, 1, 1, 0, 0, 0, 0),
-                                                  "P" = c(0, 1, 1, 0, 0, 0, 0))
-  plants$individualsList$Ind3$InitVar[[g]] = list("R" = c(0, 1, 1, 0, 0, 0, 0),
-                                                  "P" = c(0, 1, 1, 0, 0, 0, 0))
+if(packageVersion("sismonr") < "2.0.0"){
+  ## With sismonr v1.1.4
+  for(g in names(plants$individualsList$Ind1$InitVar)){
+    for(i in names(plants$individualsList)){
+      plants$individualsList[[i]]$InitVar[[g]] = list("R" = c(0, 1, 1, 0, 0, 0, 0),
+                                                      "P" = c(0, 1, 1, 0, 0, 0, 0))
+    }
+  }
+}else{
+  ## With sismonr v2.0.0
+  for(g in names(plants$individualsList$Ind1$InitAbundance)){
+    for(i in names(plants$individualsList)){
+      plants$individualsList[[i]]$InitAbundance[[g]]$R = plants$individualsList[[i]]$InitAbundance[[g]]$R * c(0, 1, 1, 0, 0, 0, 0)
+      plants$individualsList[[i]]$InitAbundance[[g]]$P = plants$individualsList[[i]]$InitAbundance[[g]]$P * c(0, 1, 1, 0, 0, 0, 0)
+    }
+  }
 }
 
 
