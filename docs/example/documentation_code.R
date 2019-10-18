@@ -157,3 +157,12 @@ plotHeatMap(sim$Simulation)
 # ggplot2::ggsave("plotHeatMap.png")
 
 sim = simulateInSilicoSystem(mysystem, mypop, simtime = 100, ntrials = 5, writefile = T, filepath = getwd())
+
+
+## Generating RNA-seq-like data
+
+rnaseqData = getRNAseqMatrix(sim$Simulation, mysystem, samplingTime = 500, mrnasOnly = T)
+
+rnaseqData$rnaSeqMatrix
+rnaseqData$samplesLibSize
+rnaseqData$genesLength

@@ -860,6 +860,72 @@ Each reaction is characterised by a name, a biochemical formula in the form "$$\
 > 
 > dissociationCTC1_P5GCN2_P5GCN2	CTC1_P5GCN2_P5GCN2 --> P5GCN2 + P5GCN2	87.5563075786515
 
+# Generating RNA-seq-like data
+
+sismonr now includes a function to transform a given time-point of a simulation into RNA-seq-like data, i.e. returns for each RNA molecule a simulated read count for each individual, with the function:
+
+```{r}
+rnaseqData = getRNAseqMatrix(sim$Simulation, mysystem, samplingTime = 500, mrnasOnly = T)
+```
+
+Each individual is considered as a separate sample in the RNA-seq experiment. The parameter `samplingTime` indicates which time-point to transform. If no value is provided, the function will use the last time-point in the simulation. The parameter `mrnasOnly` determines whether non-coding RNAs will be included in the transformation. By default `mrnasOnly = T`, and thus only protein-coding RNAs are considered. The generation of RNA-seq-like data works as follow:
+
+1. For each individual, the absolute abundance of the different (protein-coding) RNAs are transformed into (noisy) proportions. In an RNA-seq experiment, not all RNA molecules are extracted from the samples, and thus it is possible that the proportions of mRNAs of each gene into the sample to be processed may not be exactly equal to the true mRNA proportions. In particular, some mRNAs present with very low abundance may not be detected. To reproduce this bias, only a fraction of all the RNA molecules in the system is sampled. The user can control this fraction with the parameter `propRnasSampled`. Setting `propRnasSampled` to 1 corresponds to transforming the absolute abundance of the RNAs into their exact proportion in the system, while setting the parameter to a value lower than 1 introduces some noise in the proportions.
+
+2. For each individual, the proportions of the different RNAs are multiplied by the corresponding gene length. This step reproduces the bias of RNA-seq experiments in which longer genes create more reads. By default, sismonr assigns to each gene a length of 1. However, the user can provide a length for each gene through the parameter `genesLength`. The proportions are then re-scaled so that their sum over all genes in each individual is 1.
+
+3. An expected library size is sampled for each individual. Again, the user can provide the expected library size of each individual/sample with the parameter `samplesLibSize`. Otherwise, expected library sizes are sampled from a log-normal distribution with mean `meanLogLibSize_lane` (default value of 7, giving a mean expected library size of $10^7$) and a standard deviation of `sdLogLibSize_samples`. sismonr is also able to simulate a batch effect in the library size: in an RNA-seq experiment, processing the samples on different lanes can affect their resulting library size, as some lanes may generate more or less reads than the others. Thus setting the parameter `laneEffect` allows to simulate the processing of the individuals on different lanes (number of lanes controlled by the parameter `nLanes`). In this case, a mean log-library size is first sampled for each lane from a normal distribution with mean`meanLogLibSize_lane` and standard deviation `sdLogLibSize_lane`. Then each individual is randomnly assigned to a lane, and its expected library size is sampled from a log-normal distribution with mean equal to the sampled mean log-library size of the corresponding lane and standard deviation `sdLogLibSize_samples`.
+
+4. The expected read count of RNA in each individual is obtained by multiplying the proportion of the RNA by the expected library size of the individual.
+
+5. Read counts for each RNA in each individual are sampled from a Poisson distribution with parameter equal to the expected count of the corresponding RNA in the corresponding sample.
+
+The object returned by the function `getRNAseqMatrix()` is a list, containing the following information:
+
+* `rnaSeqMatrix`: a dataframe giving for each gene (rows) the simulated read counts in each individual (columns).
+
+```r
+> rnaseqData$rnaSeqMatrix
+
+# A tibble: 6 x 4
+  Molecule    Ind1    Ind2    Ind3
+  <chr>      <int>   <int>   <int>
+1 R2        611976  880457  415953
+2 R3       1220530 2494283  996548
+3 R4       2442344 3224400 1865675
+4 R5       2576783 1760480  788334
+5 R7         67980  146641       0
+6 R8       2986943 6012220 2281935
+```
+
+* `samplesLibSize`: a list providing the lane on which each sample was "processed" (element `lane`), the expected library size of each sample (element `expected_library_size`), and the mean library size for each lane (element `lane_mean_library_size`). If the individuals expected library sizes were provided by the user, only the element `expected_library_size` is returned.
+
+```r
+> rnaseqData$samplesLibSize
+
+$lane
+Ind1 Ind2 Ind3 
+   1    1    1 
+
+$expected_library_size
+    Ind1     Ind2     Ind3 
+ 9905311 14517683  6346089 
+
+$lane_mean_library_size
+    1 
+1e+07 
+```
+
+* `genesLength`: the length of each gene.
+
+```r
+> rnaseqData$genesLength
+
+2 3 4 5 7 8 
+1 1 1 1 1 1 
+```
+
+
 # Appendix
 
 ## Parameters for *in silico* system generation
