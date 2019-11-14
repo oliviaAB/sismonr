@@ -311,6 +311,9 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
                                                                               ## The j-th element of this array is a matrix: rows: all possible active states of the binding site of regulator j (column 1: name of the binding site state, column 2 fold-change associated with this state)
   promAllStates = Dict(string(i)*j => [] for i in genes["id"], j in gcnList) ## dictionary, 1 element for each allele version of each gene. Value is an array with m elements, 1 for each regulator. 
                                                                               ## The j-th element of this array is an array, listing all the possible states of the binding site of regulator j (even if not active)
+  promAllBoundRegs = Dict(string(i)*j => [] for i in genes["id"], j in gcnList) ## dictionary, 1 element for each allele version of each gene. Value is an array with m elements, 1 for each regulator. 
+                                                                              ## The j-th element of this array is an array, listing the form of the bound regulator j to the corresponding possible states of the binding site of regulator j (even if not active)
+
 
   ## Loop over all the edges in the translation regulatory network with single genes as regulators
   for r in regsingl, gcn in gcnList 
@@ -326,6 +329,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
     tempactivestates = [prom*"F" 1]
     boundactive = edg["RegSign"][r] == "1" ## are the bound states of the binding site actives i.e. able to translate? No if the regulator is a repressor
     tempallstates = [prom*"F"]
+    tempboundregs = [""]
 
     ## Add the free form of the binding site to the list of species (the bound form is specific to the bound molecule)
     push!(spec, prom*"F")
@@ -341,6 +345,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
         tempactivestates = vcat(tempactivestates, [prombound edg["TLfoldchange"][r]]) ## if the regulator is an activator add this bound state of the binding site to the list of active states + the induced fold change
       end
       push!(tempallstates, prombound) ## add this bound state of the binding site to the list of all sites
+      push!(tempboundregs, activeform[reg]*gcnreg) ## add the form of the bound regulator to the list of all bound regulators
       
       ## Add the binding reaction of the regulator to the binding site
       push!(reac, reactBioSim([prom*"F", activeform[reg]*gcnreg], [prombound])) ## promF + reg -> promregB
@@ -355,6 +360,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
 
     push!(promActiveStates[tar], tempactivestates)
     push!(promAllStates[tar], tempallstates)
+    push!(promAllBoundRegs[tar], tempboundregs)
   end
 
 
@@ -372,6 +378,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
     tempactivestates = [prom*"F" 1]
     boundactive = edg["RegSign"][r] == "1" ## are the bound states of the binding site actives i.e. able to transcribe? No if the regulator is a repressor
     tempallstates = [prom*"F"]
+    tempboundregs = [""]
 
     ## Add the free and bound forms of the binding site to the list of species
     push!(spec, prom*"F")
@@ -388,6 +395,7 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
         tempactivestates = vcat(tempactivestates, [prombound edg["TLfoldchange"][r]])
       end
       push!(tempallstates, prombound)
+      push!(tempboundregs, complvar) ## add the form of the bound regulator to the list of all bound regulators
 
       ## Add the binding reaction of the regulator to the binding site
       push!(reac, reactBioSim([prom*"F", complvar], [prombound])) ## promF + complvar -> promB
@@ -403,9 +411,10 @@ function createTLregReactions(edg, genes, activeform, complexes, complexesvarian
     
     push!(promActiveStates[tar], tempactivestates)
     push!(promAllStates[tar], tempallstates)
+    push!(promAllBoundRegs[tar], tempboundregs)
   end
 
-  return Dict("species" => spec, "initialconditions" => initcond, "reactions" => reac, "reactionsnames" => reacnames, "propensities" => prop, "promActiveStates" => promActiveStates, "promAllStates" => promAllStates)
+  return Dict("species" => spec, "initialconditions" => initcond, "reactions" => reac, "reactionsnames" => reacnames, "propensities" => prop, "promActiveStates" => promActiveStates, "promAllStates" => promAllStates, "promAllBoundRegs" => promAllBoundRegs)
 end
 
 
@@ -454,17 +463,31 @@ end
 
 
 ## Creates the RNA decay reactions of the genes
-function createRNADecayReactions(genes, RNAforms, gcnList)
+function createRNADecayReactions(genes, RNAforms, gcnList, promallTL, allboundregs)
   reac = []
   reacnames = []
   prop = []
 
   for g in genes["id"], gcn in gcnList
     gname = string(g) * gcn
-    rnaform = RNAforms[gname]
-    push!(reac, reactBioSim(rnaform, [0]))
-    push!(reacnames, "RNAdecay"*join(rnaform))
-    push!(prop, """$(genes["RDrate"][g])*QTLeffects["$(gcn)"]["qtlRDrate"][$(g)]""")
+    if length(promallTL[gname]) == 0 ## If the gene's RNA is modelled as Rg
+      rnaform = RNAforms[gname]
+      push!(reac, reactBioSim(rnaform, [0]))
+      push!(reacnames, "RNAdecay"*join(rnaform))
+      push!(prop, """$(genes["RDrate"][g])*QTLeffects["$(gcn)"]["qtlRDrate"][$(g)]""")
+    else ## If the gene's RNA is modelled as a sum of RBS
+      possrnastates = combinallpromstates(promallTL[gname])
+      possboundregs = combinallpromstates(allboundregs[gname])
+      for i in 1:size(possrnastates)[1]
+        boundrbs = [j for j in possboundregs[i, :] if j != ""]
+        if length(boundrbs) == 0
+          boundrbs = [0]
+        end
+        push!(reac, reactBioSim(possrnastates[i, :], boundrbs))
+        push!(reacnames, "RNAdecay"*join(possrnastates[i, :]))
+        push!(prop, """$(genes["RDrate"][g])*QTLeffects["$(gcn)"]["qtlRDrate"][$(g)]""")
+      end
+    end
   end
 
   return Dict("reactions" => reac, "reactionsnames" => reacnames, "propensities" => prop)
@@ -472,7 +495,7 @@ end
 
 
 ## Creates the regulator-mediated RNA decay reactions of the genes
-function createRDregReactions(edg, genes, RNAforms, activeform, complexes, complexesvariants, complexesqtlactivity, gcnList)
+function createRDregReactions(edg, genes, RNAforms, activeform, complexes, complexesvariants, complexesqtlactivity, gcnList, promallTL, allboundregs)
   reac = []
   reacnames = []
   prop = []
@@ -483,27 +506,62 @@ function createRDregReactions(edg, genes, RNAforms, activeform, complexes, compl
   for r in regsingl, gcn in gcnList 
     tarid = parse(Int, edg["to"][r])
     tar = edg["to"][r] * gcn
-    tarRNA = RNAforms[tar]
     reg = edg["from"][r]
 
-    for gcnreg in gcnList
-      push!(reac, reactBioSim(vcat(tarRNA, activeform[reg]*gcnreg), [activeform[reg]*gcnreg]))
-      push!(reacnames, "RNAdecay"*join(tarRNA)*"reg"*reg*gcnreg)
-      push!(prop, """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]*QTLeffects["$(gcnreg)"]["qtlactivity"][$(parse(Int64, reg))]""")
+    if length(promallTL[tar]) == 0 ## If the gene's RNA is modelled as Rg
+
+      tarRNA = RNAforms[tar]
+      for gcnreg in gcnList
+        push!(reac, reactBioSim(vcat(tarRNA, activeform[reg]*gcnreg), [activeform[reg]*gcnreg]))
+        push!(reacnames, "RNAdecay"*join(tarRNA)*"reg"*reg*gcnreg)
+        push!(prop, """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]*QTLeffects["$(gcnreg)"]["qtlactivity"][$(parse(Int64, reg))]""")
+      end
+
+    else ## If the gene's RNA is modelled as a sum of RBS
+
+      possrnastates = combinallpromstates(promallTL[tar])
+      possboundregs = combinallpromstates(allboundregs[tar])
+      for i in 1:size(possrnastates)[1]
+        boundrbs = [j for j in possboundregs[i, :] if j != ""]
+        for gcnreg in gcnList
+          push!(reac, reactBioSim(vcat(possrnastates[i, :], activeform[reg]*gcnreg), vcat(boundrbs, activeform[reg]*gcnreg)))
+          push!(reacnames, "RNAdecay"*join(possrnastates[i, :])*"reg"*reg*gcnreg)
+          push!(prop, """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]*QTLeffects["$(gcnreg)"]["qtlactivity"][$(parse(Int64, reg))]""")
+        end
+      end
+
     end
   end
 
   for r in regcompl, gcn in gcnList
     tarid = parse(Int, edg["to"][r])
     tar = edg["to"][r] * gcn
-    tarRNA = RNAforms[tar]
     compl = edg["from"][r]
 
-    for complvar in complexesvariants[compl]
-      push!(reac, reactBioSim(vcat(tarRNA, complvar), [complvar]))
-      push!(reacnames, "RNAdecay"*join(tarRNA)*"reg"*complvar)
-      tempprop = """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]"""*"*"*complexesqtlactivity[complvar]
-      push!(prop, tempprop)
+    if length(promallTL[tar]) == 0 ## If the gene's RNA is modelled as Rg
+
+      tarRNA = RNAforms[tar]
+      for complvar in complexesvariants[compl]
+        push!(reac, reactBioSim(vcat(tarRNA, complvar), [complvar]))
+        push!(reacnames, "RNAdecay"*join(tarRNA)*"reg"*complvar)
+        tempprop = """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]"""*"*"*complexesqtlactivity[complvar]
+        push!(prop, tempprop)
+      end
+
+    else ## If the gene's RNA is modelled as a sum of RBS
+
+      possrnastates = combinallpromstates(promallTL[tar])
+      possboundregs = combinallpromstates(allboundregs[tar])
+      for i in 1:size(possrnastates)[1]
+        boundrbs = [j for j in possboundregs[i, :] if j != ""]
+        for complvar in complexesvariants[compl]
+          push!(reac, reactBioSim(vcat(possrnastates[i, :], complvar), vcat(boundrbs, complvar)))
+          push!(reacnames, "RNAdecay"*join(possrnastates[i, :])*"reg"*complvar)
+          tempprop = """$(edg["RDregrate"][r])*QTLeffects["$(gcn)"]["$("qtlRDregrate")"][$(tarid)]"""*"*"*complexesqtlactivity[complvar]
+          push!(prop, tempprop)
+        end
+      end
+
     end
   end
 
@@ -698,6 +756,7 @@ function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, 
   regTLreactions = createTLregReactions(edgTLRN, genes, activeform, complexes, complexesvariants, complexesqtlactivity, gcnList)
   promactiveTL = regTLreactions["promActiveStates"]
   promallTL = regTLreactions["promAllStates"]
+  allboundregs = regTLreactions["promAllBoundRegs"]
   #println("regTLreactions done")
 
   ## Generates the list of all possible transcription reactions for the genes
@@ -708,11 +767,11 @@ function juliaCreateStochasticSystem(genes, edgTCRN, edgTLRN, edgRDRN, edgPDRN, 
   ## Generates the list of all possible RNA decay reactions for the genes
   ## In this model, when RNAs are represented by the sum of RBS (translation regulator binding sites), only the free form of the RNA
   ## (= all binding sites are free) decays
-  rnaDecayReactions = createRNADecayReactions(genes, RNAforms, gcnList)
+  rnaDecayReactions = createRNADecayReactions(genes, RNAforms, gcnList, promallTL, allboundregs)
   #println("rnaDecayReactions done")
 
   ## Generates the list of all possible regulator-mediated RNA decay reactions for the genes
-  regRDreactions = createRDregReactions(edgRDRN, genes, RNAforms, activeform, complexes, complexesvariants, complexesqtlactivity, gcnList)
+  regRDreactions = createRDregReactions(edgRDRN, genes, RNAforms, activeform, complexes, complexesvariants, complexesqtlactivity, gcnList, promallTL, allboundregs)
   #println("regRDreactions done")
 
   ## Generates the list of all possible translation reactions for the genes
