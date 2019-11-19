@@ -58,7 +58,8 @@ test_that("creation of stochastic system for TC reaction works", {
   expect_equal(length(reactions), 4*2*2 + ## TC, TL, RD and PD rate for each of the 2 copies of each regulator gene (genes 1 and 2)
                  2*2*2*2 + # binding + unbinding reaction of each of the 2 copies of each regulator for each copy of the target
                  3*2 + # TC of gene 3: combination of 2 binding sites each in one of 3 possible states, but only the free state of binding site for reg 2 is active
-                 3*2) # TL, RD and PD of gene 3
+                 3*2 + # TL and PD of gene 3
+                 2*2*2) # PD of regulators when bound to a binding site: 2 regulators x 2 copies of each x 2 possible regulators on which they are bound (target GCN1 and target GCN2)
 })
 
 test_that("creation of stochastic system for TL reaction works", {
@@ -76,7 +77,9 @@ test_that("creation of stochastic system for TL reaction works", {
   expect_equal(length(reactions), 4*2*2 + ## TC, TL, RD and PD rate for each of the 2 copies of each regulator gene (genes 1 and 2)
                  2*2*2*2 + # binding + unbinding reaction of each of the 2 copies of each regulator for each copy of the target
                  3*2 + # TL of gene 3: combination of 2 binding sites each in one of 3 possible states, but only the free state of binding site for reg 2 is active
-                 3*2) # TC, RD and PD of gene 3
+                 2*2 + # TC and PD of gene 3
+                 2*3*3 +# RD of gene 3: RNA composed of 2 RBS, each in 3 possible state
+                 2*2*2) #PD of regulators when bound to a binding site: 2 regulators x 2 copies of each x 2 possible regulators on which they are bound (target GCN1 and target GCN2)
 })
 
 test_that("creation of stochastic system for RD reaction works", {
@@ -141,7 +144,9 @@ test_that("creation of stochastic system for regulatory complex works", {
                  4*2 + ## association and dissociation reaction for each version of the complex
                  4*2*2 + ## binding and unbinding reaction of each version of the complex to each of the 2 versions of the target
                  5*2  + ## TC reaction with each of the 5 forms of the binding site for the 2 versions of the target gene
-                 3*2) ## TL, RD and PD reactions for both versions of the target gene
+                 3*2 +  ## TL, RD and PD reactions for both versions of the target gene
+                 2*2*2*3 ## PD of each component of the complex: 2 components x 2 copies x 2 poss for the other component x 2 (decay when the regulator is free or is bound to one of 2 possible binding sites)
+  )
 })
 
 test_that("simulation of in silico system works", {
