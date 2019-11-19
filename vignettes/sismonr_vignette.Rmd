@@ -19,7 +19,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This document is a tutorial demonstrating how to use the `sismonr` package.
+This document is a tutorial demonstrating how to use the `sismonr` package. Note that a more complete tutorial is available at [https://oliviaab.github.io/sismonr/].
 
 # Getting started
 
@@ -42,15 +42,13 @@ After this step it is necessary to restart your computer.
 
 ## Installing sismonr
 
-From R, you can install the latest version of `sismonr` available on Github at
-[https://github.com/oliviaAB/sismonr](https://github.com/oliviaAB/sismonr).
+sismonr is available on the CRAN. You can install it with:
 
 ```{r, eval = F}
-if(!require("devtools")) install.packages("devtools"); library(devtools)
-install_github("oliviaAB/sismonr")
+install.packages("sismonr")
 ```
 
-If Julia is not installed on your computer or the Julia executable is not in your `PATH` environment variable, you won't be able to install `sismonr`. 
+If Julia is not installed on your computer or the Julia executable is not in your `PATH` environment variable, you won't be able to use `sismonr`. 
 
 ## sismonr resources
 
@@ -69,10 +67,10 @@ library(sismonr)
 The first step to simulate gene expression data is to generate an *in silico* system. The *in silico* system contains the list of genes whose expression we want to simulate along with the Gene Regulatory Network (GRN) representing the regulatory interactions among the genes. We can generate a random *in silico* system with:
 
 ```{r}
-myinsilicosystem = createInSilicoSystem(G = 10, PC.p = 0.7)
+myinsilicosystem = createInSilicoSystem(G = 10, PC.p = 0.7, ploidy = 2)
 ```
 
-The different parameters passed to the function allow the user to control different aspects of the generated system. For example, `G` defines the number of genes present in the system. `PC.p` gives the probability for each gene to be protein-coding (so setting `PC.p = 1` ensures that there are only protein-coding genes in the system). A list of all parameters can be seen in the [online documentation](https://oliviaab.github.io/sismonr/#parameters-for-in-silico-system-generation) of `sismonr` or by typing:
+The different parameters passed to the function allow the user to control different aspects of the generated system. For example, `G` defines the number of genes present in the system. `PC.p` gives the probability for each gene to be protein-coding (so setting `PC.p = 1` ensures that there are only protein-coding genes in the system). `ploidy` defines the ploidy of the system, that is, the number of copies of each gene present in the system. A list of all parameters can be seen in the [online documentation](https://oliviaab.github.io/sismonr/#parameters-for-in-silico-system-generation) of `sismonr` or by typing:
 
 ```{r, eval = F}
 ?insilicosystemargs
@@ -98,7 +96,7 @@ myinsilicosystem$genes
 ```
 
 You can try generating new system by changing some parameters affecting the genes:
-```{r, eval = F}
+```{r}
 ## system with only protein-coding genes, all regulators of transcription (PC.TC.p),
 ## and all regulations are activations (positive regulation - TC.pos.p)
 myinsilicosystem2 = createInSilicoSystem(G = 15, PC.p = 1, PC.TC.p = 1, TC.pos.p = 1) 
@@ -168,9 +166,9 @@ myinsilicosystem$mosystem$PTMRN_edg
 
 The second step to simulate gene expression data is to generate an *in silico* population. In a population, different variants of each gene are segregating (by default with equal frequency). Each gene variant is characterised by a set of QTL effect coefficient values that describe how genetic mutations affect the kinetic properties of the gene. Each *in silico* individual carries one or more copies of each gene (depending on the ploidy of the system), and these copies are sampled from the list of variants segregating in the population.
 
-Here we create a population of diploid individuals, with 4 variants existing for each gene. We create 3 individuals:
+Here we create a population of individuals, with 4 variants existing for each gene. We create 3 individuals:
 ```{r}
-mypop = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 4, ploidy = 2)
+mypop = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 4)
 ```
 
 The first parameter to be passed to `createInSilicoPopulation` is the number of individuals to be created, and the second is the *in silico* system we generated in the first step. Additional arguments can be given to the function, to control the properties of the individuals. A list of these arguments are available in the [online documentation](https://oliviaab.github.io/sismonr/#parameters-for-in-silico-individuals-generation), or with:
@@ -196,9 +194,8 @@ mypop$GenesVariants
 
 You can see the effect of changing the parameters passed to the `createInSilicoPopulation` function. You can even supply your own list of segregating variants and the frequency of these variants:
 
-```{r, eval = F}
-
-mypop2 = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 2, ploidy = 2)
+```{r}
+mypop2 = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 2)
 mypop2$GenesVariants
 
 ## Creating a smaller system with only 3 genes
@@ -257,15 +254,6 @@ mypop$individualsList$Ind3$haplotype
 
 As the individuals are diploid, they have two copies of each genes. The alleles are termed `GCN1` and `GCN2`. Each row represents a gene, and the values in the data-frame correspond to the variant numbers of the genes that the individual carries.
 
-You can try to change the ploidy of the individuals:
-
-```{r}
-mypop2 = createInSilicoPopulation(3, myinsilicosystem, ngenevariants = 2, ploidy = 4)
-mypop2$individualsList$Ind1$haplotype
-mypop2$individualsList$Ind2$haplotype
-mypop2$individualsList$Ind3$haplotype
-```
-
 You can visualise the QTL effect coefficients of each variant carried by the individuals:
 
 ```{r, fig.width = 7, fig.height = 6}
@@ -295,7 +283,7 @@ sim = simulateInSilicoSystem(myinsilicosystem, mypop, simtime = 1000, ntrials = 
 
 or with the parallelised version of the simulation function:
 
-```{r, eval = F}
+```{r}
 sim = simulateParallelInSilicoSystem(myinsilicosystem, mypop, simtime = 1000, ntrials = 5)
 ```
 
