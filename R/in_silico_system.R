@@ -882,7 +882,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
     if(paste0(targetreaction, "bindingrate") %in% names(kinetics)){
       sampledbindingrate = kinetics[[paste0(targetreaction, "bindingrate")]]
     }else{ ## sample binding rate according to regulator steady state abundance
-      steadystatereg = steadyStateAbundance(tarID, insilicosystem$genes, insilicosystem$complexes, insilicosystem$sysargs$ploidy)
+      steadystatereg = steadyStateAbundance(regID, insilicosystem$genes, insilicosystem$complexes, insilicosystem$sysargs$ploidy)
       sampledbindingrate = insilicosystem$sysargs[[paste0(targetreaction,"bindingrate_samplingfct")]](sampledunbindingrate/steadystatereg)
     }
 
