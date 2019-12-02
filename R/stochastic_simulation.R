@@ -719,7 +719,7 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
   }
 
   simuplot = simuplot +
-    ggplot2::facet_grid(Type~Ind, scales = "free_y") +
+    ggplot2::facet_grid(Type~Ind, scales = "free_y") + #, space = "free_y"
     ggplot2::xlab("Time (s)") +
     ggplot2::theme_minimal() +
     ggplot2::theme(legend.text = element_text(size = 7), strip.text = element_text(size = 10),

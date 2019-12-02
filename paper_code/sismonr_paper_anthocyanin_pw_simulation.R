@@ -8,6 +8,7 @@
 
 library(sismonr)
 library(tidyverse)
+library(cowplot)
 
 rm(list = ls(all = T))
 
@@ -23,7 +24,7 @@ genes.name2id = data.frame("ID" = as.character(1:7),
                            stringsAsFactors = F)
 
 ## Complex ID - name correspondence
-complexes.name2id = data.frame("ID" = sapply(1:5, function(i){paste0("CTC", i)}),
+complexes.name2id = data.frame("ID" = paste0("CTC", 1:5),
                                "name" = c("MBW1", ## CTC1
                                           "MBW2", ## CTC2
                                           "MBWr", ## CTC3
@@ -69,7 +70,7 @@ if(packageVersion("sismonr") < "2.0.0"){
 
 ## Changing the kinetic parameters of the genes
 kineticgenes = data.frame("id" = 1:7,
-                          "TCrate" = c(1, 0.1, 0.1, 0.01, 0.01, 0.1, 0.5),
+                          "TCrate" = c(5, 0.1, 0.5, 0.01, 0.01, 0.1, 0.5),
                           "TLrate" = c(0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.001),
                           "RDrate" = c(0.1, 0.01, 0.01, 0.01, 0.01, 0.01, 0.01),
                           "PDrate" = c(0.01, 0.001, 0.001, 0.001, 0.001, 0.001, 0.001))
@@ -91,11 +92,11 @@ for(comp in compo){
 }
 
 ## Adding  regulatory interactions in the system
-interactions = list(list("edge" = c("CTC1", 4), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 50)),
-                    list("edge" = c("CTC2", 4), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 4)),
+interactions = list(list("edge" = c("CTC1", 4), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 25)),
+                    list("edge" = c("CTC2", 4), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 25)),
                     list("edge" = c("CTC2", 5), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 50)),
                     list("edge" = c("CTC2", 6), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 50)),
-                    list("edge" = c("CTC2", 7), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 10)),
+                    list("edge" = c("CTC2", 7), "regsign" = "1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2, "TCfoldchange" = 15)),
                     list("edge" = c("CTC3", 4), "regsign" = "-1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2)),
                     list("edge" = c("CTC3", 5), "regsign" = "-1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2)),
                     list("edge" = c("CTC3", 6), "regsign" = "-1", "kinetics" = list("TCbindingrate" = 0.1, "TCunbindingrate" = 2)),
@@ -129,8 +130,8 @@ plants$individualsList$Ind2$QTLeffects$GCN2$qtlTCrate[5] = 50
 plants$individualsList$Ind2$QTLeffects$GCN1$qtlTCregbind[5] = 0
 plants$individualsList$Ind2$QTLeffects$GCN2$qtlTCregbind[5] = 0
 
-plants$individualsList$Ind3$QTLeffects$GCN1$qtlRDrate[5] = 6
-plants$individualsList$Ind3$QTLeffects$GCN2$qtlRDrate[5] = 6
+plants$individualsList$Ind3$QTLeffects$GCN1$qtlRDrate[5] = 12
+plants$individualsList$Ind3$QTLeffects$GCN2$qtlRDrate[5] = 12
 ## Changing the initial conditions
 ## As specified in Albert et al., 2014, only gene 2 and 3 (bHLH1 and WDR) are constitutively expressed (see Fig. 8).
 if(packageVersion("sismonr") < "2.0.0"){
@@ -158,6 +159,7 @@ if(packageVersion("sismonr") < "2.0.0"){
 ## --------------------------------------------------------------- ## ----
 
 sim = simulateParallelInSilicoSystem(colsystem, plants, 2000, nepochs = 2000, ntrials = 100)
+#save(colsystem, plants, sim, file = "/media/sf_data/anthocyanin_simulation_11_2019.RData")
 
 ## We merge the abundance of the different allelic versions of the same genes (i.e. for each gene the abundance of RNAs - and proteins- from the two different alleles are added)
 simres = mergeAlleleAbundance(sim$Simulation)
@@ -171,14 +173,19 @@ simres = mergeAlleleAbundance(sim$Simulation)
 ## Transforming the data for ggplot2
 toplot = simres %>%
   gather(key = "ID", value = "Abundance", setdiff(names(simres), c("time", "trial", "Ind"))) %>%
-  mutate(ID = stringr::str_replace(ID, "_.+", "")) %>%
+  mutate(Abundance = Abundance + 0.5,
+         ID = stringr::str_replace(ID, "_.+", "")) %>%
   mutate(Type = case_when(str_detect(ID, "^R") ~ "RNAs",
                           str_detect(ID, "^P") ~ "Proteins",
                           str_detect(ID, "^C") ~ "Complexes"),
          Components = stringr::str_replace(ID, "^R|^P", "")) %>%
   mutate(Components = id2names[Components]) %>%
   group_by(Ind, time, Components, Type, ID) %>%
-  summarise("mean" = mean(Abundance), "LB" = quantile(Abundance, probs = c(0.025)), "UB" = quantile(Abundance, probs = c(0.975)))
+  summarise("mean" = mean(Abundance),
+            "LB" = quantile(Abundance, probs = c(0.025)),
+            "UB" = quantile(Abundance, probs = c(0.975)),
+            "Min" = min(Abundance),
+            "Max" = max(Abundance))
 
 
 plotbreaks = c("WDR", "MYB", "bHLH1", "bHLH2", "MBW1", "MBW2", "MYBrep", "MBWr", "R3-MYB", "R3-bHLH1", "R3-bHLH2", "DFR")
@@ -223,6 +230,8 @@ finalplot = ggdraw() +
   draw_plot(colourpwplot, x = 0.15, y = 0.2 , width = 0.7, height = 0.8) +
   draw_plot(legendplot, x = 0.175, y = 0, width = 0.65, height = 0.2)
 print(finalplot)
+
+ggsave("/media/sf_data/anthocyanin_pw_simulation_11_2019.pdf", finalplot, width = 12, height = 6, units = "in")
 
 ## --------------------------------------------------------------------------------- ##
 #### Computing the experimental and simulated RNA concentration ratios for the genes ##
