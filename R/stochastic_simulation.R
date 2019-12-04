@@ -448,7 +448,10 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
   }
 
   plotTitle = "Components absolute abundance"
-  if(yLogScale) simuplot = simuplot + ggplot2::scale_y_log10(); plotTitle = "log10(Components absolute abundance+0.5)"
+  if(yLogScale){
+    simuplot = simuplot + ggplot2::scale_y_log10()
+    plotTitle = "log10(Components absolute abundance+0.5)"
+  }
 
   simuplot = simuplot +
     ggplot2::facet_grid(Type~Ind, scales = "free_y") +
