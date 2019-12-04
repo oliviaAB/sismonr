@@ -3,7 +3,7 @@
 [![Travis build status](https://travis-ci.org/oliviaAB/sismonr.svg?branch=master)](https://travis-ci.org/oliviaAB/sismonr)  [![Latest](https://img.shields.io/badge/Documentation-latest-blue.svg)](https://oliviaab.github.io/sismonr/) [![CRAN](https://img.shields.io/cran/v/sismonr.svg?color=green)](https://CRAN.R-project.org/package=sismonr) [![License](https://img.shields.io/cran/l/sismonr.svg)](hhttps://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 ## sismonr
 
-`sismonr` is a package for the simulation of gene expression profiles for *in silico* regulatory systems. Some innovative features of the model include:
+`sismonr` is an R package for the simulation of gene expression profiles for *in silico* regulatory systems. Some innovative features of the model include:
 - Simulation of protein-coding and **noncoding** genes;
 - Simulation of transcriptional and **post-transcriptional** regulation;
 - Simulation of the **ploidy** (number of gene copies) of the system.
@@ -37,7 +37,14 @@ You may need to restart your computer.
 
 ### Installing sismonr
 
-You can install sismonr from R or Rstudio using the following commands:
+sismonr is available on the CRAN. You can install sismonr from R or Rstudio using the following commands:
+
+```r
+install.packages("sismonr")
+```
+
+Alternatively, to download the latest development version, you can use:
+
 ```r
 library(devtools)
 install_github("oliviaAB/sismonr")

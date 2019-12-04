@@ -4,7 +4,7 @@
 \alias{plotSimulation}
 \title{Plots the result of a simulation.}
 \usage{
-plotSimulation(simdf, inds = unique(simdf$Ind),
+plotSimulation(simdf, molecules = NULL, inds = unique(simdf$Ind),
   trials = unique(simdf$trial), timeMin = min(simdf$time),
   timeMax = max(simdf$time), mergeAllele = T, mergePTM = T,
   mergeComplexes = F, yLogScale = T, nIndPerRow = 3,
@@ -12,6 +12,8 @@ plotSimulation(simdf, inds = unique(simdf$Ind),
 }
 \arguments{
 \item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}
+
+\item{molecules}{A vector of gene IDs (numeric or character) and/or complex IDs (e.g. CTC1) to be plotted.}
 
 \item{inds}{A vector of in silico individual names for which to plot the expression profiles.}
 
@@ -51,7 +53,9 @@ and the min and max abundances represented as coloured areas around the mean.
 mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 mypop = createInSilicoPopulation(15, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
-plotSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
+plotSimulation(sim$Simulation,
+ c(1, 2, 3),
+ c("Ind1", "Ind2", "Ind3", "Ind4"),
  axis.title = element_text(color = "red"))
 }
 }

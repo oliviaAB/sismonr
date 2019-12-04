@@ -619,6 +619,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #' and the min and max abundances represented as coloured areas around the mean.
 #'
 #' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).
+#' @param molecules A vector of gene IDs (numeric or character) and/or complex IDs (e.g. CTC1) to be plotted.
 #' @param inds A vector of in silico individual names for which to plot the expression profiles.
 #' @param trials A vector of trials ID (= number) to use for the plot (see details).
 #' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
@@ -636,7 +637,9 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 #' mypop = createInSilicoPopulation(15, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
-#' plotSimulation(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
+#' plotSimulation(sim$Simulation,
+#'  c(1, 2, 3),
+#'  c("Ind1", "Ind2", "Ind3", "Ind4"),
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
@@ -747,6 +750,7 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 #' and the min and max abundances represented as coloured areas around the mean.
 #'
 #' @param simdf The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).
+#' @param molecules A vector of gene IDs (numeric or character) and/or complex IDs (e.g. CTC1) to be plotted.
 #' @param inds A vector of in silico individual names for which to plot the expression profiles.
 #' @param trials A vector of trials ID (= number) to use for the plot (see details).
 #' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
@@ -764,7 +768,9 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 #' mysystem = createInSilicoSystem(G = 5, ploidy = 2)
 #' mypop = createInSilicoPopulation(10, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
-#' plotHeatMap(sim$Simulation, c("Ind1", "Ind2", "Ind3", "Ind4"),
+#' plotHeatMap(sim$Simulation,
+#'  c(1, 2, 3),
+#'  c("Ind1", "Ind2", "Ind3", "Ind4"),
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export

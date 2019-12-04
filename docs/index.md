@@ -9,6 +9,39 @@ The sismonr package aims at simulating random *in silico* biological systems, co
 
 Here we describe how to use the sismonr package. The code used throughout this documentation as well as the created variables saved as `.RData` objects are available [here](https://github.com/oliviaAB/sismonr/tree/master/docs/example).
 
+## Installation
+
+The sismonr package depends on the programming language Julia. It is preferable to install Julia on your computer before installing sismonr.
+
+### Installing Julia
+
+To install Julia, go to [https://julialang.org/downloads/](https://julialang.org/downloads/) and follow the instructions. The sismonr package currently works with version >= 1.0.
+
+Please make sure to include the Julia executable in your environmental variable PATH. Linux users can use the following command in the terminal:
+
+```
+sudo ln -s path_to_julia_folder/bin/julia /usr/local/bin/julia
+```
+
+to create a symbolic link to julia inside the `/usr/local/bin` folder.
+
+**Windows users** can open the Control Panel and go to System > Advanced system settings > Environment variables. Select the PATH variable, click on Edit > New and copy-paste the path `path_to_julia_folder/bin`.
+
+### Installing sismonr
+
+sismonr is available on the CRAN. You can install sismonr from R or Rstudio using the following commands:
+
+```r
+install.packages("sismonr")
+```
+
+Alternatively, to download the latest development version, you can use:
+
+```r
+library(devtools)
+install_github("oliviaAB/sismonr")
+```
+
 ## A first note
 
 The sismonr package uses the programming language Julia to speed up computations for some of the functions. Note that the user doesn't need to have any knowledge of Julia to use sismonr, all calls to Julia are handled internally. When starting a new R session, the first call to any sismonr function using Julia will therefore take a few seconds longer than usual (and print a blank line), as sismonr is starting a new Julia process to run the underlying Julia commands.
