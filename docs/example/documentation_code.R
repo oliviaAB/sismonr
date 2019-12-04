@@ -147,7 +147,7 @@ plotSimulation(sim$Simulation, mergePTM = F)
 sumtable = summariseSimulation(sim$Simulation)
 head(sumtable)
 
-plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
+plotSimulation(sim$Simulation, molecules = c(5, "CTC1"), inds = c("Ind1"), timeMin = 200, timeMax = 300)
 # ggplot2::ggsave("plotSimulation2.png", width = 20, height = 20, units = "cm")
 
 sumtable = summariseSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)

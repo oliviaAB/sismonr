@@ -711,9 +711,9 @@ Time: 0 s - 2000 s
 
 The function prints on your console the individuals, trials and timespan considered for the summary. You can suppress this display with the argument `verbose = F` in the function call.
 
-If you want to focus on one *in silico* individual, and zoom on a smaller time-period, you can use:
+If you want to focus on one *in silico* individual, a specific group of genes, and zoom on a smaller time-period, you can use:
 ```r
-plotSimulation(sim$Simulation, inds = c("Ind1"), timeMin = 200, timeMax = 300)
+plotSimulation(sim$Simulation, molecules = c(5, "CTC1"), inds = c("Ind1"), timeMin = 200, timeMax = 300)
 ```
 ![plotSimulation2](images/plotSimulation2.png)
 

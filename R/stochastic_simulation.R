@@ -448,7 +448,7 @@ plotBase = function(toplot, palette, multitrials, yLogScale, ...){
   }
 
   plotTitle = "Components absolute abundance"
-  if(yLogScale) simuplot = simuplot + ggplot2::scale_y_log10(); plotTitle = "log10(Components absolute abundance+1)"
+  if(yLogScale) simuplot = simuplot + ggplot2::scale_y_log10(); plotTitle = "log10(Components absolute abundance+0.5)"
 
   simuplot = simuplot +
     ggplot2::facet_grid(Type~Ind, scales = "free_y") +
@@ -640,7 +640,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
-plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, nCompPerRow = 10, ...){
+plotSimulation = function(simdf, molecules = NULL, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, nCompPerRow = 10, ...){
 
   ## Select the requested inviduals (in principle we could only do this later but this avoids transforming the whole dataset
   ## if we want to plot only a couple of individuals)
@@ -664,8 +664,17 @@ plotSimulation = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf
            "Components" = stringr::str_replace(.data$ID, "^R|^P", ""),
            "Components" = stringr::str_replace(.data$Components, "^m", "PTM"))
 
+  ## Select the molecules to plot
+  if(!is.null(molecules)){
+    toplot = toplot %>%
+      mutate("Molecule" = case_when(!!sym("Type") %in% c("RNAs", "Proteins") ~ stringr::str_extract(.data$Components, "(?<=^|(PTM))\\d+"),
+                                    !!sym("Type") == "Complexes" ~ stringr::str_extract(.data$Components, "^C[[:alpha:]]{2,3}\\d+"))) %>%
+      dplyr::filter(!!sym("Molecule") %in% molecules) %>%
+      select(-!!sym("Molecule"))
+  }
+
   ## If plot in log-scale, need to have non-zero abundances
-  if(yLogScale) toplot = toplot %>% mutate("Abundance" = !!sym("Abundance") + 1)
+  if(yLogScale) toplot = toplot %>% mutate("Abundance" = !!sym("Abundance") + 0.5)
 
   ## If multiple trials, summarise them with mean, min and max
   if(multitrials){
@@ -713,7 +722,7 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
   simuplot = ggplot2::ggplot(toplot, aes_string(x = "time", y = "Components", fill = "mean")) + ggplot2::geom_tile()
 
   if(yLogScale){
-    simuplot = simuplot + ggplot2::scale_fill_viridis_c(trans = "log10", option = VirPalOption, name = "log10(Components absolute abundance+1)")
+    simuplot = simuplot + ggplot2::scale_fill_viridis_c(trans = "log10", option = VirPalOption, name = "log10(Components absolute abundance+0.5)")
   }else{
     simuplot = simuplot + ggplot2::scale_fill_viridis_c(option = VirPalOption, name = "Components absolute abundance")
   }
@@ -759,7 +768,7 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
-plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, VirPalOption = "plasma", ...){
+plotHeatMap = function(simdf, molecules = NULL, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, VirPalOption = "plasma", ...){
   simind = simdf %>% dplyr::filter(!!sym("Ind") %in% inds) %>%
                      dplyr::filter(!!sym("trial") %in% trials) %>%
                      dplyr::filter(!!sym("time") >= timeMin & !!sym("time") <= timeMax)
@@ -777,8 +786,17 @@ plotHeatMap = function(simdf, inds = unique(simdf$Ind), trials = unique(simdf$tr
            "Components" = stringr::str_replace(.data$ID, "^R|^P", ""),
            "Components" = stringr::str_replace(.data$Components, "^m", "PTM"))
 
+  ## Select the molecules to plot
+  if(!is.null(molecules)){
+    toplot = toplot %>%
+      mutate("Molecule" = case_when(!!sym("Type") %in% c("RNAs", "Proteins") ~ stringr::str_extract(.data$Components, "(?<=^|(PTM))\\d+"),
+                                    !!sym("Type") == "Complexes" ~ stringr::str_extract(.data$Components, "^C[[:alpha:]]{2,3}\\d+"))) %>%
+      dplyr::filter(!!sym("Molecule") %in% molecules) %>%
+      select(-!!sym("Molecule"))
+  }
+
   ## If plot in log-scale, need to have non-zero abundances
-  if(yLogScale) toplot = toplot %>% mutate("Abundance" = !!sym("Abundance") + 1)
+  if(yLogScale) toplot = toplot %>% mutate("Abundance" = !!sym("Abundance") + 0.5)
 
   ## Only plot the mean (even if only one trial to be plotted)
   toplot = toplot %>% dplyr::group_by(!!sym("Ind"), !!sym("time"), !!sym("Components"), !!sym("Type"), !!sym("ID")) %>%
