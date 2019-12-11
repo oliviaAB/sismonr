@@ -202,7 +202,7 @@ test_that("sampling expected library sizes works", {
 
 test_that("creating RNA-seq data works",{
   check_julia()
-  mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2, PC.p = 0.7)
+  mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2, PC.p = 1)
   mypop = createInSilicoPopulation(3, mysystem)
   sim = simulateInSilicoSystem(mysystem, mypop, simtime = 500, ntrials = 10, nepochs = 5)
 
