@@ -4,12 +4,17 @@
 \alias{plotMutations}
 \title{Plots the QTL effect coefficients of a population.}
 \usage{
-plotMutations(insilicopopulation, insilicosystem, scaleLims = NULL,
+plotMutations(
+  insilicopopulation,
+  insilicosystem,
+  scaleLims = NULL,
   qtlEffectCoeffs = insilicopopulation$indargs$qtlnames,
   inds = names(insilicopopulation$individualsList),
   alleles = insilicosystem$sysargs$gcnList,
   genes = 1:length(insilicopopulation$GenesVariants),
-  nGenesPerRow = 10, ...)
+  nGenesPerRow = 10,
+  ...
+)
 }
 \arguments{
 \item{insilicopopulation}{The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).}

@@ -4,8 +4,14 @@
 \alias{createIndividual}
 \title{Creates an in silico individual.}
 \usage{
-createIndividual(insilicosystem, variantsList, variantsFreq, indargs,
-  InitVar = NULL, initialNoise = TRUE)
+createIndividual(
+  insilicosystem,
+  variantsList,
+  variantsFreq,
+  indargs,
+  InitVar = NULL,
+  initialNoise = TRUE
+)
 }
 \arguments{
 \item{insilicosystem}{An \code{insilicosystem} object. The in silico system based on which individuals are created. See \code{\link{createInSilicoSystem}}.}

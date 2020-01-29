@@ -4,11 +4,21 @@
 \alias{plotHeatMap}
 \title{Plots the result of a simulation as a heatmap.}
 \usage{
-plotHeatMap(simdf, molecules = NULL, inds = unique(simdf$Ind),
-  trials = unique(simdf$trial), timeMin = min(simdf$time),
-  timeMax = max(simdf$time), mergeAllele = T, mergePTM = T,
-  mergeComplexes = F, yLogScale = T, nIndPerRow = 3,
-  VirPalOption = "plasma", ...)
+plotHeatMap(
+  simdf,
+  molecules = NULL,
+  inds = unique(simdf$Ind),
+  trials = unique(simdf$trial),
+  timeMin = min(simdf$time),
+  timeMax = max(simdf$time),
+  mergeAllele = T,
+  mergePTM = T,
+  mergeComplexes = F,
+  yLogScale = T,
+  nIndPerRow = 3,
+  VirPalOption = "plasma",
+  ...
+)
 }
 \arguments{
 \item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}

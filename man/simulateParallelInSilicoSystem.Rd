@@ -4,10 +4,19 @@
 \alias{simulateParallelInSilicoSystem}
 \title{Simulates an in silico system in parallel.}
 \usage{
-simulateParallelInSilicoSystem(insilicosystem, insilicopopulation, simtime,
-  nepochs = -1, ntrials = 1, simalgorithm = "Direct",
-  writefile = F, filepath = NULL, filename = "simulation",
-  no_cores = parallel::detectCores() - 1, ev = getJuliaEvaluator())
+simulateParallelInSilicoSystem(
+  insilicosystem,
+  insilicopopulation,
+  simtime,
+  nepochs = -1,
+  ntrials = 1,
+  simalgorithm = "Direct",
+  writefile = F,
+  filepath = NULL,
+  filename = "simulation",
+  no_cores = parallel::detectCores() - 1,
+  ev = getJuliaEvaluator()
+)
 }
 \arguments{
 \item{insilicosystem}{The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).}

@@ -4,9 +4,14 @@
 \alias{sampleLibrarySize}
 \title{Samples the expected library size of individuals/samples}
 \usage{
-sampleLibrarySize(samples_list, meanLogLibSize_lane = 7,
-  sdLogLibSize_lane = 0.5, sdLogLibSize_samples = 0.2,
-  laneEffect = F, nLanes = 2)
+sampleLibrarySize(
+  samples_list,
+  meanLogLibSize_lane = 7,
+  sdLogLibSize_lane = 0.5,
+  sdLogLibSize_samples = 0.2,
+  laneEffect = F,
+  nLanes = 2
+)
 }
 \arguments{
 \item{samples_list}{List of sample/individual names.}

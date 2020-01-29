@@ -4,10 +4,13 @@
 \alias{insilicoindividualargs}
 \title{Constructor function for the \code{insilicoindividualargs} class.}
 \usage{
-insilicoindividualargs(ngenevariants = 5,
-  qtleffect_samplingfct = function(x) {     truncnorm::rtruncnorm(x, a =
-  0, b = Inf, mean = 1, sd = 0.1) }, initvar_samplingfct = function(x) { 
-     truncnorm::rtruncnorm(x, a = 0, b = Inf, mean = 1, sd = 0.1) })
+insilicoindividualargs(
+  ngenevariants = 5,
+  qtleffect_samplingfct = function(x) {     truncnorm::rtruncnorm(x, a = 0, b = Inf,
+    mean = 1, sd = 0.1) },
+  initvar_samplingfct = function(x) {     truncnorm::rtruncnorm(x, a = 0, b = Inf, mean
+    = 1, sd = 0.1) }
+)
 }
 \arguments{
 \item{ngenevariants}{Integer. Number of alleles existing for each gene and segregating in the in silico population. Default value is 5.}

@@ -4,8 +4,7 @@
 \alias{addEdge}
 \title{Adds an edge in the in silico system's regulatory network.}
 \usage{
-addEdge(insilicosystem, regID, tarID, regsign = NULL,
-  kinetics = list())
+addEdge(insilicosystem, regID, tarID, regsign = NULL, kinetics = list())
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}

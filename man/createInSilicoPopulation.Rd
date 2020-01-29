@@ -4,8 +4,15 @@
 \alias{createInSilicoPopulation}
 \title{Creates a population of in silico individuals.}
 \usage{
-createInSilicoPopulation(nInd, insilicosystem, genvariants = NULL,
-  genvariants.freq = NULL, InitVar = NULL, initialNoise = TRUE, ...)
+createInSilicoPopulation(
+  nInd,
+  insilicosystem,
+  genvariants = NULL,
+  genvariants.freq = NULL,
+  InitVar = NULL,
+  initialNoise = TRUE,
+  ...
+)
 }
 \arguments{
 \item{nInd}{Integer. The number of in silico individuals to create.}

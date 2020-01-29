@@ -4,8 +4,13 @@
 \alias{createRegulatoryNetwork}
 \title{Creates an in silico regulatory network.}
 \usage{
-createRegulatoryNetwork(regsList, tarsList, reaction, sysargs,
-  ev = getJuliaEvaluator())
+createRegulatoryNetwork(
+  regsList,
+  tarsList,
+  reaction,
+  sysargs,
+  ev = getJuliaEvaluator()
+)
 }
 \arguments{
 \item{regsList}{A named list of length 2. Element "PC" (resp."NC") is a vector of gene IDs of the protein-coding (resp. noncoding) regulators

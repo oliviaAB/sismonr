@@ -4,10 +4,17 @@
 \alias{summariseSimulation}
 \title{Returns a summary data-frame of a simulation.}
 \usage{
-summariseSimulation(simdf, inds = unique(simdf$Ind),
-  trials = unique(simdf$trial), timeMin = min(simdf$time),
-  timeMax = max(simdf$time), mergeAllele = T, mergePTM = T,
-  mergeComplexes = F, verbose = T)
+summariseSimulation(
+  simdf,
+  inds = unique(simdf$Ind),
+  trials = unique(simdf$trial),
+  timeMin = min(simdf$time),
+  timeMax = max(simdf$time),
+  mergeAllele = T,
+  mergePTM = T,
+  mergeComplexes = F,
+  verbose = T
+)
 }
 \arguments{
 \item{simdf}{The data frame with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}

@@ -4,11 +4,21 @@
 \alias{plotSimulation}
 \title{Plots the result of a simulation.}
 \usage{
-plotSimulation(simdf, molecules = NULL, inds = unique(simdf$Ind),
-  trials = unique(simdf$trial), timeMin = min(simdf$time),
-  timeMax = max(simdf$time), mergeAllele = T, mergePTM = T,
-  mergeComplexes = F, yLogScale = T, nIndPerRow = 3,
-  nCompPerRow = 10, ...)
+plotSimulation(
+  simdf,
+  molecules = NULL,
+  inds = unique(simdf$Ind),
+  trials = unique(simdf$trial),
+  timeMin = min(simdf$time),
+  timeMax = max(simdf$time),
+  mergeAllele = T,
+  mergePTM = T,
+  mergeComplexes = F,
+  yLogScale = T,
+  nIndPerRow = 3,
+  nCompPerRow = 10,
+  ...
+)
 }
 \arguments{
 \item{simdf}{The dataframe with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}

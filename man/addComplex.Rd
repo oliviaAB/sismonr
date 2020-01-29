@@ -4,8 +4,12 @@
 \alias{addComplex}
 \title{Adds a regulatory complex in the in silico system.}
 \usage{
-addComplex(insilicosystem, compo, formationrate = NULL,
-  dissociationrate = NULL)
+addComplex(
+  insilicosystem,
+  compo,
+  formationrate = NULL,
+  dissociationrate = NULL
+)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}

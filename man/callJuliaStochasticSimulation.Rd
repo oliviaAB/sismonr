@@ -4,9 +4,18 @@
 \alias{callJuliaStochasticSimulation}
 \title{Calls the Julia simulation function.}
 \usage{
-callJuliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes,
-  simtime, modelname = "MySimulation", ntrials, nepochs, simalgorithm,
-  ev = getJuliaEvaluator())
+callJuliaStochasticSimulation(
+  stochmodel,
+  QTLeffects,
+  InitAbundance,
+  genes,
+  simtime,
+  modelname = "MySimulation",
+  ntrials,
+  nepochs,
+  simalgorithm,
+  ev = getJuliaEvaluator()
+)
 }
 \arguments{
 \item{stochmodel}{A Julia proxy object to retrieve the stochastic system in the Julia evaluator.}

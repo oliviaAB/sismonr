@@ -4,8 +4,15 @@
 \alias{addGene}
 \title{Adds a gene in the in silico system.}
 \usage{
-addGene(insilicosystem, coding = NULL, TargetReaction = NULL,
-  TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL)
+addGene(
+  insilicosystem,
+  coding = NULL,
+  TargetReaction = NULL,
+  TCrate = NULL,
+  TLrate = NULL,
+  RDrate = NULL,
+  PDrate = NULL
+)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}

@@ -4,8 +4,13 @@
 \alias{plotGRN}
 \title{Plots the GRN of the in silico system.}
 \usage{
-plotGRN(insilicosystem, edgeType = NULL, showAllVertices = F,
-  plotType = "2D", ...)
+plotGRN(
+  insilicosystem,
+  edgeType = NULL,
+  showAllVertices = F,
+  plotType = "2D",
+  ...
+)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}

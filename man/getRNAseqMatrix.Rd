@@ -4,11 +4,21 @@
 \alias{getRNAseqMatrix}
 \title{Transforms a simulation time-point into RNA-seq-like data.}
 \usage{
-getRNAseqMatrix(simdf, insilicosystem, samplingTime = max(simdf$time),
-  laneEffect = F, nLanes = 2, propRnasSampled = 0.9,
-  samplesLibSize = NULL, genesLength = NULL, mrnasOnly = T,
-  mergeComplexes = F, meanLogLibSize_lane = 7,
-  sdLogLibSize_lane = 0.5, sdLogLibSize_samples = 0.2)
+getRNAseqMatrix(
+  simdf,
+  insilicosystem,
+  samplingTime = max(simdf$time),
+  laneEffect = F,
+  nLanes = 2,
+  propRnasSampled = 0.9,
+  samplesLibSize = NULL,
+  genesLength = NULL,
+  mrnasOnly = T,
+  mergeComplexes = F,
+  meanLogLibSize_lane = 7,
+  sdLogLibSize_lane = 0.5,
+  sdLogLibSize_samples = 0.2
+)
 }
 \arguments{
 \item{simdf}{The data-frame with the result of the simulation (see \code{\link{simulateInSilicoSystem}}).}

@@ -4,8 +4,14 @@
 \alias{createStochSystem}
 \title{Creates a stochastic system from an in silico system.}
 \usage{
-createStochSystem(insilicosystem, writefile = F, filepath = NULL,
-  filename = "simulation", verbose = T, ev = getJuliaEvaluator())
+createStochSystem(
+  insilicosystem,
+  writefile = F,
+  filepath = NULL,
+  filename = "simulation",
+  verbose = T,
+  ev = getJuliaEvaluator()
+)
 }
 \arguments{
 \item{insilicosystem}{The in silico system (object of class \code{insilicosystem}, see \code{\link{createInSilicoSystem}}).}
