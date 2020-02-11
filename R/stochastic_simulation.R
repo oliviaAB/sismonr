@@ -81,7 +81,8 @@ createStochSystem = function(insilicosystem, writefile = F, filepath = NULL, fil
 #' @param ntrials Integer. The number of times the simulation must be replicated.
 #' @param nepochs Integer. The number of times to record the state of the system during the simulation.
 #' @param simalgorithm String. The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
-#' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
+#' Possible values are: "Direct", "EnhancedDirect", "SortingDirect", "FirstReaction", "NextReaction", "TauLeapingDG2001", "TauLeapingDGLP2003", "StepAnticipation", "HybridSAL".
+#' See \url{https://alanderos91.github.io/BioSimulator.jl/dev/man/algorithms/} for details about the algorithms.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
 #' @return The result of the simulation (a data-frame).
 #' @export
@@ -113,26 +114,41 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitAbundance, 
 
 #' Simulates an in silico system.
 #'
-#' Simulates (stochastically) the behaviour of an in silico system over time, i.e. the expression of the different genes.
+#' Simulates (stochastically) the behaviour of an in silico system over time,
+#' i.e. the expression of the different genes.
 #'
-#' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
-#' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @param insilicosystem The in silico system to be simulated (see
+#'   \code{\link{createInSilicoSystem}}).
+#' @param insilicopopulation The in silico population to be simulated (see
+#'   \code{\link{createInSilicoPopulation}}).
 #' @param simtime The final time of the simulation (in seconds).
-#' @param nepochs The number of times to record the state of the system during the simulation.
-#' @param ntrials The number of times the simulation must be replicated (for each individual).
-#' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
-#' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
-#' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in which the files will be created (default: current working directory).
-#' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
-#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
-#' @return A list composed of:
-#' \itemize{
-#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
-#' RNA form of the gene, "Pi" to the protein form of the gene. The suffix "GCNj" indicates that the molecule comes from the j-th allele of the gene.
-#' \item \code{runningtime}: A vector of running time of all runs of the simulation for each in silico individuals.
-#' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
-#' }
+#' @param nepochs The number of times to record the state of the system during
+#'   the simulation.
+#' @param ntrials The number of times the simulation must be replicated (for
+#'   each individual).
+#' @param simalgorithm The name of the simulation algorithm to use in the Julia
+#'   function \code{simulate} from the module \code{BioSimulator}. Possible
+#'   values are: "Direct", "EnhancedDirect", "SortingDirect", "FirstReaction",
+#'   "NextReaction", "TauLeapingDG2001", "TauLeapingDGLP2003",
+#'   "StepAnticipation", "HybridSAL". See
+#'   \url{https://alanderos91.github.io/BioSimulator.jl/dev/man/algorithms/} for
+#'   details about the algorithms.
+#' @param writefile Does the julia function write the species and reactions
+#'   lists in a text file?
+#' @param filepath If writefile = \code{TRUE}, path to the folder in which the
+#'   files will be created (default: current working directory).
+#' @param filename If writefile = \code{TRUE}, prefix of the files created to
+#'   store the lists of species and reactions.
+#' @param ev A Julia evaluator. If none provided select the current evaluator or
+#'   create one if no evaluator exists.
+#' @return A list composed of: \itemize{ \item \code{Simulation}: A data-frame
+#'   with the simulated expression profiles of the genes for the different
+#'   individuals in the in silico population. For gene i, "Ri" corresponds to
+#'   the RNA form of the gene, "Pi" to the protein form of the gene. The suffix
+#'   "GCNj" indicates that the molecule comes from the j-th allele of the gene.
+#'   \item \code{runningtime}: A vector of running time of all runs of the
+#'   simulation for each in silico individuals. \item \code{stochmodel}: A Julia
+#'   proxy object to retrieve the stochastic system in the Julia evaluator. }
 #' @examples
 #' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
@@ -208,28 +224,44 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 
 #' Simulates an in silico system in parallel.
 #'
-#' Simulates (stochastically) the behaviour of an in silico system over time using parallelisation, i.e. the expression of the different genes.
+#' Simulates (stochastically) the behaviour of an in silico system over time
+#' using parallelisation, i.e. the expression of the different genes.
 #'
-#' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
-#' @param insilicopopulation The in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @param insilicosystem The in silico system to be simulated (see
+#'   \code{\link{createInSilicoSystem}}).
+#' @param insilicopopulation The in silico population to be simulated (see
+#'   \code{\link{createInSilicoPopulation}}).
 #' @param simtime The final time of the simulation (in seconds).
-#' @param nepochs The number of times to record the state of the system during the simulation.
-#' @param ntrials The number of times the simulation must be replicated (for each individual).
-#' @param simalgorithm The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
-#' Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".
-#' @param writefile Does the julia function write the species and reactions lists in a text file?
-#' @param filepath If writefile = \code{TRUE}, path to the folder in which the files will be created (default: current working directory).
-#' @param filename If writefile = \code{TRUE}, prefix of the files created to store the lists of species and reactions.
-#' @param no_cores The number of cores to use for the simulation. By default use the function \code{detectCores} from the \code{parallel}
-#' package to detect the number of available cores, and use this number - 1 for the simulation.
-#' @param ev A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.
-#' @return A list composed of:
-#' \itemize{
-#' \item \code{Simulation}: A data-frame with the simulated expression profiles of the genes for the different individuals in the in silico population. For gene i, "Ri" corresponds to the
-#' RNA form of the gene, "Pi" to the protein form of the gene. The suffix "GCNj" indicates that the molecule comes from the j-th allele of the gene.
-#' \item \code{runningtime}: The running time (elapsed seconds) of the parallel simulation (only 1 value).
-#' \item \code{stochmodel}: A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
-#' }
+#' @param nepochs The number of times to record the state of the system during
+#'   the simulation.
+#' @param ntrials The number of times the simulation must be replicated (for
+#'   each individual).
+#' @param simalgorithm The name of the simulation algorithm to use in the Julia
+#'   function \code{simulate} from the module \code{BioSimulator}. Possible
+#'   values are: "Direct", "EnhancedDirect", "SortingDirect", "FirstReaction",
+#'   "NextReaction", "TauLeapingDG2001", "TauLeapingDGLP2003",
+#'   "StepAnticipation", "HybridSAL". See
+#'   \url{https://alanderos91.github.io/BioSimulator.jl/dev/man/algorithms/} for
+#'   details about the algorithms.
+#' @param writefile Does the julia function write the species and reactions
+#'   lists in a text file?
+#' @param filepath If writefile = \code{TRUE}, path to the folder in which the
+#'   files will be created (default: current working directory).
+#' @param filename If writefile = \code{TRUE}, prefix of the files created to
+#'   store the lists of species and reactions.
+#' @param no_cores The number of cores to use for the simulation. By default use
+#'   the function \code{detectCores} from the \code{parallel} package to detect
+#'   the number of available cores, and use this number - 1 for the simulation.
+#' @param ev A Julia evaluator. If none provided select the current evaluator or
+#'   create one if no evaluator exists.
+#' @return A list composed of: \itemize{ \item \code{Simulation}: A data-frame
+#'   with the simulated expression profiles of the genes for the different
+#'   individuals in the in silico population. For gene i, "Ri" corresponds to
+#'   the RNA form of the gene, "Pi" to the protein form of the gene. The suffix
+#'   "GCNj" indicates that the molecule comes from the j-th allele of the gene.
+#'   \item \code{runningtime}: The running time (elapsed seconds) of the
+#'   parallel simulation (only 1 value). \item \code{stochmodel}: A Julia proxy
+#'   object to retrieve the stochastic system in the Julia evaluator. }
 #' @examples
 #' \donttest{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)

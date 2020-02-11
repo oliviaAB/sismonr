@@ -35,7 +35,8 @@ callJuliaStochasticSimulation(
 \item{nepochs}{Integer. The number of times to record the state of the system during the simulation.}
 
 \item{simalgorithm}{String. The name of the simulation algorithm to use in the Julia function \code{simulate} from the module \code{BioSimulator}.
-Can be one of "Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation".}
+Possible values are: "Direct", "EnhancedDirect", "SortingDirect", "FirstReaction", "NextReaction", "TauLeapingDG2001", "TauLeapingDGLP2003", "StepAnticipation", "HybridSAL".
+See \url{https://alanderos91.github.io/BioSimulator.jl/dev/man/algorithms/} for details about the algorithms.}
 
 \item{ev}{A Julia evaluator. If none provided select the current evaluator or create one if no evaluator exists.}
 }

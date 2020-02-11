@@ -14,7 +14,7 @@ check_julia = function(){
       skip("Error when checking the existing Julia version. Please check that Julia is correctly installed.")
     }
     else if(base::grepl("true", version_check, ignore.case = TRUE)){
-      skip("Julia version < v1.0 installed, require v1.0 or later")
+      skip("Julia version < v1.0 installed, require v1.0 or later.")
     }
   }
 }

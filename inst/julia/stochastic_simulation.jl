@@ -157,42 +157,48 @@ function juliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes,
       nepochs = simtime
     end
 
+#     if Pkg.installed()["BioSimulator"] < v"0.9" ## With the older version of BioSimulator
+# 
+#       ## Convert the String name of the simulator to use into a BioSimulator object of type inheriting from Algorithm
+#       if in(simalgorithm, ["Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation"])
+#         simalgorithm = eval(Meta.parse("BioSimulator."*simalgorithm*"()"))
+#       else
+#         error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"FirstReaction\", \"NextReaction\", \"OptimizedDirect\", \"TauLeaping\" or \"StepAnticipation\".")
+#       end
+# 
+#       model = createBioSimModel(stochmodel, QTLeffects, InitAbundance, modelname)
+
+      #println("JULIA> Running simulation ...")
+#       result = simulate(model, simalgorithm, time = convert(Float64, simtime), epochs = round(Int64, nepochs), trials = convert(Int64, ntrials))
+      #println("JULIA> Done!")
+
+#       resultdf = DataFrame(result)
+#     end
+
     ## Convert the String name of the simulator to use into a BioSimulator object of type inheriting from Algorithm
-    if in(simalgorithm, ["Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation"])
+    if in(simalgorithm, ["Direct", "EnhancedDirect", "SortingDirect", "FirstReaction", "NextReaction", "TauLeapingDG2001", "TauLeapingDGLP2003", "StepAnticipation", "HybridSAL"])
       simalgorithm = eval(Meta.parse("BioSimulator."*simalgorithm*"()"))
     else
-      error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"FirstReaction\", \"NextReaction\", \"OptimizedDirect\", \"TauLeaping\" or \"StepAnticipation\".")
+      error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"EnhancedDirect\", \"SortingDirect\", \"FirstReaction\", \"NextReaction\", \"TauLeapingDG2001\", \"TauLeapingDGLP2003\", \"StepAnticipation\" or \"HybridSAL\".")
     end
 
     model = createBioSimModel(stochmodel, QTLeffects, InitAbundance, modelname)
 
-    if Pkg.installed()["BioSimulator"] < v"0.9" ## With the older version of BioSimulator
-
-      #println("JULIA> Running simulation ...")
-      result = simulate(model, simalgorithm, time = convert(Float64, simtime), epochs = round(Int64, nepochs), trials = convert(Int64, ntrials))
-      #println("JULIA> Done!")
-
-      resultdf = DataFrame(result)
-
-    else ## With the latest version of BioSimulator
-
-      ## We have to compute the time at which we want to record molecules abundance
-      t_step = floor(simtime / nepochs)
-      t_to_keep = collect(0:t_step:simtime)
-      if t_to_keep[end] != simtime
-        t_to_keep[end] = simtime
-      end
-
-      #println("JULIA> Running simulation ...")
-      result = [simulate(model, simalgorithm, tfinal = convert(Float64, simtime), save_points = t_to_keep) for _ in 1:convert(Int64, ntrials)] #  trials = convert(Int64, ntrials)
-      #println("JULIA> Done!")
-
-      resultdf = DataFrame(result)
-      new_col_names = Dict(zip(["X$i" for i in 1:length(keys(model.species_list))], collect(keys(model.species_list))))
-      new_col_names["t"] = :time
-      rename!(resultdf, new_col_names)
-
+    ## We have to compute the time at which we want to record molecules abundance
+    t_step = floor(simtime / nepochs)
+    t_to_keep = collect(0:t_step:simtime)
+    if t_to_keep[end] != simtime
+      t_to_keep[end] = simtime
     end
+
+    #println("JULIA> Running simulation ...")
+    result = [simulate(model, simalgorithm, tfinal = convert(Float64, simtime), save_points = t_to_keep) for _ in 1:convert(Int64, ntrials)] #  trials = convert(Int64, ntrials)
+    #println("JULIA> Done!")
+
+    resultdf = DataFrame(result)
+    new_col_names = Dict(zip(["X$i" for i in 1:length(keys(model.species_list))], collect(keys(model.species_list))))
+    new_col_names["t"] = :time
+    rename!(resultdf, new_col_names)
 
     abundancedf = transformSimRes2Abundance(resultdf, genes, stochmodel)
 

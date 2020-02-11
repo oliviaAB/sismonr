@@ -1,3 +1,11 @@
+## sismonr 2.1.0
+* Automatically updates BioSimulator to v0.9.3
+* Accounts for changes of syntax in BioSimulator v0.9.3
+* Names of possible stochastic simulation algorithms changed
+
+## sismonr 2.0.1
+* Forces the installation of BioSimulator v0.5.1
+
 # sismonr 2.0.0
 
 ## New features
