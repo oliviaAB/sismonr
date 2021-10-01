@@ -17,7 +17,7 @@ A dataframe in which the abundance of free and in complex versions of a molecule
 Merge (i.e. sum) the abundance of the free and in-complex versions of each molecule in the results of a simulation.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1, ploidy = 1)
 mysystem = addComplex(mysystem, c(1, 2))
 mypop = createInSilicoPopulation(1, mysystem)

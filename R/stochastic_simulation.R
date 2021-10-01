@@ -31,7 +31,7 @@ df2list = function(mydf){
 #' @param ev A Julia evaluator (for the XRJulia). If none provided select the current evaluator or create one if no evaluator exists.
 #' @return A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5)
 #' stochsys = createStochSystem(mysystem)
 #' }
@@ -92,7 +92,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitAbundance, 
   evXR = XR::getInterface(getClass("JuliaInterface"))
   expr = gettextf("%s(%s)","juliaStochasticSimulation", evXR$ServerArglist(stochmodel, QTLeffects, InitAbundance, genesdf,
                                                                            simtime, modelname = modelname, ntrials = ntrials,
-                                                                           nepochs = nepochs, simalgorithm = simalgorithm))
+                                                                           nepochs = nepochs, simalgorithm = simalgorithm, seed = .get_seed()))
   key = evXR$ProxyName()
   cmd = jsonlite::toJSON(c("eval", expr, key, T))
   writeLines(cmd, evXR$connection)
@@ -150,7 +150,7 @@ callJuliaStochasticSimulation = function(stochmodel, QTLeffects, InitAbundance, 
 #'   simulation for each in silico individuals. \item \code{stochmodel}: A Julia
 #'   proxy object to retrieve the stochastic system in the Julia evaluator. }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 #' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, simtime = 1000, ntrials = 10)
@@ -263,7 +263,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #'   parallel simulation (only 1 value). \item \code{stochmodel}: A Julia proxy
 #'   object to retrieve the stochastic system in the Julia evaluator. }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 #' mypop = createInSilicoPopulation(15, mysystem)
 #' sim = simulateParallelInSilicoSystem(mysystem, mypop, 1000)
@@ -357,7 +357,7 @@ sumColAbundance = function(df, colsid){
 #' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of the different allelic versions of the same molecule have been merged to give the abundance of the molecule (without distinction of the allele of origin).
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, empty = TRUE, ploidy = 2)
 #' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
@@ -386,7 +386,7 @@ mergeAlleleAbundance = function(df){
 #' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of original and modified versions of a protein have been merged to give the abundance of the protein (without distinction of its post-translational modification state).
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none", ploidy = 1)
 #' mypop = createInSilicoPopulation(1, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100)
@@ -415,7 +415,7 @@ mergePTMAbundance = function(df){
 #' or \code{\link{simulateParallelInSilicoSystem}}).
 #' @return A dataframe in which the abundance of free and in complex versions of a molecule have been merged to give the abundance of the molecule (without distinction of whether or not it is bound in a molecular complex).
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.TC.p = 1, ploidy = 1)
 #' mysystem = addComplex(mysystem, c(1, 2))
 #' mypop = createInSilicoPopulation(1, mysystem)
@@ -668,7 +668,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
 #' @return A plot from \code{\link[ggpubr]{ggarrange}}.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 #' mypop = createInSilicoPopulation(15, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
@@ -799,7 +799,7 @@ plotBaseHM = function(toplot, yLogScale, VirPalOption, ...){
 #' @param ... Any additional parameter to be passed to \code{\link[ggplot2]{theme}} for the plot of each individual.
 #' @return A plot from \code{\link[ggpubr]{ggarrange}}.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, ploidy = 2)
 #' mypop = createInSilicoPopulation(10, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
@@ -874,7 +874,7 @@ plotHeatMap = function(simdf, molecules = NULL, inds = unique(simdf$Ind), trials
 #' @param verbose If TRUE (default), print the individuals, trials, min and max time considered for the computation of the summary.
 #' @return A data-frame giving for each component (rows) and each individual (columns) the max and final average abundance over the different trials.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 #' mypop = createInSilicoPopulation(15, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
@@ -1026,7 +1026,7 @@ sampleLibrarySize = function(samples_list, meanLogLibSize_lane = 7, sdLogLibSize
 #' \item \code{genesLength} The length of each gene.
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5, regcomplexes = "none",
 #'                                 ploidy = 2, PC.p = 1)
 #' mypop = createInSilicoPopulation(10, mysystem)

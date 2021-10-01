@@ -26,7 +26,7 @@ An object of class \code{insilicosystem}, that is a list composed of:
 Creates an in silico system, i.e. the genes and the regulatory network defining the system.
 }
 \examples{
-\donttest{
+\dontrun{
 ## Creates an in silico system composed of 20 genes
 mysystem1 = createInSilicoSystem(G = 20)
 mysystem1$edg ## see all regulations in the system

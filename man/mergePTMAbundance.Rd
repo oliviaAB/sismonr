@@ -17,7 +17,7 @@ A dataframe in which the abundance of original and modified versions of a protei
 Merge (i.e. sum) the abundance of the original and modified (PTM) versions of each protein in the results of a simulation.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, PC.p = 1, PC.PTM.p = 0.9, regcomplexes = "none", ploidy = 1)
 mypop = createInSilicoPopulation(1, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)

@@ -39,7 +39,7 @@ It must be noted that the type of regulation depends on the biological function 
 (parameter \code{TargetReaction}).
 }
 \examples{
-\donttest{
+\dontrun{
 ## creates a system with no regulation
 mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = TRUE)
 mysystem$edg

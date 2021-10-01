@@ -33,7 +33,7 @@ A Julia proxy object to retrieve the stochastic system in the Julia evaluator.
 Creates a list of molecules, reactions and associated propensities to represent the in silico system.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5)
 stochsys = createStochSystem(mysystem)
 }

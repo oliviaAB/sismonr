@@ -86,7 +86,7 @@ createVariants = function(genes, indargs){
 #' initial abundance of the protein ("P") and RNA ("R") form of the genes (coefficient for gene \code{i} at the \code{i}-th position in the vectors).
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 3, ploidy = 4)
 #' indargs = insilicoindividualargs()
 #' ## We will create only 1 variant of gene 1, 3 variants of gene 2 and
@@ -239,7 +239,7 @@ createIndividual = function(insilicosystem, variantsList, variantsFreq, indargs,
 #' \item \code{indargs} An object of class \code{\link{insilicoindividualargs}}; the parameters used to create the in silico individuals.
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## Creating a first population with 3 diploid individuals,
 #' ## with 2 variants of each gene segregating in the population
 #' mysystem = createInSilicoSystem(G = 6, ploidy = 2)
@@ -350,7 +350,7 @@ createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, ge
 #' individuals (rows) for each gene (column) in the system. For noncoding genes, some QTL effect coefficients are not relevant (the ones
 #' related to protein or translation) and are represented in gray as NA.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10, ploidy = 2)
 #' mypop = createInSilicoPopulation(10, mysystem)
 #' plotMutations(mypop, mysystem)

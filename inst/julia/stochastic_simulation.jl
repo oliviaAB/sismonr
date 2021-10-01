@@ -9,7 +9,7 @@ using DataFrames
 # ------------------------------------------------------------------------------------------------ #
 
 function createBioSimModel(stochmodel, QTLeffects, InitAbundance, modelname)
-       
+
   model = BioSimulator.Network(modelname)
 
   ## Add the species in the model, with their initial abundance
@@ -72,13 +72,13 @@ function allequal(x)
 end
 
 ## Transforms the results of the simulation into the abundance profile of the different molecules over time
-## This is beause in the simulation each regulator binding site is a distinct molecule, but in our system 
+## This is beause in the simulation each regulator binding site is a distinct molecule, but in our system
 ## they can belong to a same RNA molecule
 function transformSimRes2Abundance(resultdf, genes, stochmodel)
 
   julia_version = VERSION >= v"1.2.0"
 
-  
+
   abundancedf = resultdf[:, [:time, :trial]]
   #abundancedf = Dict("time" => resultdf[:, :time], "trial" => resultdf[:, :trial])
 
@@ -95,10 +95,10 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
       end
     end
 
-    if length(stochmodel["TLproms"][g]) > 0        
+    if length(stochmodel["TLproms"][g]) > 0
       ## Check for each RNA that the different binding sites on the RNA are in equal abundance at each time of the simulation
       rbsabundance = [sum(permutedims(Vector(resultdf[t, map(Symbol, x)]))) for t in 1:size(resultdf)[1], x in stochmodel["TLproms"][g]]
-                  
+
       if !all(mapslices(allequal, rbsabundance, dims = 2))
         error("The abundance of the different binding sites on the RNA "*g*"are not equal.")
       end
@@ -130,7 +130,7 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
           abundancedf[!, Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)] ## Julia 1.2.0 syntax
         else
           abundancedf[Symbol("Pm"*g)] = resultdf[:, Symbol("Pm"*g)] ## Julia 1.1.0 syntax
-        end        
+        end
       end
     end
   end
@@ -141,16 +141,18 @@ function transformSimRes2Abundance(resultdf, genes, stochmodel)
       abundancedf[!, comp] = resultdf[:, comp] ## Julia 1.2.0 syntax
     else
       abundancedf[comp] = resultdf[:, comp] ## Julia 1.1.0 syntax
-    end  
+    end
   end
 
   return abundancedf
 end
 
 
-function juliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes, simtime; modelname = "MySimulation", ntrials = 1, nepochs = -1, simalgorithm = "Direct")
+function juliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes, simtime; modelname = "MySimulation", ntrials = 1, nepochs = -1, simalgorithm = "Direct", seed = nothing)
 
   try
+
+    Random.seed!(seed)
 
     ## If no nepochs provided, record abundance at each time units of the simulation
     if nepochs == -1
@@ -158,14 +160,14 @@ function juliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes,
     end
 
 #     if Pkg.installed()["BioSimulator"] < v"0.9" ## With the older version of BioSimulator
-# 
+#
 #       ## Convert the String name of the simulator to use into a BioSimulator object of type inheriting from Algorithm
 #       if in(simalgorithm, ["Direct", "FirstReaction", "NextReaction", "OptimizedDirect", "TauLeaping", "StepAnticipation"])
 #         simalgorithm = eval(Meta.parse("BioSimulator."*simalgorithm*"()"))
 #       else
 #         error("Specified algorithm is not implemented in module BioSimulator. Must be \"Direct\", \"FirstReaction\", \"NextReaction\", \"OptimizedDirect\", \"TauLeaping\" or \"StepAnticipation\".")
 #       end
-# 
+#
 #       model = createBioSimModel(stochmodel, QTLeffects, InitAbundance, modelname)
 
       #println("JULIA> Running simulation ...")

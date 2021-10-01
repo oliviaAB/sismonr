@@ -37,7 +37,7 @@ Creates an empty in silico system (i.e. no regulatory interactions) given a data
 \code{\link{createMultiOmicNetwork}}).
 }
 \examples{
-\donttest{
+\dontrun{
 mysysargs = insilicosystemargs(G = 5)
 mygenes = createGenes(mysysargs)
 mynetwork = createEmptyMultiOmicNetwork(mygenes)

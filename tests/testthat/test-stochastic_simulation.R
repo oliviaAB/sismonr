@@ -23,7 +23,7 @@ test_that("creation of stochastic system from empty system works", {
   check_julia()
   mysystem = createInSilicoSystem(G = 5, empty = T, PC.p = 1, ploidy = 3)
   stochsys = createStochSystem(mysystem)
-  dictkeys = juliaGet(juliaEval("collect(keys(%s))", stochsys))
+  dictkeys = unlist(juliaGet(juliaEval("collect(keys(%s))", stochsys)))
   species = unlist(juliaGet(juliaEval("%s[\"species\"]", stochsys)))
   reactions = unlist(juliaGet(juliaEval("%s[\"reactions\"]", stochsys)))
 
@@ -36,8 +36,8 @@ test_that("creation of stochastic system from empty system works", {
   expect_equal(juliaEval("length(%s[\"initialconditions\"])", stochsys), length(species))
   expect_equal(juliaEval("length(%s[\"reactionsnames\"])", stochsys), length(reactions))
   expect_equal(juliaEval("length(%s[\"propensities\"])", stochsys), length(reactions))
-  expect_equal(juliaGet(juliaEval("[length(v) for v in values(%s[\"TCproms\"])]", stochsys)), rep(0, 3*5))
-  expect_equal(juliaGet(juliaEval("[length(v) for v in values(%s[\"TLproms\"])]", stochsys)), rep(0, 3*5))
+  expect_equal(unlist(juliaGet(juliaEval("[length(v) for v in values(%s[\"TCproms\"])]", stochsys))), rep(0, 3*5))
+  expect_equal(unlist(juliaGet(juliaEval("[length(v) for v in values(%s[\"TLproms\"])]", stochsys))), rep(0, 3*5))
   expect_equal(length(species), 5*3*2) ## RNA and protein species of each gene in 3 copies (ploidy = 3)
   expect_equal(length(reactions), 5*4*3) ## TC, TL, RD and PD reactions for each of the 3 copies of each gene
   expect_equal(length(speciesNC), 5*3) ## RNA species of each gene in 3 copies (ploidy = 3)

@@ -39,7 +39,7 @@ values are vectors of gene IDs constituting each regulatory complex.
 Creates an in silico system from a data-frame of genes in the system.
 }
 \examples{
-\donttest{
+\dontrun{
 mysysargs = insilicosystemargs(G = 5)
 mygenes = createGenes(mysysargs)
 mynetwork = createMultiOmicNetwork(mygenes, mysysargs)

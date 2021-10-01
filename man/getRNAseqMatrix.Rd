@@ -75,7 +75,7 @@ The latter can be provided by the user (parameter \code{samplesLibSize}); otherw
 each individual is sampled from a Poisson distribution with parameter lambda equal to the corresponding expected count.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, regcomplexes = "none",
                                 ploidy = 2, PC.p = 1)
 mypop = createInSilicoPopulation(10, mysystem)

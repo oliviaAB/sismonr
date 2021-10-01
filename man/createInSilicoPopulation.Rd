@@ -52,7 +52,7 @@ molecule will be sampled from a truncated Normal distribution of mean \code{SSab
 steady state abundance in the absence of any regulation, as specified above. The Normal distribution is truncated to only return positive values.
 }
 \examples{
-\donttest{
+\dontrun{
 ## Creating a first population with 3 diploid individuals,
 ## with 2 variants of each gene segregating in the population
 mysystem = createInSilicoSystem(G = 6, ploidy = 2)

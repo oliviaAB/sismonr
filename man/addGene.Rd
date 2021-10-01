@@ -43,7 +43,7 @@ The modified in silico system.
 Adds a gene in the in silico system with specified parameters if provided, or with parameters sampled according to the system parameters.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5)
 mysystem$genes
 mysystem2 = addGene(mysystem, "PC", "TC", TCrate = 0.0001, TLrate = 0.001)

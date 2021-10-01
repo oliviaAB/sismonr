@@ -13,7 +13,7 @@ removeJuliaEvaluator(ev)
 \code{removeJuliaEvaluator} closes a Julia evaluator from XRJulia package.
 }
 \examples{
-\donttest{
+\dontrun{
 removeJuliaEvaluator(getJuliaEvaluator())
 }
 }

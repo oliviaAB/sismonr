@@ -9,6 +9,15 @@ using Pkg
 # 	Pkg.add("ClobberingReload")
 # end
 
+importExprRD = Meta.parse("import Random");
+try
+	eval(importExprRD)
+	print("Module Random installed.\n")
+catch err
+	print("Installing Julia module Random. This can take a few minutes.\n")
+	Pkg.add("Random")
+end
+
 importExprJS = Meta.parse("import JSON");
 try
 	eval(importExprJS)

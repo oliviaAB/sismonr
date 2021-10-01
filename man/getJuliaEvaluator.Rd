@@ -18,7 +18,7 @@ but if no evaluator exists, creates a new one and loads \code{sismonr} Julia fun
 on it.
 }
 \examples{
-\donttest{
+\dontrun{
 getJuliaEvaluator()
 }
 }

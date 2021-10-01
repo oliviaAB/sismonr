@@ -44,7 +44,7 @@ A list of two elements:
 Creates an in silico regulatory network given a list of regulators and targets.
 }
 \examples{
-\donttest{
+\dontrun{
 ## We want to create a small transcription regulatory network
 ## In this example, genes 1 and 2 are protein-coding regulators (say transcription factors),
 ## gene 3 is a noncoding regulator (say an miRNA), and genes 4-6 are the genes to be regulated

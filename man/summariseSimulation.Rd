@@ -42,7 +42,7 @@ A data-frame giving for each component (rows) and each individual (columns) the 
 Returns a summary data-frame of a simulation giving the maximum average abundance of each component over the different trials and the average abundance of the components at the final time of the simulation, for the selected in silico individuals.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 mypop = createInSilicoPopulation(15, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)

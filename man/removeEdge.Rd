@@ -20,7 +20,7 @@ The modified in silico system.
 Removes an edge in the in silico system between specified genes.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 10)
 mysystem$edg
 ## we'll remove the first edge

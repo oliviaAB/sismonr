@@ -19,7 +19,7 @@ but prevent errors arising from looking for a Julia executable with the "which"/
 is not present.
 }
 \examples{
-\donttest{
-finJuliaNoError(test = T)
+\dontrun{
+findJuliaNoError(test = T)
 }
 }

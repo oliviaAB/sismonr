@@ -30,7 +30,7 @@ Returns the modified in silico system.
 Adds a regulatory complex in the in silico system with specified parameters (if provided), or with parameters sampled according to the system parameters.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1)
 mysystem$complexes ## list of complexes existing in the system
 mysystem2 = addComplex(mysystem, c(1, 2, 3))

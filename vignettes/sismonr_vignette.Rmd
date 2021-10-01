@@ -60,6 +60,7 @@ In order to use `sismonr` we need to load the package. You will notice that ever
 
 ```{r}
 library(sismonr)
+set.seed(15) ## for reproducibility
 ```
 
 ## 1. Creating an *in silico* system

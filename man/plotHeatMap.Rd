@@ -58,7 +58,7 @@ If more than one trial is to be plotted, the mean abundance of each molecule ove
 and the min and max abundances represented as coloured areas around the mean.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, ploidy = 2)
 mypop = createInSilicoPopulation(10, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)

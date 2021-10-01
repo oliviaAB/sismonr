@@ -90,6 +90,10 @@ createGenes = function(sysargs){
   return(genes)
 }
 
+.get_seed = function(){
+  sample(1:1e8, 1)
+}
+
 #' Creates an in silico regulatory network.
 #'
 #' Creates an in silico regulatory network given a list of regulators and targets.
@@ -115,7 +119,7 @@ createGenes = function(sysargs){
 #' \item \code{complexesTargetReaction}: a list defining which expression step the different regulatory complexes target (each element is named with the complex ID, the targeted reaction are given with a reaction ID, e.g. "TC" for transcription).
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## We want to create a small transcription regulatory network
 #' ## In this example, genes 1 and 2 are protein-coding regulators (say transcription factors),
 #' ## gene 3 is a noncoding regulator (say an miRNA), and genes 4-6 are the genes to be regulated
@@ -134,7 +138,7 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
                              regsList[["NC"]], tarsList[["NC"]], sysargs[[paste(reaction, "NC", "indeg.distr", sep = ".")]],
                              sysargs[[paste(reaction, "NC", "outdeg.distr", sep = ".")]], sysargs[[paste(reaction, "NC", "outdeg.exp", sep = ".")]],
                              sysargs[[paste(reaction, "NC", "autoregproba", sep = ".")]], sysargs[[paste(reaction, "NC", "twonodesloop", sep = ".")]],
-                             sysargs[["regcomplexes"]], sysargs[["regcomplexes.size"]], sysargs[["regcomplexes.p"]],
+                             sysargs[["regcomplexes"]], sysargs[["regcomplexes.size"]], sysargs[["regcomplexes.p"]], .get_seed(),
                              evaluator = ev), evaluator = ev)
 
   if(nrow(juliaedg$edg) == 0){
@@ -196,7 +200,7 @@ createRegulatoryNetwork = function(regsList, tarsList, reaction, sysargs, ev = g
 #' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysysargs = insilicosystemargs(G = 5)
 #' mygenes = createGenes(mysysargs)
 #' mynetwork = createMultiOmicNetwork(mygenes, mysysargs)
@@ -411,7 +415,7 @@ createMultiOmicNetwork = function(genes, sysargs, ev = getJuliaEvaluator()){
 #' \item \code{complexesTargetReaction}: a list defining which expression step is targeted by each regulatory complex.
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysysargs = insilicosystemargs(G = 5)
 #' mygenes = createGenes(mysysargs)
 #' mynetwork = createEmptyMultiOmicNetwork(mygenes)
@@ -446,7 +450,7 @@ createEmptyMultiOmicNetwork = function(genes){
 #' \item \code{sysargs}: An object of class \code{insilicosystemargs}; the parameters used to create the system.
 #' }
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## Creates an in silico system composed of 20 genes
 #' mysystem1 = createInSilicoSystem(G = 20)
 #' mysystem1$edg ## see all regulations in the system
@@ -500,7 +504,7 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #' parameter \code{basal_protlifetime_samplingfct} provided in sysargs (see \code{\link{insilicosystemargs}}).
 #' @return The modified in silico system.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 5)
 #' mysystem$genes
 #' mysystem2 = addGene(mysystem, "PC", "TC", TCrate = 0.0001, TLrate = 0.001)
@@ -657,7 +661,7 @@ addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate 
 #' parameter \code{complexesdissociationrate_samplingfct} provided in \code{sysargs} (see \code{\link{insilicosystemargs}}).
 #' @return Returns the modified in silico system.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1)
 #' mysystem$complexes ## list of complexes existing in the system
 #' mysystem2 = addComplex(mysystem, c(1, 2, 3))
@@ -727,7 +731,7 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
 #' @param name Character. The name of the regulatory complex to remove.
 #' @return The modified in silico system.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, regcomplexes.p = 0.8)
 #' mysystem$complexes
 #' mysystem$edg
@@ -788,7 +792,7 @@ removeComplex = function(insilicosystem, name){
 #' }
 #' @return The modified in silico system.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ## creates a system with no regulation
 #' mysystem = createInSilicoSystem(G = 10, PC.p = 1, PC.TC.p = 1, empty = TRUE)
 #' mysystem$edg
@@ -934,7 +938,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
 #' @param tarID Integer or character. The ID of the target gene.
 #' @return The modified in silico system.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10)
 #' mysystem$edg
 #' ## we'll remove the first edge
@@ -988,7 +992,7 @@ removeEdge = function(insilicosystem, regID, tarID){
 #' }
 #' @param showAllVertices Display vertices that don't have any edge? Default is FALSE.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10)
 #' grn = getGRN(mysystem)
 #' grnTC = getGRN(mysystem, edgeType = "TC", showAllVertices = F)
@@ -1092,7 +1096,7 @@ plotGRNlegend = function(verticesColour, edgesColour){
 #'  \code{\link[igraph]{tkplot}}).
 #' @param ... any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10)
 #' plotGRN(mysystem)
 #' plotGRN(mysystem, edgeType = "TC")

@@ -17,7 +17,7 @@ A dataframe in which the abundance of the different allelic versions of the same
 Merge (i.e. sum) the abundance of the different allelic versions of each molecule in the results of a simulation.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 5, empty = TRUE, ploidy = 2)
 mypop = createInSilicoPopulation(1, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100)

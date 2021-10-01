@@ -48,7 +48,7 @@ related to protein or translation) and are represented in gray as NA.
 Plots the QTL effect coefficients for all the genes of a in silico system of the in silico individuals.
 }
 \examples{
-\donttest{
+\dontrun{
 mysystem = createInSilicoSystem(G = 10, ploidy = 2)
 mypop = createInSilicoPopulation(10, mysystem)
 plotMutations(mypop, mysystem)

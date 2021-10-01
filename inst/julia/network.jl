@@ -1,4 +1,5 @@
 using StatsBase
+using Random
 
 ## Test if the file is sourced in a Julia evaluator in R
 function juliatest()
@@ -18,7 +19,7 @@ function sampleexpon(n, lambda, max)
     res = Int64[]
     for nb in rnb
       push!(res, findfirst(x -> x >= nb, cumprob))
-    end 
+    end
     return res
   else
     return [0 for i in 1:n]
@@ -35,7 +36,7 @@ function samplepowerlaw(n, gamma, max)
     res = Int64[]
     for nb in rnb
       push!(res, findfirst(x -> x >= nb, cumprob))
-    end 
+    end
     return res
   else
     return [0 for i in 1:n]
@@ -57,7 +58,7 @@ end
 
 # "Inverse" preferential attachment from Lachgar
 function probaInvPA(nodes, edg)
-  ki = getInDeg(nodes, edg) # in-degree of each node 
+  ki = getInDeg(nodes, edg) # in-degree of each node
   if sum(ki) == 0
     res = fill(1, length(nodes))
   else
@@ -107,15 +108,16 @@ end
 ##Inputs: cf function nwgeneration
 function juliaCreateNetwork(reacname, regPC, tarPC, indegPC, outdegPC, outdexexpPC, autoregprobaPC, twonodesloopPC,
   regNC, tarNC, indegNC, outdegNC, outdexexpNC, autoregprobaNC, twonodesloopNC,
-  regcomplexes, compsize = nothing, compprob = nothing)
+  regcomplexes, compsize = nothing, compprob = nothing, seed = nothing)
 
-  
+  Random.seed!(seed)
+
   edgPC = nwgeneration("PC", regPC, tarPC, indegPC, outdegPC, outdexexpPC, autoregprobaPC, twonodesloopPC)
   edgNC = nwgeneration("NC", regNC, tarNC, indegNC, outdegNC, outdexexpNC, autoregprobaNC, twonodesloopNC)
 
   if regcomplexes == "none"
     edg = vcat(edgPC, edgNC)
-    edg[:,1] = [string(i) for i in edg[:,1]] ## Transform the integer ID of regulators into String ID 
+    edg[:,1] = [string(i) for i in edg[:,1]] ## Transform the integer ID of regulators into String ID
     complexes = Dict()
   end
 
@@ -166,7 +168,7 @@ function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autor
   if outdeg == "exponential"
     foutdeg = getfield(@__MODULE__, Symbol("sampleexpon"))
   elseif outdeg == "powerlaw"
-    foutdeg = getfield(@__MODULE__, Symbol("samplepowerlaw"))  
+    foutdeg = getfield(@__MODULE__, Symbol("samplepowerlaw"))
   else
     error("Argument outdeg non-valid: must be \"exponential\" or \"powerlaw\"")
   end
@@ -207,7 +209,7 @@ function nwgeneration(codingStatus, reg, target, indeg, outdeg, outdegexp, autor
       probTar[exEdg] .= 0
     end
 
-    ## Make sure that the out-degree of regulator r doesn't exceed the number of targets with non-null proba 
+    ## Make sure that the out-degree of regulator r doesn't exceed the number of targets with non-null proba
     out[r] = min(out[r], sum(probTar .> 0))
 
     ## Sample targets of regulator
@@ -237,7 +239,7 @@ end
 ##   - reacname: ID of the type of regulation considered
 
 ## Output:
-##   - edgcomp: a 2D array of edges, 1st column: from, 2nd column: to, 3rd column: regBy 
+##   - edgcomp: a 2D array of edges, 1st column: from, 2nd column: to, 3rd column: regBy
 
 function compreg(edg, compsize, compprob, reacname)
 
@@ -272,7 +274,7 @@ function compreg(edg, compsize, compprob, reacname)
     ## add the new edges corresponding to regulation by complexes
     edg = vcat(edg, edgtoadd)
 
-    edg[:,1] = [string(i) for i in edg[:,1]] ## Transform the integer ID of regulators into String ID 
+    edg[:,1] = [string(i) for i in edg[:,1]] ## Transform the integer ID of regulators into String ID
 
     return Dict("newedg" => edg, "complexes" => complexes)
 end

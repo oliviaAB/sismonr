@@ -8,8 +8,8 @@
 #' path to the Julia executable if it exists.
 #' @return TRUE/FALSE or the path to the Julia executable
 #' @examples
-#' \donttest{
-#' finJuliaNoError(test = T)
+#' \dontrun{
+#' findJuliaNoError(test = T)
 #' }
 #' @export
 findJuliaNoError = function(test = FALSE) {
@@ -53,7 +53,7 @@ findJuliaNoError = function(test = FALSE) {
 #' @param port An integer specifying the port to be used. Default \code{NULL}.
 #' @return A Julia Evaluator from the XRJulia package.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' ev = newJuliaEvaluator()
 #' }
 #' @export
@@ -87,7 +87,7 @@ newJuliaEvaluator <- function(port = NULL) {
 #'
 #' @return A Julia evaluator from \code{XRJulia} package.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' getJuliaEvaluator()
 #' }
 #' @export
@@ -108,7 +108,7 @@ getJuliaEvaluator <- function(){
 #'
 #' @param ev A Julia evaluator from the XRJulia package.
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' removeJuliaEvaluator(getJuliaEvaluator())
 #' }
 #' @export
