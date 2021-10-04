@@ -635,7 +635,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
       ggplot2::geom_text(data = legend_text, aes_string(label = "Names", x = "x", y = "y", angle = "angle", size = "size", hjust = "hjust"), show.legend = F) +
       ggplot2::geom_segment(data = legend_lines, colour = "gray90", aes_string(x = "x", xend = "xend", y = "y", yend = "yend")) +
       ggplot2::scale_colour_manual(values = rowpalette, breaks = names(rowpalette)) +
-      ggplot2::scale_size(range = c(2.5, 3.5), guide = F) +
+      ggplot2::scale_size(range = c(2.5, 3.5), guide = "none") +
       ggplot2::xlim(-1.6, nCompPerRow+1) + ggplot2::ylim(0.45, 4.9) +
       ggplot2::theme_void()
 
