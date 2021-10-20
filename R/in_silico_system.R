@@ -484,6 +484,86 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
   return(value)
 }
 
+
+#' Retrieve genes from in silico system
+#'
+#' Returns a data-frame of the genes and associated properties in the in silico system.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @return A data-frame with the following columns:
+#' \itemize{
+#' \item \code{id}: Integer, ID of the genes;
+#' \item \code{coding}: coding status of the genes (either "PC" for protein-coding or "NC" for noncoding);
+#' \item \code{TargetReaction}: the biological function of the genes ("TC": transcription regulator, "TL": translation regulator, "RD": RNA decay
+#' regulator, "PD": protein decay regulator, "PTM": post-translational modification regulator, "MR": metabolic enzyme).;
+#' \item \code{PTMform}: Does the gene have a PTM form?;
+#' \item \code{Active form}: what is the active form of the gene? "R" for noncoding genes, "P" for protein-coding genes,
+#' "Pm" for protein-coding genes with a PTM form;
+#' \item \code{TCrate}: transcription rate of the genes;
+#' \item \code{TLrate}: translation rate of the genes;
+#' \item \code{RDrate}: RNA decay rate of the genes;
+#' \item \code{PDrate}: Protein decay rate of the genes.
+#' }
+#' @examples
+#' \dontrun{
+#' mysystem = createInSilicoSystem(G = 10)
+#' getGenes(mysystem)
+#' }
+getGenes <- function(insilicosystem){
+  insilicosystem$genes
+}
+
+#' Retrieves regulatory edges from in silico system
+#'
+#' Returns a data-frame of the regulatory edges and associated properties in the in silico system.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @return A data-frame with the following columns:
+#' \itemize{
+#' \item \code{from}: gene ID of the regulator, as a character;
+#' \item \code{to}: gene ID of the target, as an integer;
+#' \item \code{TargetReaction}: the ID of the reaction (as given by \code{reaction});
+#' \item \code{RegSign}: The sign of the reaction ("1" or "-1");
+#' \item \code{RegBy}: Is the regulator a protein-coding gene ("PC"), a noncoding gene ("NC") or a complex ("C")?
+#' }
+#' @examples
+#' \dontrun{
+#' mysystem = createInSilicoSystem(G = 10)
+#' getGenes(mysystem)
+#' }
+getEdges <- function(insilicosystem){
+  insilicosystem$edg
+}
+
+#' Retrieves regulatory complexes from in silico system
+#'
+#' Returns a list of the regulatory complexes and associated properties in the in silico system.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @return A named list, with one element per regulatory complex. Each element is itself a list, with the following components:
+#' \itemize{
+#' \item \code{complexes}: a list of regulatory complexes composition. The names of the elements are the IDs of the complexes, and the
+#' values are vectors of gene IDs constituting each regulatory complex.
+#' \item \code{formationrate}: the formation rate of the complex.
+#' \item \code{dissociationrate}: the dissociation rate of the complex.
+#' }
+#' @examples
+#' \dontrun{
+#' mysystem = createInSilicoSystem(G = 20)
+#' getComplexes(mysystem)
+#' }
+getComplexes <- function(insilicosystem){
+
+  res <- lapply(names(insilicosystem$complexes), function(i){
+    c(list(components = insilicosystem$complexes[[i]]),
+      insilicosystem$complexeskinetics[[i]])
+  })
+
+  names(res) <- names(insilicosystem$complexes)
+
+  return(res)
+}
+
 #' Adds a gene in the in silico system.
 #'
 #' Adds a gene in the in silico system with specified parameters if provided, or with parameters sampled according to the system parameters.
