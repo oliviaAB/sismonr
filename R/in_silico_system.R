@@ -495,8 +495,8 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #' \item \code{id}: Integer, ID of the genes;
 #' \item \code{coding}: coding status of the genes (either "PC" for protein-coding or "NC" for noncoding);
 #' \item \code{TargetReaction}: the biological function of the genes ("TC": transcription regulator, "TL": translation regulator, "RD": RNA decay
-#' regulator, "PD": protein decay regulator, "PTM": post-translational modification regulator, "MR": metabolic enzyme).;
-#' \item \code{PTMform}: Does the gene have a PTM form?;
+#' regulator, "PD": protein decay regulator, "PTM": post-translational modification regulator, "MR": metabolic enzyme);
+#' \item \code{PTMform}: Does the gene have a PTM form?
 #' \item \code{Active form}: what is the active form of the gene? "R" for noncoding genes, "P" for protein-coding genes,
 #' "Pm" for protein-coding genes with a PTM form;
 #' \item \code{TCrate}: transcription rate of the genes;

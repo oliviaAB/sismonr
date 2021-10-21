@@ -68,6 +68,53 @@ createStochSystem = function(insilicosystem, writefile = F, filepath = NULL, fil
   return(juliastochsystem)
 }
 
+
+#' Retrieves the stochastic model for an in silico system
+#'
+#' Returns a data-frame with the list of reactions with associated name and rate in the stochastic model generated from the in silico system. If
+#' an in silico population is provided, the rate of each reaction will be calculated for each in silico individual in the population.
+#'
+#' @param insilicosystem The in silico system to be simulated (see \code{\link{createInSilicoSystem}}).
+#' @param insilicopopulation Optional, the in silico population to be simulated (see \code{\link{createInSilicoPopulation}}).
+#' @return A data-frame, with the following columns:
+#' \itemize{
+#' \item \code{reaction}: the stochastic reaction;
+#' \item \code{reaction_name}: the name of the stochastic reaction;
+#' \item \code{reaction_rate}: the formula to compute the reaction rate, as a character.
+#' }
+#' In addition, if an in silico population is provided, the data-frame will include one column per in silico individual with the rate of the reactions
+#' for the individual.
+#' @examples
+#' \dontrun{
+#' mysystem = createInSilicoSystem(G = 5)
+#' getReactions(mysystem)
+#' }
+getReactions <- function(insilicosystem, insilicopopulation = NULL){
+
+  stochsys <- createStochSystem(insilicosystem)
+  res <- data.frame(reaction = unlist(XRJulia::juliaGet(XRJulia::juliaEval(paste0(stochsys@.Data, "[\"reactions\"]")))),
+                    reaction_name = unlist(XRJulia::juliaGet(XRJulia::juliaEval(paste0(stochsys@.Data, "[\"reactionsnames\"]")))))
+
+  rates <- unlist(XRJulia::juliaGet(XRJulia::juliaEval(paste0(stochsys@.Data, "[\"propensities\"]"))))
+  rates <- stringr::str_replace_all(rates, "\\[", "\\[\\[")
+  rates <- stringr::str_replace_all(rates, "\\]", "\\]\\]")
+
+  res$reaction_rate <- rates
+
+  if(!is.null(insilicopopulation)){
+    inds_name <- names(insilicopopulation$individualsList)
+
+    for(i in inds_name){
+      QTLeffects <- insilicopopulation$individualsList[[i]]$QTLeffects
+      rates_ind <- sapply(rates, function(x){eval(str2expression(x))})
+
+      res[[paste0("rate_", i)]] <- rates_ind
+    }
+  }
+
+  return(res)
+}
+
 #' Calls the Julia simulation function.
 #'
 #' Calls the Julia function for simulating a stochastic system. Should not be used by itself (this function is called by the wrapper functions \link{simulateInSilicoSystem} and \link{simulateParallelInSilicoSystem}).
