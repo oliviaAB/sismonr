@@ -34,7 +34,8 @@ Imports:
     grDevices,
     igraph,
     graphics,
-    scales
+    scales,
+    visNetwork
 SystemRequirements: Julia, v 1.0 or later
 RoxygenNote: 7.1.2
 Suggests: 

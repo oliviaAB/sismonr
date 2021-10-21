@@ -1082,8 +1082,8 @@ removeEdge = function(insilicosystem, regID, tarID){
 getGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F){
 
   ## Create the list of vertices
-  vertices = rbind(data.frame(vertexID = insilicosystem$genes$id, type = rep("Gene", length(insilicosystem$genes$id)), coding = insilicosystem$genes$coding),
-                   data.frame(vertexID = names(insilicosystem$complexes), type = rep("Complex", length(insilicosystem$complexes)), coding = rep("none", length(insilicosystem$complexes))))
+  vertices = rbind(data.frame(vertexID = insilicosystem$genes$id, type = rep("Gene", length(insilicosystem$genes$id)), coding = insilicosystem$genes$coding, targetReaction = insilicosystem$genes$TargetReaction),
+                   data.frame(vertexID = names(insilicosystem$complexes), type = rep("Complex", length(insilicosystem$complexes)), coding = rep("none", length(insilicosystem$complexes)), targetReaction = unlist(insilicosystem$complexesTargetReaction)))
 
   ## Create the list of edges
   if(is.null(edgeType)){
@@ -1239,5 +1239,146 @@ plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotTyp
 }
 
 
+plotGRNinteractive <- function(insilicosystem,
+                               nodes_label = NULL,
+                               nodes_colour = c("TC" = "#FF834A", "TL" = "#579BDB", "RD" = "#FFB746", "PD" = "#7DCCFF", "PTM" = "#4BC095", 'MR' = "#EC99C6"),
+                               wiggly_nodes = TRUE,
+                               edgeType = NULL,
+                               showAllVertices = TRUE){
 
+  ## Checking the input values ----
+  if(class(insilicosystem) != "insilicosystem"){
+    stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  }
+
+  #if(length(nodes_shape) != 3) stop("Argument nodes_shape must be of length 3.")
+  #if(is.null(names(nodes_shape))) names(nodes_shape) <- c("PC", "NC", "Complex")
+  #if(!all(names(nodes_shape) %in% c("PC", "NC", "Complex"))) stop("Argument nodes_shape must have names: 'PC', 'NC', 'Complex'.")
+
+  nodes_shape = c("PC" = "ellipse", "NC" = "diamond", "Complex" = "box")
+
+  if(length(nodes_colour) != 6) stop("Argument nodes_colour must be of length 6.")
+  if(is.null(names(nodes_colour))) names(nodes_colour) <- c("TC", "TL", "RD", "PD", "PTM", "MR")
+  if(!all(names(nodes_colour) %in% c("TC", "TL", "RD", "PD", "PTM", "MR", "Complex"))) stop("Argument nodes_colour must have names: 'TC', 'TL', 'RD', 'PD', 'PTM', 'MR', 'Complex'.")
+
+  network_igraph <- getGRN(insilicosystem, edgeType, showAllVertices)
+  network <- visNetwork::toVisNetworkData(network_igraph, idToLabel = TRUE)
+
+  nodes <- network$nodes %>%
+    dplyr::mutate(coding = case_when(coding == "none" ~ "Complex",
+                                    TRUE ~ coding),
+                  shape = nodes_shape[coding],
+                  color = nodes_colour[targetReaction],
+                  borderWidth = case_when(coding == "Complex" ~ 2,
+                                          TRUE ~ 0))
+
+  if(!is.null(nodes_label)){
+    nodes <- nodes %>%
+      dplyr::mutate(label = case_when(id %in% names(nodes_label) ~ nodes_label[label],
+                                      TRUE ~ label))
+  }
+
+  nodes_label <- nodes$label
+  names(nodes_label) <- nodes$id
+
+  ## Hover information for nodes
+  coding_label <- c("PC" = "Protein-coding gene",
+                    "NC" = "Non-coding gene",
+                    "Complex" = "Regulatory complex")
+  targetReaction_label <- c("TC" = "Transcription regulator",
+                            "TL" = "Translation regulator",
+                            "RD" = "Regulator of RNA decay",
+                            "PD" = "Regulator of protein decay",
+                            "PTM" = "Regulator of post-translational modification",
+                            "MR" = "Not a regulator")
+  complexes_compo <- sapply(insilicosystem$complexes, function(x){
+    paste0(nodes_label[x], collapse = ", ")
+  }, USE.NAMES = TRUE)
+
+  nodes <- nodes %>%
+    mutate(title = paste0(label, " (id: ", id, ")<br>",
+                          coding_label[coding], "<br>",
+                          targetReaction_label[targetReaction]),
+           title = case_when(coding == "Complex" ~ paste0(title, "<br>Composed of: ", complexes_compo[id]),
+                             TRUE ~ title))
+
+  edges <- network$edges %>%
+    dplyr::mutate(arrows = case_when(type == "Regulation" ~ "to",
+                                     type == "Binding" ~ NA_character_),
+                  color = case_when(type == "Binding" ~ "#999999",
+                                    TRUE ~ NA_character_),
+                  dashes = case_when(sign == "1" ~ FALSE,
+                                     sign == "-1" ~ TRUE))
+
+  ## Hover information for edges
+  targetReaction_edge_label <- c("TC" = " the transcription of ",
+                                 "TL" = " the translation of ",
+                                 "RD" = " the RNA decay of ",
+                                 "PD" = " the protein decay of ",
+                                 "PTM" = " transforms (modifies) the proteins of ")
+
+  tars <- c("TC", "TL", "RD", "PD")
+
+  edges <- edges %>%
+    mutate(edge_meaning = case_when(type == "Binding" ~ " is part of complex ",
+                                    (sign == "1") & (targetReaction %in% tars) ~ " activates",
+                                    (sign == "1") & !(targetReaction %in% tars) ~ " ",
+                                    (sign == "-1") & (targetReaction %in% tars) ~ " represses",
+                                    (sign == "-1") & !(targetReaction %in% tars) ~ " un-"),
+           edge_meaning = case_when(type == "Regulation" ~ paste0(edge_meaning, targetReaction_edge_label[targetReaction]),
+                                    TRUE ~ edge_meaning),
+           title = paste0(nodes_label[from], edge_meaning, nodes_label[to]))
+
+
+  ## Making the legend
+
+  ## Nodes legend
+  nodes_legend <- list(
+    list(label = "Protein-coding gene",
+         shape = "ellipse",
+         color = "gray",
+         borderWidth = 0),
+
+    list(label = "Non-coding gene",
+         shape = "diamond",
+         color = "gray",
+         borderWidth = 0),
+
+    list(label = "Regulatory complex",
+         shape = "box",
+         color = "gray",
+         borderWidth = 2),
+
+    list(label = "Transcription regulator",
+         shape = "diamond",
+         color = nodes_colour["TC"],
+         borderWidth = 0),
+
+    list(label = "Translation regulator",
+         shape = "diamond",
+         color = nodes_colour["TL"],
+         borderWidth = 0),
+
+    list(label = "Regulator of RNA decay",
+         shape = "diamond",
+         color = nodes_colour["TL"],
+         borderWidth = 0),
+
+    list(label = "Regulator of protein decay",
+         shape = "diamond",
+         color = nodes_colour["PD"],
+         borderWidth = 0),
+
+    list(label = "Regulator of post-translational modification",
+         shape = "diamond",
+         color = nodes_colour["PTM"],
+         borderWidth = 0)
+  )
+
+  visNetwork::visNetwork(nodes, edges) %>%
+    visNodes(size = 20, physics = wiggly_nodes) %>%
+    #visLegend(addNodes = Reduce(bind_rows, nodes_legend), stepX = 0, stepY = 100, ncol = 4) %>%
+    visOptions(highlightNearest = TRUE) %>%
+    visPhysics(timestep = ifelse(wiggly_nodes, 0.5, 1))
+}
 
