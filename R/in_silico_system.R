@@ -509,6 +509,7 @@ createInSilicoSystem = function(empty = F, ev = getJuliaEvaluator(), ...){
 #' mysystem = createInSilicoSystem(G = 10)
 #' getGenes(mysystem)
 #' }
+#' @export
 getGenes <- function(insilicosystem){
   insilicosystem$genes
 }
@@ -531,6 +532,7 @@ getGenes <- function(insilicosystem){
 #' mysystem = createInSilicoSystem(G = 10)
 #' getGenes(mysystem)
 #' }
+#' @export
 getEdges <- function(insilicosystem){
   insilicosystem$edg
 }
@@ -1178,12 +1180,12 @@ plotGRNlegend = function(verticesColour, edgesColour){
 #' @examples
 #' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10)
-#' plotGRN(mysystem)
-#' plotGRN(mysystem, edgeType = "TC")
-#' plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
+#' plotGRNstatic(mysystem)
+#' plotGRNstatic(mysystem, edgeType = "TC")
+#' plotGRNstatic(mysystem, edgeType = "TC", showAllVertices = T)
 #' }
 #' @export
-plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotType = "2D", ...){
+plotGRNstatic = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotType = "2D", ...){
 
   opar = graphics::par()[c("oma", "fig", "mar")]
   on.exit(graphics::par(opar))
@@ -1215,11 +1217,11 @@ plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotTyp
 
   if(igraph::gorder(network)>0){
     if(plotType == "2D"){
-        # layout(matrix(c(1, 2), ncol = 1), widths = c(1, 1), heights = c(0.8, 0.2))
-        graphics::par(oma = c(7, 0, 0, 0), mar = c(0, 0, 0, 0))
-        igraph::plot.igraph(network, edge.curved = T, vertex.label.color = "black", ...)
-        plotGRNlegend(verticesColour, edgesColour)
-        # graphics::par(oma = c(0, 0, 0, 0))
+      # layout(matrix(c(1, 2), ncol = 1), widths = c(1, 1), heights = c(0.8, 0.2))
+      graphics::par(oma = c(7, 0, 0, 0), mar = c(0, 0, 0, 0))
+      igraph::plot.igraph(network, edge.curved = T, vertex.label.color = "black", ...)
+      plotGRNlegend(verticesColour, edgesColour)
+      # graphics::par(oma = c(0, 0, 0, 0))
     }else if(plotType == "interactive2D"){
       # requireNamespace("tcltk", quietly = TRUE)
       if(igraph::gorder(network) >= 500) warning("Too many vertices for an interactive plot - we recommand using plotType = \"2D\".")
@@ -1239,12 +1241,47 @@ plotGRN = function(insilicosystem, edgeType = NULL, showAllVertices = F, plotTyp
 }
 
 
-plotGRNinteractive <- function(insilicosystem,
-                               nodes_label = NULL,
-                               nodes_colour = c("TC" = "#FF834A", "TL" = "#579BDB", "RD" = "#FFB746", "PD" = "#7DCCFF", "PTM" = "#4BC095", 'MR' = "#EC99C6"),
-                               wiggly_nodes = TRUE,
-                               edgeType = NULL,
-                               showAllVertices = TRUE){
+#' Plots the GRN of the in silico system.
+#'
+#' Plots the gene regulatory network of the insilico system as an interactive html graph, with information about the genes and
+#' regulatory relationships displayed on hover. Produces a \code{\link[visNetwork]{visNetwork}} plot.
+#'
+#' @param insilicosystem The in silico system (see \code{\link{createInSilicoSystem}}).
+#' @param nodes_label Named character vector; each element is the label to display for a node in the GRN. For a gene, the name
+#' of the vector element should be the gene ID, e.g. c("1" = "Gene 1"). For a regulatory complex, the name of the vector element should
+#' be the complex ID, e.g. c("CTC1" = "Regulatory complex 1"). Can be provided for only a subset of the nodes. For the nodes for which
+#' a label is not provided, their ID will be displayed instead.
+#' @param nodes_colour Named character vector; colours to be used for each possible biological function of the genes and regulatory complexes.
+#' Must be of length 6, with names: 'TC', 'TL', 'RD', 'PD', 'PTM', 'MR'.
+#' @param wiggly_nodes Boolean. Should the nodes be "wiggly" (i.e. should the physics be enabled for the nodes in the graph)? Default value
+#' is FALSE.
+#' @param edgeType The type of interactions to plot. If NULL (default value), all the interactions are plotted. Otherwise, can be either:
+#' \itemize{
+#' \item "TC": plot only regulation of transcription;
+#' \item "TL": plot only regulation of translation;
+#' \item "RD": plot only regulation of RNA decay;
+#' \item "PD": plot only regulation of protein decay;
+#' \item "PTM": plot only regulation of protein post-translational modification;
+#' \item "RegComplexes": plot only binding interactions, i.e. linking the regulatory complexes to their components.
+#' }
+#' @param showAllVertices Display vertices (nodes) that don't have any edge? Default is FALSE.
+#' @param show_legend Boolean, should a legend be displayed? Default value is TRUE.
+#' @examples
+#' \dontrun{
+#' mysystem = createInSilicoSystem(G = 10)
+#' plotGRN(mysystem)
+#' plotGRN(mysystem, wiggly_nodes = TRUE)
+#' plotGRN(mysystem, edgeType = "TC")
+#' plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
+#' }
+#' @export
+plotGRN <- function(insilicosystem,
+                    nodes_label = NULL,
+                    nodes_colour = c("TC" = "#FF834A", "TL" = "#579BDB", "RD" = "#FFB746", "PD" = "#7DCCFF", "PTM" = "#4BC095", 'MR' = "#EC99C6"),
+                    wiggly_nodes = FALSE,
+                    edgeType = NULL,
+                    showAllVertices = TRUE,
+                    show_legend = TRUE){
 
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
@@ -1259,23 +1296,24 @@ plotGRNinteractive <- function(insilicosystem,
 
   if(length(nodes_colour) != 6) stop("Argument nodes_colour must be of length 6.")
   if(is.null(names(nodes_colour))) names(nodes_colour) <- c("TC", "TL", "RD", "PD", "PTM", "MR")
-  if(!all(names(nodes_colour) %in% c("TC", "TL", "RD", "PD", "PTM", "MR", "Complex"))) stop("Argument nodes_colour must have names: 'TC', 'TL', 'RD', 'PD', 'PTM', 'MR', 'Complex'.")
+  if(!all(names(nodes_colour) %in% c("TC", "TL", "RD", "PD", "PTM", "MR"))) stop("Argument nodes_colour must have names: 'TC', 'TL', 'RD', 'PD', 'PTM', 'MR'.")
 
   network_igraph <- getGRN(insilicosystem, edgeType, showAllVertices)
   network <- visNetwork::toVisNetworkData(network_igraph, idToLabel = TRUE)
 
   nodes <- network$nodes %>%
-    dplyr::mutate(coding = case_when(coding == "none" ~ "Complex",
-                                    TRUE ~ coding),
-                  shape = nodes_shape[coding],
-                  color = nodes_colour[targetReaction],
-                  borderWidth = case_when(coding == "Complex" ~ 2,
-                                          TRUE ~ 0))
+    dplyr::mutate(coding = case_when(!!sym("coding") == "none" ~ "Complex",
+                                     TRUE ~ !!sym("coding")),
+                  shape = nodes_shape[!!sym("coding")],
+                  color = nodes_colour[!!sym("targetReaction")],
+                  borderWidth = case_when(!!sym("coding") == "Complex" ~ 2,
+                                          TRUE ~ 0),
+                  group = "1")
 
   if(!is.null(nodes_label)){
     nodes <- nodes %>%
-      dplyr::mutate(label = case_when(id %in% names(nodes_label) ~ nodes_label[label],
-                                      TRUE ~ label))
+      dplyr::mutate(label = case_when(!!sym("id") %in% names(nodes_label) ~ nodes_label[!!sym("label")],
+                                      TRUE ~ !!sym("label")))
   }
 
   nodes_label <- nodes$label
@@ -1296,19 +1334,19 @@ plotGRNinteractive <- function(insilicosystem,
   }, USE.NAMES = TRUE)
 
   nodes <- nodes %>%
-    mutate(title = paste0(label, " (id: ", id, ")<br>",
-                          coding_label[coding], "<br>",
-                          targetReaction_label[targetReaction]),
-           title = case_when(coding == "Complex" ~ paste0(title, "<br>Composed of: ", complexes_compo[id]),
-                             TRUE ~ title))
+    dplyr::mutate(title = paste0(!!sym("label"), " (id: ", !!sym("id"), ")<br>",
+                                 coding_label[!!sym("coding")], "<br>",
+                                 targetReaction_label[!!sym("targetReaction")]),
+                  title = case_when(!!sym("coding") == "Complex" ~ paste0(!!sym("title"), "<br>Composed of: ", complexes_compo[!!sym("id")]),
+                                    TRUE ~ !!sym("title")))
 
   edges <- network$edges %>%
-    dplyr::mutate(arrows = case_when(type == "Regulation" ~ "to",
-                                     type == "Binding" ~ NA_character_),
-                  color = case_when(type == "Binding" ~ "#999999",
+    dplyr::mutate(arrows = case_when(!!sym("type") == "Regulation" ~ "to",
+                                     !!sym("type") == "Binding" ~ NA_character_),
+                  color = case_when(!!sym("type") == "Binding" ~ "#999999",
                                     TRUE ~ NA_character_),
-                  dashes = case_when(sign == "1" ~ FALSE,
-                                     sign == "-1" ~ TRUE))
+                  dashes = case_when(!!sym("sign") == "1" ~ FALSE,
+                                     !!sym("sign") == "-1" ~ TRUE))
 
   ## Hover information for edges
   targetReaction_edge_label <- c("TC" = " the transcription of ",
@@ -1320,65 +1358,105 @@ plotGRNinteractive <- function(insilicosystem,
   tars <- c("TC", "TL", "RD", "PD")
 
   edges <- edges %>%
-    mutate(edge_meaning = case_when(type == "Binding" ~ " is part of complex ",
-                                    (sign == "1") & (targetReaction %in% tars) ~ " activates",
-                                    (sign == "1") & !(targetReaction %in% tars) ~ " ",
-                                    (sign == "-1") & (targetReaction %in% tars) ~ " represses",
-                                    (sign == "-1") & !(targetReaction %in% tars) ~ " un-"),
-           edge_meaning = case_when(type == "Regulation" ~ paste0(edge_meaning, targetReaction_edge_label[targetReaction]),
-                                    TRUE ~ edge_meaning),
-           title = paste0(nodes_label[from], edge_meaning, nodes_label[to]))
+    dplyr::mutate(edge_meaning = case_when(!!sym("type") == "Binding" ~ " is part of complex ",
+                                           (!!sym("sign") == "1") & (!!sym("targetReaction") %in% tars) ~ " activates",
+                                           (!!sym("sign") == "1") & !(!!sym("targetReaction") %in% tars) ~ " ",
+                                           (!!sym("sign") == "-1") & (!!sym("targetReaction") %in% tars) ~ " represses",
+                                           (!!sym("sign") == "-1") & !(!!sym("targetReaction") %in% tars) ~ " un-"),
+                  edge_meaning = case_when(type == "Regulation" ~ paste0(!!sym("edge_meaning"), targetReaction_edge_label[!!sym("targetReaction")]),
+                                           TRUE ~ !!sym("edge_meaning")),
+                  title = paste0(nodes_label[!!sym("from")], !!sym("edge_meaning"), nodes_label[!!sym("to")]))
+
+
+  ## Creating the graph
+
+  grn_plot <- visNetwork::visNetwork(nodes, edges)
+
+  if(nrow(nodes) > 150){
+    grn_plot <- grn_plot %>%
+      visNetwork::visIgraphLayout(randomSeed = 123)
+  } else{
+    grn_plot <- grn_plot  %>%
+      visNetwork::visLayout(improvedLayout = TRUE,
+                            randomSeed = 123)
+  }
+
+  grn_plot <- grn_plot %>%
+    visNetwork::visNodes(size = 20, physics = wiggly_nodes) %>%
+    visNetwork::visOptions(highlightNearest = TRUE) %>%
+    visNetwork::visPhysics(timestep = ifelse(wiggly_nodes, 0.5, 1))
 
 
   ## Making the legend
 
-  ## Nodes legend
-  nodes_legend <- list(
-    list(label = "Protein-coding gene",
-         shape = "ellipse",
-         color = "gray",
-         borderWidth = 0),
+  if(show_legend){
+    ## Nodes legend
+    nodes_legend <- list(
+      list(label = "Protein-coding gene",
+           shape = "ellipse",
+           color = "#F2F2F2",
+           borderWidth = 0),
 
-    list(label = "Non-coding gene",
-         shape = "diamond",
-         color = "gray",
-         borderWidth = 0),
+      list(label = "Non-coding gene",
+           shape = "diamond",
+           color = "#F2F2F2",
+           borderWidth = 0),
 
-    list(label = "Regulatory complex",
-         shape = "box",
-         color = "gray",
-         borderWidth = 2),
+      list(label = "Regulatory complex",
+           shape = "box",
+           color = "#F2F2F2",
+           borderWidth = 2),
 
-    list(label = "Transcription regulator",
-         shape = "diamond",
-         color = nodes_colour["TC"],
-         borderWidth = 0),
+      list(label = "Transcription regulator",
+           shape = "diamond",
+           color = nodes_colour["TC"],
+           borderWidth = 0),
 
-    list(label = "Translation regulator",
-         shape = "diamond",
-         color = nodes_colour["TL"],
-         borderWidth = 0),
+      list(label = "Translation regulator",
+           shape = "diamond",
+           color = nodes_colour["TL"],
+           borderWidth = 0),
 
-    list(label = "Regulator of RNA decay",
-         shape = "diamond",
-         color = nodes_colour["TL"],
-         borderWidth = 0),
+      list(label = "Regulator of RNA decay",
+           shape = "diamond",
+           color = nodes_colour["RD"],
+           borderWidth = 0),
 
-    list(label = "Regulator of protein decay",
-         shape = "diamond",
-         color = nodes_colour["PD"],
-         borderWidth = 0),
+      list(label = "Regulator of protein decay",
+           shape = "diamond",
+           color = nodes_colour["PD"],
+           borderWidth = 0),
 
-    list(label = "Regulator of post-translational modification",
-         shape = "diamond",
-         color = nodes_colour["PTM"],
-         borderWidth = 0)
-  )
+      list(label = "Regulator of post-\ntranslational modification",
+           shape = "diamond",
+           color = nodes_colour["PTM"],
+           borderWidth = 0)
+    )
 
-  visNetwork::visNetwork(nodes, edges) %>%
-    visNodes(size = 20, physics = wiggly_nodes) %>%
-    #visLegend(addNodes = Reduce(bind_rows, nodes_legend), stepX = 0, stepY = 100, ncol = 4) %>%
-    visOptions(highlightNearest = TRUE) %>%
-    visPhysics(timestep = ifelse(wiggly_nodes, 0.5, 1))
+    ## Edges legend
+    edges_legend = list(
+      list(label = "\n\nActivation",
+           color = "black",
+           arrows = "to"
+      ),
+
+      list(label = "\n\nRepression",
+           color = "black",
+           arrows = "to",
+           dashes = TRUE
+      ),
+
+      list(label = "\n\n Part of complex",
+           color = "#999999")
+    )
+
+    grn_plot <- grn_plot %>%
+      visNetwork::visLegend(addNodes = Reduce(bind_rows, nodes_legend),
+                            addEdges = Reduce(bind_rows, edges_legend),
+                            stepY = 80,
+                            useGroups = FALSE)
+  }
+
+  return(grn_plot)
 }
 

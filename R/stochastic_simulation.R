@@ -89,6 +89,7 @@ createStochSystem = function(insilicosystem, writefile = F, filepath = NULL, fil
 #' mysystem = createInSilicoSystem(G = 5)
 #' getReactions(mysystem)
 #' }
+#' @export
 getReactions <- function(insilicosystem, insilicopopulation = NULL){
 
   stochsys <- createStochSystem(insilicosystem)

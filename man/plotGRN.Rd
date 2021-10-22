@@ -6,40 +6,52 @@
 \usage{
 plotGRN(
   insilicosystem,
+  nodes_label = NULL,
+  nodes_colour = c(TC = "#FF834A", TL = "#579BDB", RD = "#FFB746", PD = "#7DCCFF", PTM
+    = "#4BC095", MR = "#EC99C6"),
+  wiggly_nodes = FALSE,
   edgeType = NULL,
-  showAllVertices = F,
-  plotType = "2D",
-  ...
+  showAllVertices = TRUE,
+  show_legend = TRUE
 )
 }
 \arguments{
 \item{insilicosystem}{The in silico system (see \code{\link{createInSilicoSystem}}).}
 
+\item{nodes_label}{Named character vector; each element is the label to display for a node in the GRN. For a gene, the name
+of the vector element should be the gene ID, e.g. c("1" = "Gene 1"). For a regulatory complex, the name of the vector element should
+be the complex ID, e.g. c("CTC1" = "Regulatory complex 1"). Can be provided for only a subset of the nodes. For the nodes for which
+a label is not provided, their ID will be displayed instead.}
+
+\item{nodes_colour}{Named character vector; colours to be used for each possible biological function of the genes and regulatory complexes.
+Must be of length 6, with names: 'TC', 'TL', 'RD', 'PD', 'PTM', 'MR'.}
+
+\item{wiggly_nodes}{Boolean. Should the nodes be "wiggly" (i.e. should the physics be enabled for the nodes in the graph)? Default value
+is FALSE.}
+
 \item{edgeType}{The type of interactions to plot. If NULL (default value), all the interactions are plotted. Otherwise, can be either:
 \itemize{
-\item "TC": plot only regulation of transcription
-\item "TL": plot only regulation of translation
-\item "RD": plot only regulation of RNA decay
-\item "PD": plot only regulation of protein decay
-\item "PTM": plot only regulation of protein post-translational modification
+\item "TC": plot only regulation of transcription;
+\item "TL": plot only regulation of translation;
+\item "RD": plot only regulation of RNA decay;
+\item "PD": plot only regulation of protein decay;
+\item "PTM": plot only regulation of protein post-translational modification;
 \item "RegComplexes": plot only binding interactions, i.e. linking the regulatory complexes to their components.
 }}
 
-\item{showAllVertices}{Display vertices that don't have any edge? Default is FALSE}
+\item{showAllVertices}{Display vertices (nodes) that don't have any edge? Default is FALSE.}
 
-\item{plotType}{The type of plot function to use for the network: can be either
-"2D" (default, use the function \code{\link[igraph]{plot.igraph}}) or "interactive2D" (use the function
- \code{\link[igraph]{tkplot}}).}
-
-\item{...}{any other arguments to be passed to the plot function, see \code{\link[igraph]{igraph.plotting}}.}
+\item{show_legend}{Boolean, should a legend be displayed? Default value is TRUE.}
 }
 \description{
-Plots the gene regulatory network of the insilico system, including all types of regulation or only those defined by the user.
+Plots the gene regulatory network of the insilico system as an interactive html graph, with information about the genes and
+regulatory relationships displayed on hover. Produces a \code{\link[visNetwork]{visNetwork}} plot.
 }
 \examples{
 \dontrun{
 mysystem = createInSilicoSystem(G = 10)
 plotGRN(mysystem)
+plotGRN(mysystem, wiggly_nodes = TRUE)
 plotGRN(mysystem, edgeType = "TC")
 plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
 }
