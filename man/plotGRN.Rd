@@ -12,7 +12,9 @@ plotGRN(
   wiggly_nodes = FALSE,
   edgeType = NULL,
   showAllVertices = TRUE,
-  show_legend = TRUE
+  show_legend = TRUE,
+  width = NULL,
+  height = NULL
 )
 }
 \arguments{
@@ -42,6 +44,13 @@ is FALSE.}
 \item{showAllVertices}{Display vertices (nodes) that don't have any edge? Default is FALSE.}
 
 \item{show_legend}{Boolean, should a legend be displayed? Default value is TRUE.}
+
+\item{width}{See \code{\link[visNetwork]{visNetwork}}.}
+
+\item{heigth}{See \code{\link[visNetwork]{visNetwork}}.}
+}
+\value{
+A \code{\link[visNetwork]{visNetwork}} plot.
 }
 \description{
 Plots the gene regulatory network of the insilico system as an interactive html graph, with information about the genes and
@@ -54,5 +63,11 @@ plotGRN(mysystem)
 plotGRN(mysystem, wiggly_nodes = TRUE)
 plotGRN(mysystem, edgeType = "TC")
 plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
+
+## Save the interactive plot as an HTML file
+visNetwork::visSave(plotGRN(mysystem), file = "GRN_plot.html")
+
+## Save a static version of the plot
+visNetwork::visExport()
 }
 }

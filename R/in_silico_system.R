@@ -1266,6 +1266,9 @@ plotGRNstatic = function(insilicosystem, edgeType = NULL, showAllVertices = F, p
 #' }
 #' @param showAllVertices Display vertices (nodes) that don't have any edge? Default is FALSE.
 #' @param show_legend Boolean, should a legend be displayed? Default value is TRUE.
+#' @param width See \code{\link[visNetwork]{visNetwork}}.
+#' @param height See \code{\link[visNetwork]{visNetwork}}.
+#' @return A \code{\link[visNetwork]{visNetwork}} plot.
 #' @examples
 #' \dontrun{
 #' mysystem = createInSilicoSystem(G = 10)
@@ -1273,6 +1276,12 @@ plotGRNstatic = function(insilicosystem, edgeType = NULL, showAllVertices = F, p
 #' plotGRN(mysystem, wiggly_nodes = TRUE)
 #' plotGRN(mysystem, edgeType = "TC")
 #' plotGRN(mysystem, edgeType = "TC", showAllVertices = T)
+#'
+#' ## Save the interactive plot as an HTML file
+#' visNetwork::visSave(plotGRN(mysystem), file = "GRN_plot.html")
+#'
+#' ## Save a static version of the plot
+#' visNetwork::visExport()
 #' }
 #' @export
 plotGRN <- function(insilicosystem,
@@ -1281,7 +1290,9 @@ plotGRN <- function(insilicosystem,
                     wiggly_nodes = FALSE,
                     edgeType = NULL,
                     showAllVertices = TRUE,
-                    show_legend = TRUE){
+                    show_legend = TRUE,
+                    width = NULL,
+                    height = NULL){
 
   ## Checking the input values ----
   if(class(insilicosystem) != "insilicosystem"){
@@ -1370,7 +1381,7 @@ plotGRN <- function(insilicosystem,
 
   ## Creating the graph
 
-  grn_plot <- visNetwork::visNetwork(nodes, edges)
+  grn_plot <- visNetwork::visNetwork(nodes, edges, width = width, height = height)
 
   if(nrow(nodes) > 150){
     grn_plot <- grn_plot %>%
@@ -1454,7 +1465,8 @@ plotGRN <- function(insilicosystem,
       visNetwork::visLegend(addNodes = Reduce(bind_rows, nodes_legend),
                             addEdges = Reduce(bind_rows, edges_legend),
                             stepY = 80,
-                            useGroups = FALSE)
+                            useGroups = FALSE,
+                            main = "Legend")
   }
 
   return(grn_plot)
