@@ -47,7 +47,7 @@ is FALSE.}
 
 \item{width}{See \code{\link[visNetwork]{visNetwork}}.}
 
-\item{heigth}{See \code{\link[visNetwork]{visNetwork}}.}
+\item{height}{See \code{\link[visNetwork]{visNetwork}}.}
 }
 \value{
 A \code{\link[visNetwork]{visNetwork}} plot.

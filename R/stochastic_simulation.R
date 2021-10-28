@@ -418,6 +418,7 @@ mergeAlleleAbundance = function(df){
   mergeddf = df %>% select(!!sym("time"), !!sym("trial"), !!sym("Ind"))
   molsGCN = colnames(df)
   mols = stringr::str_replace_all(molsGCN, "GCN[[:digit:]]+", "")
+  mols = stringr::str_remove(mols, "_.+")
 
   for(m in setdiff(unique(mols), c("time", "trial", "Ind"))){
     mergeddf[[m]] = sumColAbundance(df,which(mols == m))
@@ -515,6 +516,95 @@ chooseColourPalette = function(toplot, mergeAllele){
   return(palette)
 }
 
+checkColourPalette = function(toplot, colours, mergeAllele){
+  compo_id = stringr::str_remove(unique(toplot$Components), "(GCN\\d+)|(_.+)")
+  compo_id = unique(compo_id)
+
+  if(length(colours) != length(compo_id)) stop("Number of colours must match number of components in the system. There are ", length(compo_id), " in the system: '", paste0(compo_id, collapse = "', '"), "'.")
+  if(is.null(names(colours))) stop("Parameter 'colours' should be a named vector. Components ID (to use as names for the 'colours' parameter) are: '", paste0(compo_id, collapse = "', '"), "'.")
+
+  wrong_id = setdiff(names(colours), compo_id)
+  if(length(wrong_id)) stop("The following names in 'colours' parameter do not match any component ID: '", paste0(wrong_id, collapse = "', '"), "'.\n Component IDs are: '", paste0(compo_id, collapse = "', '"), "'.")
+
+  palette = colours
+
+  if(!mergeAllele){
+    ## we need to see how many different components exist in the system and how many allelic version of each exist
+    compocols = data.frame(Components = unique(toplot$Components)) %>%
+      mutate("isComplex" = stringr::str_detect(.data$Components, "^C")) %>%
+      mutate("compoID" = stringr::str_replace_all(.data$Components, "GCN.+|_.+", ""),
+             "Allele" = stringr::str_replace(.data$Components, "^[[:digit:]]+(?=GCN)|^[^_]+_{1}", "")) %>%
+      dplyr::arrange(.data$compoID, .data$Allele)
+
+    paletteCompo = colours
+
+    palette = unlist(lapply(names(paletteCompo), function(x){ ## create a gradient (one colour for each allelic version of the component)
+      nall = sum(compocols$compoID == x)
+      return(rev(grDevices::colorRampPalette(c("#FFFFFF", paletteCompo[x]))(nall+1)[-1]))
+    }))
+    names(palette) = sort(compocols$Components)
+  }
+
+  return(palette)
+}
+
+
+checkLabels = function(toplot, labels, mergeAllele, mergePTM){
+  ## Checking the molecules labels
+  if(is.null(labels)){
+    labels = unique(toplot$Components)
+    names(labels) = unique(toplot$Components)
+  } else{
+    if(!mergeAllele){
+      compo_id = stringr::str_remove(unique(toplot$Components), "(GCN\\d+)|(_.+)")
+      compo_id = unique(compo_id)
+    } else {
+      compo_id = unique(toplot$Components)
+    }
+
+    if(length(labels) > length(compo_id)) stop("More labels than components in the system. There are ", length(compo_id), " in the system: '", paste0(compo_id, collapse = "', '"), "'.")
+
+    if(is.null(names(labels))) stop("Parameter 'labels' should be a named vector. Components ID (to use as names for the 'labels' parameter) are: '", paste0(compo_id, collapse = "', '"), "'.")
+
+    wrong_id = setdiff(names(labels), compo_id)
+    if(length(wrong_id)) warning("The following names in 'labels' parameter do not match any component ID and will be ignored: '", paste0(wrong_id, collapse = "', '"), "'.")
+    labels = labels[!(names(labels) %in% wrong_id)]
+
+    if(!mergePTM){
+      ptm_compo = compo_id[stringr::str_detect(compo_id, "^PTM")]
+
+      temp = sapply(setdiff(ptm_compo, names(labels)), function(j){
+        j_id = stringr::str_remove(j, "PTM")
+        ifelse(j_id %in% names(labels), paste0(labels[j_id], " (PTM)"), paste0(j_id, " (PTM)"))
+      })
+
+      if(length(temp)) labels = c(labels, temp)
+    }
+
+    ## For components with no label specified, their label will be their ID
+    no_label = setdiff(compo_id, names(labels))
+    labels[no_label] = no_label
+
+    if(!mergeAllele){
+      compo_id_allele = unique(toplot$Components)
+      compo_id_no_allele = stringr::str_remove(compo_id_allele, "(GCN\\d+)|(_.+)")
+
+      labels_allele = sapply(1:length(compo_id_allele), function(j){
+        allele_suffix = stringr::str_extract(compo_id_allele[j], "(GCN\\d+)|(_.+)")
+        allele_suffix = stringr::str_remove(allele_suffix, "_") ## remove first _
+        allele_suffix = stringr::str_replace_all(allele_suffix, "_", ", ")
+        paste0(labels[compo_id_no_allele[j]], "\n", allele_suffix)
+      })
+
+      names(labels_allele) = compo_id_allele
+      labels = labels_allele
+    }
+  }
+
+  return(labels)
+}
+
+
 plotBase = function(toplot, palette, multitrials, yLogScale, ...){
   if(multitrials){
     simuplot = ggplot2::ggplot(toplot, aes_string(x = "time")) +
@@ -607,7 +697,7 @@ sortComponents = function(componames){
   return(sorted)
 }
 
-plotLegendComponents = function(palette, nCompPerRow = 10, components){
+plotLegendComponents = function(labels, palette, nCompPerRow = 10, components){
 
   sortedComp = sortComponents(names(palette))
   sortedComp = cbind(sortedComp, data.frame("isPC" = sapply(sortedComp$Components, function(x){
@@ -663,7 +753,7 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
                                      "x" = (1:nbc) + nbg,
                                      "y" = rep(3, nbc)))
 
-    legend_text =  rbind(data.frame("Names" = names(rowpalette),
+    legend_text =  rbind(data.frame("Names" = labels[names(rowpalette)],
                                     "x" = 1:(nbg+nbc),
                                     "y" = 4.1,
                                     "angle" = 0,
@@ -707,6 +797,10 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #' @param trials A vector of trials ID (= number) to use for the plot (see details).
 #' @param timeMin Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.
 #' @param timeMax Numeric. The maximum simulation time to plot. Default value set to the maximum time in the simulation.
+#' @param labels Named character vector. Gives the label of each component, to be used in the legend. The names of the vector must match the component IDs.
+#' If no label provided for a component, its ID will be used instead.
+#' @param colours Named character vector. Gives the colour to be used for each component. Size must match the number of components in the system
+#' (ignoring alleles if ploidy > 1), and names of the vector must match the components ID.
 #' @param mergeAllele Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}
 #' @param mergePTM Are the modified and non-modified versions of the proteins merged? Default TRUE. Also see \code{\link{mergePTMAbundance}}
 #' @param mergeComplexes Are the free and in complex gene products merged? Default FALSE. Also see \code{\link{mergeComplexesAbundance}}
@@ -721,14 +815,30 @@ plotLegendComponents = function(palette, nCompPerRow = 10, components){
 #' mypop = createInSilicoPopulation(15, mysystem)
 #' sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 #' plotSimulation(sim$Simulation,
-#'  c(1, 2, 3),
-#'  c("Ind1", "Ind2", "Ind3", "Ind4"),
+#'  molecules = c(1, 2, 3),
+#'  inds = c("Ind1", "Ind2", "Ind3", "Ind4"),
+#'  labels = c("1" = "Gene A", "2" = "Gene B", "3" = "Gene C"),
+#'  colours = c("1" = "blue", "2" = "green", "3" = "purple"),
 #'  axis.title = element_text(color = "red"))
 #' }
 #' @export
-plotSimulation = function(simdf, molecules = NULL, inds = unique(simdf$Ind), trials = unique(simdf$trial), timeMin = min(simdf$time), timeMax = max(simdf$time), mergeAllele = T, mergePTM = T, mergeComplexes = F, yLogScale  = T, nIndPerRow = 3, nCompPerRow = 10, ...){
+plotSimulation = function(simdf,
+                          molecules = NULL,
+                          inds = unique(simdf$Ind),
+                          trials = unique(simdf$trial),
+                          timeMin = min(simdf$time),
+                          timeMax = max(simdf$time),
+                          labels = NULL,
+                          colours = NULL,
+                          mergeAllele = T,
+                          mergePTM = T,
+                          mergeComplexes = F,
+                          yLogScale  = T,
+                          nIndPerRow = 3,
+                          nCompPerRow = 10, ...){
 
-  ## Select the requested inviduals (in principle we could only do this later but this avoids transforming the whole dataset
+
+  ## Select the requested individuals (in principle we could only do this later but this avoids transforming the whole dataset
   ## if we want to plot only a couple of individuals)
   simind = simdf %>% dplyr::filter(!!sym("Ind") %in% inds) %>%
                      dplyr::filter(!!sym("trial") %in% trials) %>%
@@ -743,7 +853,9 @@ plotSimulation = function(simdf, molecules = NULL, inds = unique(simdf$Ind), tri
 
   ## First transformation into a long tibble
   toplot = simind %>%
-    tidyr::gather(key = "ID", value = "Abundance", setdiff(names(simind), c("time", "trial", "Ind"))) %>%
+    tidyr::pivot_longer(cols = setdiff(names(simind), c("time", "trial", "Ind")),
+                        names_to = "ID",
+                        values_to = "Abundance") %>%
     mutate("Type" = case_when(stringr::str_detect(.data$ID, "^R") ~ "RNAs",
                             stringr::str_detect(.data$ID, "^P") ~ "Proteins",
                             stringr::str_detect(.data$ID, "^C") ~ "Complexes"),
@@ -769,7 +881,12 @@ plotSimulation = function(simdf, molecules = NULL, inds = unique(simdf$Ind), tri
       dplyr::summarise("mean" = mean(!!sym("Abundance")), "LB" = min(!!sym("Abundance")), "UB" = max(!!sym("Abundance")))
   }
 
-  palette = chooseColourPalette(toplot, mergeAllele)
+  if(is.null(colours)){
+    palette = chooseColourPalette(toplot, mergeAllele)
+  } else {
+    palette = checkColourPalette(toplot, colours, mergeAllele)
+  }
+
 
   # ## How many rows of plot given the nb of inds to plot and nb of inds per row
   # nbrows = c(rep(nIndsPerRow, length(inds) %/% nIndsPerRow), length(inds) %% nIndsPerRow)
@@ -783,6 +900,8 @@ plotSimulation = function(simdf, molecules = NULL, inds = unique(simdf$Ind), tri
   #   firstindex = firstindex + nbrows[i]
   # }
 
+  labels = checkLabels(toplot, labels, mergeAllele, mergePTM)
+
   ## Create a plot for each individual
   plots = vector("list", length = length(inds))
   for(i in 1:length(inds)){
@@ -795,7 +914,7 @@ plotSimulation = function(simdf, molecules = NULL, inds = unique(simdf$Ind), tri
   simuplot = ggpubr::ggarrange(plotlist = plots, nrow = nbrows, ncol = min(nIndPerRow, length(inds)), common.legend = T, heights = rep(1, length(plots)), legend = "none")
 
   ## add the legend
-  legendplots = plotLegendComponents(palette, nCompPerRow, unique(toplot$ID))
+  legendplots = plotLegendComponents(labels, palette, nCompPerRow, unique(toplot$ID))
   finalplot = ggpubr::ggarrange(simuplot, plotlist = legendplots, nrow = length(legendplots) + 1, ncol = 1, heights = c(7, rep(1, length(legendplots))))
 
 

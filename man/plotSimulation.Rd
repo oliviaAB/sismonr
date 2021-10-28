@@ -11,6 +11,8 @@ plotSimulation(
   trials = unique(simdf$trial),
   timeMin = min(simdf$time),
   timeMax = max(simdf$time),
+  labels = NULL,
+  colours = NULL,
   mergeAllele = T,
   mergePTM = T,
   mergeComplexes = F,
@@ -32,6 +34,12 @@ plotSimulation(
 \item{timeMin}{Numeric. The minimum simulation time to plot. Default value set to the minimum time in the simulation.}
 
 \item{timeMax}{Numeric. The maximum simulation time to plot. Default value set to the maximum time in the simulation.}
+
+\item{labels}{Named character vector. Gives the label of each component, to be used in the legend. The names of the vector must match the component IDs.
+If no label provided for a component, its ID will be used instead.}
+
+\item{colours}{Named character vector. Gives the colour to be used for each component. Size must match the number of components in the system
+(ignoring alleles if ploidy > 1), and names of the vector must match the components ID.}
 
 \item{mergeAllele}{Are the gene products originating from different alleles merged? Default TRUE. Also see \code{\link{mergeAlleleAbundance}}}
 
@@ -64,8 +72,10 @@ mysystem = createInSilicoSystem(G = 5, regcomplexes = "none", ploidy = 2)
 mypop = createInSilicoPopulation(15, mysystem)
 sim = simulateInSilicoSystem(mysystem, mypop, 100, ntrials = 5)
 plotSimulation(sim$Simulation,
- c(1, 2, 3),
- c("Ind1", "Ind2", "Ind3", "Ind4"),
+ molecules = c(1, 2, 3),
+ inds = c("Ind1", "Ind2", "Ind3", "Ind4"),
+ labels = c("1" = "Gene A", "2" = "Gene B", "3" = "Gene C"),
+ colours = c("1" = "blue", "2" = "green", "3" = "purple"),
  axis.title = element_text(color = "red"))
 }
 }
