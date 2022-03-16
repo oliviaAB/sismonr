@@ -2,23 +2,6 @@ context("Creating in silico populations")
 library(sismonr)
 library(XRJulia)
 
-check_julia = function(){
-  if (!findJuliaNoError(test = T)) {
-    skip("Julia not installed.")
-  }else{
-    ## Test that the correct version of Julia is installed
-    julia_bin = XRJulia::findJulia()
-    if (.Platform$OS.type == "windows") cmd_args = "-E \"VERSION < v\\\"1.0.0\\\"\"" else cmd_args = "-E 'VERSION < v\"1.0.0\"'"
-    version_check = tryCatch(system2(julia_bin, args = cmd_args, stdout = TRUE, stderr = TRUE), warning = function(e) "", error = function(e) "")
-    if(version_check == ""){
-      skip("Error when checking the existing Julia version. Please check that Julia is correctly installed.")
-    }
-    else if(base::grepl("true", version_check, ignore.case = TRUE)){
-      skip("Julia version < v1.0 installed, require v1.0 or later")
-    }
-  }
-}
-
 test_that("creation of variants works",{
   check_julia()
   indargs = insilicoindividualargs()
