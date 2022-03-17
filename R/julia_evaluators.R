@@ -244,7 +244,7 @@ removeJuliaEvaluator <- function(ev) {
 #' Use for tests only.
 check_julia <- function(){
   if (!findJuliaNoError(test = T)) {
-    skip("Julia not installed.")
+    testthat::skip("Julia not installed.")
   }else{
     ## Test that the correct version of Julia is installed
     min_version <- "1.6.5"

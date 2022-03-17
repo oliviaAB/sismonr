@@ -1,46 +1,48 @@
 ## Resubmission
 
-This is a resubmission (sismonr 1.1.4 has been accepted on CRAN). In this version I have:
+This is a resubmission (sismonr 2.1.0 has been accepted on CRAN) to fix some issues from the CRAN checks. In this version I have:
 
-* Added a function to transform abundance data into RNAseq-like data (read counts)
-* Improved the stochastic model generated
-* Added some new options for the visualisation functions
+* replaced the .onAttach() function by .onLoad() function
+* The.onLoad() function checks for the presence of the required Julia modules and issues a message if they are not available.
+* Provided a separate function to install the required Julia modules; the function requires explicit user consent (through command line)
+before installing the Julia modules.
+* Fixed Julia syntax and corresponding tests to accommodate for Julia 1.6.5.
+
+I also apologize to the CRAN maintainers for the last version of sismonr installing some Julia modules without explicit user consent, which is in violation of the CRAN policies. This has been corrected in the current version as described above. I am truly sorry for this oversight on my part.
 
 ## Test environments
-- local Windows 10, R 3.5.1, Julia 1.1.0
-- local (VirtualBox) Ubuntu 18.04, R 3.6.1, Julia 1.2.0
-- Winbuilder: x86_64-w64-mingw32 (64-bit) R 3.6.1
-- Rhub:
-  - windows-x86_64-devel: Windows Server 2008 R2 SP1, R-devel, 32/64 bit
-  - ubuntu-gcc-release: Ubuntu Linux 16.04 LTS, R-release, GCC 
-  - fedora-clang-devel: Fedora Linux, R-devel, clang, gfortran
-  - solaris-x86-patched: Oracle Solaris 10, x86, 32 bit, R-patched (experimental)
 
-##R CMD check results
+- local Windows 10, R 4.1.2, Julia 1.6.4
+- Ubuntu 18.04, R 4.1.2, Julia 1.6.5
+- Winbuilder: x86_64-w64-mingw32 (64-bit) R 4.3.1
+- Winbuilder: x86_64-w64-mingw32 (64-bit) R Under development (unstable) (2022-03-15 r81903 ucrt)
+- Rhub:
+  - windows-x86_64-devel: Windows Server 2022, R-devel, 64 bit
+  - ubuntu-gcc-release: Ubuntu Linux 20.04.1 LTS, R-release, GCC
+  - fedora-clang-devel: Fedora Linux, R-devel, clang, gfortran
+  - macos-highsierra-release-cran: macOS 10.13.6 High Sierra, R-release, CRAN's setup
+  - debian-gcc-release: Debian Linux, R-release, GCC
+
+## R CMD check results
 There were no ERRORs or WARNINGs.
 
 There was 1 NOTE:
 
-* checking CRAN incoming feasibility ... NOTE
-  Possibly mis-spelled words in DESCRIPTION:
-    GitHub (11:1255)
-    sismonr (11:1039, 11:1154)
+```
+* checking R code for possible problems ... [11s] NOTE
+File 'sismonr/R/zzz.R':
+  .onLoad calls:
+    packageStartupMessage("Julia is not installed on the computer or not accessible by R. Check that Julia is correcly installed and/or in the PATH variable.\n")
+    packageStartupMessage("Error when checking the existing Julia version. Please check that Julia is correctly installed.")
+    packageStartupMessage("The current version of Julia is < to v",     min_version, ". Please install Julia v", min_version, " or later.")
+    packageStartupMessage("Required Julia modules not installed. Please run 'installJuliaModules()' to install them.")
 
-On Rhub - Fedora Linux, there was 1 NOTE:
+See section 'Good practice' in '?.onAttach'.
+```
 
-* checking CRAN incoming feasibility ...NB: need Internet access to use CRAN incoming checks
-   NOTE
-   
-  Possibly mis-spelled words in DESCRIPTION:
-    Angelin (11:945)
-    Biggs (11:964)
-    Omic (3:38)
-    Silico (3:25)
-    Vignes (11:979)
-    noncoding (11:184)
-    ploidy (11:488)
-    silico (11:75, 11:464, 11:754, 11:789)
-    sismonr (11:1039, 11:1154)
-    translational (11:315)
-    
-All words are biological terms or last names and correctly spelled.
+After checking the good practice section of `?.onAttach`, I confirm that the startup messages are necessary to inform the user if the correct version of Julia is not available (as per the system requirements) or the required Julia modules not present. 
+
+
+## Downstream dependencies
+
+There are currently no downstream dependencies for this package
