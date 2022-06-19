@@ -38,13 +38,7 @@ You may need to restart your computer.
 
 ### Installing sismonr
 
-sismonr is available on the CRAN. You can install sismonr from R or Rstudio using the following commands:
-
-```r
-install.packages("sismonr")
-```
-
-Alternatively, to download the latest development version, you can use:
+Use:
 
 ```r
 library(devtools)
