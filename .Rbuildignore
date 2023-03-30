@@ -9,3 +9,6 @@
 ^CRAN-SUBMISSION$
 ^man/figures/make_hex_sticker\.R$
 ^sismonr\.png$
+^_pkgdown\.yml$
+^pkgdown$
+^\.github$
