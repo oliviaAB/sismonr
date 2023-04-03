@@ -6,10 +6,14 @@
 \usage{
 insilicoindividualargs(
   ngenevariants = 5,
-  qtleffect_samplingfct = function(x) {     truncnorm::rtruncnorm(x, a = 0, b = Inf,
-    mean = 1, sd = 0.1) },
-  initvar_samplingfct = function(x) {     truncnorm::rtruncnorm(x, a = 0, b = Inf, mean
-    = 1, sd = 0.1) }
+  qtleffect_samplingfct = function(x) {
+     truncnorm::rtruncnorm(x, a = 0, b = Inf,
+    mean = 1, sd = 0.1)
+ },
+  initvar_samplingfct = function(x) {
+     truncnorm::rtruncnorm(x, a = 0, b = Inf, mean
+    = 1, sd = 0.1)
+ }
 )
 }
 \arguments{

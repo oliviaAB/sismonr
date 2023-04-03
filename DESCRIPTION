@@ -36,10 +36,12 @@ Imports:
     scales,
     visNetwork
 SystemRequirements: Julia, v 1.6.5 or later
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.2
 Suggests: 
     knitr,
     rmarkdown,
     tcltk,
     testthat (>= 2.1.0)
 VignetteBuilder: knitr
+Remotes:
+    waidschrat/XRJulia

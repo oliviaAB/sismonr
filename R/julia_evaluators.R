@@ -97,7 +97,7 @@ checkJuliaModules <- function(silence_warning = FALSE){
   testFile = system.file("julia", "testModules.jl", package = "sismonr")
 
   ## Run the script
-  if (.Platform$OS.type == "windows") cmd = paste0('"',julia_bin,'" ', testFile) else cmd = paste(julia_bin, " ", testFile)
+  if (.Platform$OS.type == "windows") cmd = paste0('"',julia_bin,'" "', testFile, '"') else cmd = paste(julia_bin, " ", testFile)
   check_modules_res = base::system(cmd, intern = TRUE)
 
   ## The script returns an integer, giving the number of required Julia modules that are missing
@@ -129,7 +129,7 @@ installJuliaModules <- function() {
     julia_bin = XRJulia::findJulia()
     testFile = system.file("julia", "installModules.jl", package = "sismonr")
 
-    if (.Platform$OS.type == "windows") cmd = paste0('"',julia_bin,'" ', testFile) else cmd = paste(julia_bin, " ", testFile)
+    if (.Platform$OS.type == "windows") cmd = paste0('"',julia_bin,'" "', testFile, '"') else cmd = paste(julia_bin, " ", testFile)
     check_modules_res = base::system(cmd, intern = FALSE)
 
     ## So that we know the required Julia modules are available

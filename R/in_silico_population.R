@@ -294,7 +294,7 @@ createIndividual = function(insilicosystem, variantsList, variantsFreq, indargs,
 #' @export
 createInSilicoPopulation = function(nInd, insilicosystem, genvariants = NULL, genvariants.freq = NULL, InitVar = NULL, initialNoise = TRUE, ...){
 
-  if(class(insilicosystem) != "insilicosystem") stop("Argument insilicosystem must be of class \"insilicosystem\".")
+  if(!inherits(insilicosystem, "insilicosystem")) stop("Argument insilicosystem must be of class \"insilicosystem\".")
 
   indargs = insilicoindividualargs(...)
 

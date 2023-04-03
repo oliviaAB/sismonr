@@ -599,7 +599,7 @@ getComplexes <- function(insilicosystem){
 addGene = function(insilicosystem, coding = NULL, TargetReaction = NULL, TCrate = NULL, TLrate = NULL, RDrate = NULL, PDrate = NULL){
 
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
@@ -758,7 +758,7 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
   compoC = compo[stringr::str_detect(compo, "^C")] ## components of the complex that are regulatory complexes
 
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
@@ -825,7 +825,7 @@ addComplex = function(insilicosystem, compo, formationrate = NULL, dissociationr
 removeComplex = function(insilicosystem, name){
 
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
@@ -899,7 +899,7 @@ addEdge = function(insilicosystem, regID, tarID, regsign = NULL, kinetics = list
   regID = as.character(regID)
   tarID = as.character(tarID)
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
@@ -1036,7 +1036,7 @@ removeEdge = function(insilicosystem, regID, tarID){
   tarID = as.character(tarID)
 
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
@@ -1191,7 +1191,7 @@ plotGRNstatic = function(insilicosystem, edgeType = NULL, showAllVertices = F, p
   on.exit(graphics::par(opar))
 
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
@@ -1295,7 +1295,7 @@ plotGRN <- function(insilicosystem,
                     height = NULL){
 
   ## Checking the input values ----
-  if(class(insilicosystem) != "insilicosystem"){
+  if(!inherits(insilicosystem, "insilicosystem")){
     stop("Argument insilicosystem must be of class \"insilicosystem\".")
   }
 
