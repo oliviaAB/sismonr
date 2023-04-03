@@ -1,14 +1,14 @@
-## sismonr 2.3.0
+# sismonr 2.3.0
 * On loading, check of 1) presence of Julia, 2) correct version of Julia installed (v1.6.5 or higher) and 3) presence of the required Julia modules. If the required Julia modules are not available, a message will be issued, but the modules will not be installed. This can be done by the user through the call to a separate function.
 * When creating a new Julia evaluator, if the required Julia modules are not available, calls a function to install them. The user has to provide explicit consent (through a prompt in the command line) before any Julia module is installed.
 * Internal Julia syntax changed for consistency with Julia v1.6.5.
 
-## sismonr 2.1.0
+# sismonr 2.1.0
 * Automatically updates BioSimulator to v0.9.3
 * Accounts for changes of syntax in BioSimulator v0.9.3
 * Names of possible stochastic simulation algorithms changed
 
-## sismonr 2.0.1
+# sismonr 2.0.1
 * Forces the installation of BioSimulator v0.5.1
 
 # sismonr 2.0.0

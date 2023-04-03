@@ -1,5 +1,0 @@
-theme: jekyll-theme-cayman
-
-markdown: kramdown
-kramdown:
-  parse_block_html: true
