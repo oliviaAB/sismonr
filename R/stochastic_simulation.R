@@ -302,6 +302,9 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #'   the number of available cores, and use this number - 1 for the simulation.
 #' @param ev A Julia evaluator. If none provided select the current evaluator or
 #'   create one if no evaluator exists.
+#' @param use_same_seed Logical, should the same seed be set for each core? Default
+#' value is \code{FALSE}. WARNING: might lead to unexpected results if \code{no_cores}
+#' is larger than the number of in silico individuals to simulate.
 #' @return A list composed of: \itemize{ \item \code{Simulation}: A data-frame
 #'   with the simulated expression profiles of the genes for the different
 #'   individuals in the in silico population. For gene i, "Ri" corresponds to
@@ -320,7 +323,7 @@ simulateInCluster = function(i, indtosimulate, ntrialstosimulate, increment, ind
 #' plotSimulation(sim$Simulation)
 #' }
 #' @export
-simulateParallelInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator()){
+simulateParallelInSilicoSystem = function(insilicosystem, insilicopopulation, simtime, nepochs = -1, ntrials = 1, simalgorithm = "Direct", writefile = F, filepath = NULL, filename = "simulation", no_cores = parallel::detectCores()-1, ev = getJuliaEvaluator(), use_same_seed = FALSE){
 
   if(is.null(filepath)) writefile = F
 
@@ -365,7 +368,15 @@ simulateParallelInSilicoSystem = function(insilicosystem, insilicopopulation, si
                                                                                                              ## so that if we have to simulate Ind1 10 times in total, and we split as following
                                                                                                              ## node 1 = 4 trials, node2 = 3 trials, node 3 = 3 trials
                                                                                                              ## node 1 will return trials 1 to 4, node 2: 5 to 7, node 3: 8 to 10
+    if(use_same_seed) warning("'use_same_seed' is TRUE but number of cores is higher than number of individuals to simulate. Might lead to unexpected results.")
     }
+
+  if(use_same_seed){
+    seed <- .get_seed()
+    cmd <- paste0("set.seed(", seed, ")")
+    cmd <- str2expression(cmd)
+    parallel::clusterEvalQ(mycluster, eval(cmd))
+  }
 
   message("Starting simulations at ", format(Sys.time(), usetz = T), "\n")
 
