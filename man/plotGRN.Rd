@@ -7,8 +7,8 @@
 plotGRN(
   insilicosystem,
   nodes_label = NULL,
-  nodes_colour = c(TC = "#FF834A", TL = "#579BDB", RD = "#FFB746", PD = "#7DCCFF", PTM
-    = "#4BC095", MR = "#EC99C6"),
+  nodes_colour = c(TC = "#FF834A", TL = "#579BDB", RD = "#FFB746", PD = "#7DCCFF", PTM =
+    "#4BC095", MR = "#EC99C6"),
   wiggly_nodes = FALSE,
   edgeType = NULL,
   showAllVertices = TRUE,
