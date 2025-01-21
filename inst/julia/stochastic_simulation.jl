@@ -2,6 +2,7 @@ using Pkg
 using StatsBase
 # using JLD ## temporary
 using BioSimulator
+import BioSimulator: tablefy
 using DataFrames
 
 # ------------------------------------------------------------------------------------------------ #
@@ -197,7 +198,15 @@ function juliaStochasticSimulation(stochmodel, QTLeffects, InitAbundance, genes,
     result = [simulate(model, simalgorithm, tfinal = convert(Float64, simtime), save_points = t_to_keep) for _ in 1:convert(Int64, ntrials)] #  trials = convert(Int64, ntrials)
     #println("JULIA> Done!")
 
-    resultdf = DataFrame(result)
+    #resultdf = DataFrame(result)
+    resultdf_ind = [DataFrame(tablefy(result[i])) for i in 1:length(result)]
+    for (i, df) in enumerate(resultdf_ind)
+      df[!, :trial] .= i
+      select!(df, :trial, Not(:trial))
+    end
+
+    resultdf = vcat(resultdf_ind...)
+
     new_col_names = Dict(zip(["X$i" for i in 1:length(keys(model.species_list))], collect(keys(model.species_list))))
     new_col_names["t"] = :time
     rename!(resultdf, new_col_names)
