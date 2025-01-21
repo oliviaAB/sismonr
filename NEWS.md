@@ -1,3 +1,7 @@
+## Current developmental version
+
+* Fixed error during simulation, where simulation results from BioSimulator failed to be converted into a DataFrame.
+
 ## sismonr 2.3.0
 * On loading, check of 1) presence of Julia, 2) correct version of Julia installed (v1.6.5 or higher) and 3) presence of the required Julia modules. If the required Julia modules are not available, a message will be issued, but the modules will not be installed. This can be done by the user through the call to a separate function.
 * When creating a new Julia evaluator, if the required Julia modules are not available, calls a function to install them. The user has to provide explicit consent (through a prompt in the command line) before any Julia module is installed.
